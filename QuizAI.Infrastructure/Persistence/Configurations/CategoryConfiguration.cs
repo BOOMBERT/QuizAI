@@ -10,5 +10,8 @@ internal class CategoryConfiguration : IEntityTypeConfiguration<Category>
     {
         builder.Property(c => c.Name)
             .HasMaxLength(128);
+
+        builder.HasIndex(c => c.Name)
+            .IsUnique();
     }
 }

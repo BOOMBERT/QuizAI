@@ -13,9 +13,6 @@ internal class QuizConfiguration : IEntityTypeConfiguration<Quiz>
 
         builder.Property(qz => qz.Description)
             .HasMaxLength(512);
-        
-        builder.Property(qz => qz.CreatorName)
-            .HasMaxLength(128);
 
         builder.Property(qz => qz.CreationDate)
             .HasDefaultValueSql("GETUTCDATE()");
