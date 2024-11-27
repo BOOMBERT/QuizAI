@@ -7,7 +7,7 @@ public class Quiz
     public string? Description { get; set; }
     public DateTime CreationDate { get; set; }
 
-    public int? ImageId { get; set; }    
+    public Guid? ImageId { get; set; }    
     public Image? Image { get; set; }
 
     public ICollection<Category> Categories { get; set; } = new List<Category>();

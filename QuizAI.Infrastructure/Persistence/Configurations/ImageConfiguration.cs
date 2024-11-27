@@ -8,18 +8,12 @@ internal class ImageConfiguration : IEntityTypeConfiguration<Image>
 {
     public void Configure(EntityTypeBuilder<Image> builder)
     {
-        builder.Property(i => i.FilePath)
-            .HasMaxLength(255);
-
-        builder.Property(i => i.Name)
-            .HasMaxLength(128);
-
         builder.Property(i => i.FileExtension)
-            .HasMaxLength(4);
+            .HasMaxLength(5);
 
         builder.Property(i => i.Hash)
-            .HasMaxLength(64);
-        
+            .HasColumnType("VARBINARY(32)");
+
         builder.HasIndex(i => i.Hash)
             .IsUnique();
     }

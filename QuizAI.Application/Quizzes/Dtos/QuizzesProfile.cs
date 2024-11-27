@@ -12,6 +12,10 @@ public class QuizzesProfile : Profile
             .ForMember(
                 dest => dest.Categories, 
                 opt => opt.Ignore()
+            )
+            .ForMember(
+                dest => dest.Image,
+                opt => opt.Ignore()
             );
     }
 }

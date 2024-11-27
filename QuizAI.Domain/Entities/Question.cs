@@ -9,7 +9,7 @@ public class Question
     public QuestionType Type { get; set; }
     public byte Order { get; set; }
 
-    public int? ImageId { get; set; }
+    public Guid? ImageId { get; set; }
     public Image? Image { get; set; }
 
     public Guid QuizId { get; set; }

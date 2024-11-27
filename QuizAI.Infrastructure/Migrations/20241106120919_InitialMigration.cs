@@ -28,12 +28,11 @@ namespace QuizAI.Infrastructure.Migrations
                 name: "Images",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     FilePath = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: false),
                     Name = table.Column<string>(type: "nvarchar(128)", maxLength: 128, nullable: false),
                     FileExtension = table.Column<string>(type: "nvarchar(4)", maxLength: 4, nullable: false),
-                    Hash = table.Column<string>(type: "nvarchar(64)", maxLength: 64, nullable: false)
+                    Hash = table.Column<byte[]>(type: "VARBINARY(40)", maxLength: 40, nullable: false)
                 },
                 constraints: table =>
                 {
@@ -49,7 +48,7 @@ namespace QuizAI.Infrastructure.Migrations
                     Description = table.Column<string>(type: "nvarchar(512)", maxLength: 512, nullable: true),
                     CreatorName = table.Column<string>(type: "nvarchar(128)", maxLength: 128, nullable: false),
                     CreationDate = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "GETUTCDATE()"),
-                    ImageId = table.Column<int>(type: "int", nullable: true)
+                    ImageId = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -70,7 +69,7 @@ namespace QuizAI.Infrastructure.Migrations
                     Content = table.Column<string>(type: "nvarchar(512)", maxLength: 512, nullable: false),
                     Type = table.Column<int>(type: "int", nullable: false),
                     Order = table.Column<byte>(type: "tinyint", nullable: false),
-                    ImageId = table.Column<int>(type: "int", nullable: true),
+                    ImageId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     QuizId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
                 },
                 constraints: table =>
