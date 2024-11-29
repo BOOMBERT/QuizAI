@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Hosting;
+﻿using Microsoft.Extensions.Hosting;
 using QuizAI.Application.Interfaces;
 
 namespace QuizAI.Application.Services;
@@ -18,17 +17,12 @@ public class FileStorageService : IFileStorageService
         }
     }
 
-    public async Task<Guid> UploadFileAsync(IFormFile file)
+    public async Task<Guid> UploadAsync(byte[] fileData, string fileExtension)
     {
-        var fileExtension = Path.GetExtension(file.FileName);
         var fileNameAsGuid = Guid.NewGuid();
+        var filePath = Path.Combine(_storagePath, fileNameAsGuid + fileExtension.ToLower());
 
-        var filePath = Path.Combine(_storagePath, fileNameAsGuid + fileExtension);
-
-        using (var stream = new FileStream(filePath, FileMode.Create))
-        {
-            await file.CopyToAsync(stream);
-        }
+        await File.WriteAllBytesAsync(filePath, fileData);
 
         return fileNameAsGuid;
     }

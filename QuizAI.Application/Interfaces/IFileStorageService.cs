@@ -4,5 +4,5 @@ namespace QuizAI.Application.Interfaces;
 
 public interface IFileStorageService
 {
-    Task<Guid> UploadFileAsync(IFormFile file);
+    Task<Guid> UploadAsync(byte[] fileData, string fileExtension);
 }

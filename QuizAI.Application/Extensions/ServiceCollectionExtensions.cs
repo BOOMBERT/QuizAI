@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Hosting;
 using QuizAI.Application.Interfaces;
 using QuizAI.Application.Services;
+using QuizAI.Domain.Repositories;
 
 namespace QuizAI.Application.Extensions;
 
@@ -21,6 +22,14 @@ public static class ServiceCollectionExtensions
             var environment = provider.GetRequiredService<IHostEnvironment>();
             return new FileStorageService(environment, storageFolderName);
         });
-        services.AddScoped<IImageService, ImageService>();
+
+        services.AddScoped<IImageService, ImageService>(provider =>
+        {
+            var imagesRepository = provider.GetRequiredService<IImagesRepository>();
+            var fileStorageService = provider.GetRequiredService<IFileStorageService>();
+            (ushort, ushort) imagesDefaultSize = (800, 800);
+            var imagesMaxSizeInBytes = 2 * 1024 * 1024; // 2MB
+            return new ImageService(imagesRepository, fileStorageService, imagesDefaultSize, imagesMaxSizeInBytes);
+        });
     }
 }
