@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using QuizAI.Domain.Enums;
+using QuizAI.Domain.Exceptions;
 
 namespace QuizAI.Application.Utils;
 
@@ -17,21 +18,21 @@ public static class FileValidationUtil
     public static void Validate(IFormFile file, int maxSizeInBytes)
     {
         if (file == null || file.Length == 0)
-            throw new ArgumentNullException("The file is empty or missing");
+            throw new UnprocessableEntityException("The file is empty or missing");
         
         if (file.Length > maxSizeInBytes)
-            throw new ArgumentException($"The file exceeds the maximum allowed size of {maxSizeInBytes / (1024 * 1024)} MB");
+            throw new RequestEntityTooLargeException($"The file exceeds the maximum allowed size of {maxSizeInBytes / (1024 * 1024)} MB");
 
         var fileExtension = Path.GetExtension(file.FileName).ToLower();
 
         if (_supportedImageExtensions.Contains(fileExtension))
         {
             if (!ValidateImage(file))
-                throw new InvalidOperationException("Invalid image file");
+                throw new UnprocessableEntityException("Invalid image file");
         }
         else
         {
-            throw new NotSupportedException($"The file extension '{fileExtension}' is not supported");
+            throw new UnsupportedMediaTypeException($"The file extension '{fileExtension}' is not supported");
         }
     }
 
@@ -59,7 +60,7 @@ public static class FileValidationUtil
     private static bool IsMatchingMagicNumber(byte[] buffer, string fileExtension)
     {
         if (!_imageMagicNumbers.TryGetValue(fileExtension, out var fileMagicNumbers))
-            throw new NotSupportedException($"The file extension '{fileExtension}' is not supported");
+            throw new UnsupportedMediaTypeException($"The file extension '{fileExtension}' is not supported");
 
         return buffer.Length >= fileMagicNumbers.Length && buffer.Take(fileMagicNumbers.Length).SequenceEqual(fileMagicNumbers);
     }
