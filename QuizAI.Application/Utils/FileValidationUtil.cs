@@ -32,7 +32,7 @@ public static class FileValidationUtil
         }
         else
         {
-            throw new UnsupportedMediaTypeException($"The file extension '{fileExtension}' is not supported");
+            throw new UnsupportedMediaTypeException($"The file extension {fileExtension} is not supported");
         }
     }
 
@@ -60,7 +60,7 @@ public static class FileValidationUtil
     private static bool IsMatchingMagicNumber(byte[] buffer, string fileExtension)
     {
         if (!_imageMagicNumbers.TryGetValue(fileExtension, out var fileMagicNumbers))
-            throw new UnsupportedMediaTypeException($"The file extension '{fileExtension}' is not supported");
+            throw new UnsupportedMediaTypeException($"The file extension {fileExtension} is not supported");
 
         return buffer.Length >= fileMagicNumbers.Length && buffer.Take(fileMagicNumbers.Length).SequenceEqual(fileMagicNumbers);
     }

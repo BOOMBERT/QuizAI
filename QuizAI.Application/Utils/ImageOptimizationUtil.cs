@@ -56,7 +56,7 @@ public static class ImageOptimizationUtil
             }
             else
             {
-                throw new UnsupportedMediaTypeException($"The file extension '{fileExtension}' is not supported");
+                throw new UnsupportedMediaTypeException($"The file extension {fileExtension} is not supported");
             }
 
             return memoryStream.ToArray();
@@ -72,7 +72,7 @@ public static class ImageOptimizationUtil
             CompressionSetting.Medium => PngCompressionLevel.Level8,
             CompressionSetting.High => PngCompressionLevel.Level7,
             CompressionSetting.Maximum => PngCompressionLevel.Level6,
-            _ => throw new UnprocessableEntityException($"The compression setting '{compressionSetting}' is not supported")
+            _ => throw new UnprocessableEntityException($"The compression setting {compressionSetting} is not supported")
         };
     }
 }
