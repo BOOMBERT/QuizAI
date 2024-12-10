@@ -42,7 +42,7 @@ public class ErrorHandlingMiddleware : IMiddleware
 
     private void LogError(HttpContext context, object details, LogEventLevel logLevel, HttpStatusCode statusCode)
     {
-        string query = context.Request.QueryString.ToString().Substring(1);
+        string query = context.Request.QueryString.ToString().TrimStart('?');
 
         var logResponse = new LogResponse(
             context.Request.Method,

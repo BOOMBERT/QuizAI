@@ -1,4 +1,6 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using FluentValidation;
+using FluentValidation.AspNetCore;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using QuizAI.Application.Interfaces;
 using QuizAI.Application.Services;
@@ -14,6 +16,8 @@ public static class ServiceCollectionExtensions
         
         services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(applicationAssembly));
         services.AddAutoMapper(applicationAssembly);
+        services.AddValidatorsFromAssembly(applicationAssembly)
+            .AddFluentValidationAutoValidation();
 
         var storageFolderName = "Uploads";
 
