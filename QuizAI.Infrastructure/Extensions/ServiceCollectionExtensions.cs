@@ -17,5 +17,6 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IRepository, Repository>();
         services.AddScoped<ICategoriesRepository, CategoriesRepository>();
         services.AddScoped<IImagesRepository, ImagesRepository>();
+        services.AddScoped<IQuizzesRepository, QuizzesRepository>();
     }
 }

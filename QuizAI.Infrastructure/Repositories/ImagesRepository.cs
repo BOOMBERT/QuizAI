@@ -20,4 +20,12 @@ public class ImagesRepository : IImagesRepository
             .Where(i => i.Hash.SequenceEqual(hash))
             .FirstOrDefaultAsync();
     }
+
+    public async Task<string?> GetExtensionAsync(Guid id)
+    {
+        return await _context.Images
+            .Where(i => i.Id == id)
+            .Select(i => i.FileExtension)
+            .FirstOrDefaultAsync();
+    }
 }

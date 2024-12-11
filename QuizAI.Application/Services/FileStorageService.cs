@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Hosting;
 using QuizAI.Application.Interfaces;
+using QuizAI.Domain.Exceptions;
 
 namespace QuizAI.Application.Services;
 
@@ -25,5 +26,16 @@ public class FileStorageService : IFileStorageService
         await File.WriteAllBytesAsync(filePath, fileData);
 
         return fileNameAsGuid;
+    }
+
+    public async Task<byte[]> RetrieveFileAsync(Guid fileName, string fileExtension)
+    {
+        var fullFilename = fileName.ToString() + fileExtension.ToLower();
+        var filePath = Path.Combine(_storagePath, fullFilename);
+
+        if (!File.Exists(filePath))
+            throw new NotFoundException($"The file {fullFilename} could not be found.");
+
+        return await File.ReadAllBytesAsync(filePath);
     }
 }

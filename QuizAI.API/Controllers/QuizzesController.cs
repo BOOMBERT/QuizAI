@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using QuizAI.Application.Common;
 using QuizAI.Application.Quizzes.Commands.CreateQuiz;
+using QuizAI.Application.Quizzes.Queries.GetQuizImageById;
 
 namespace QuizAI.API.Controllers;
 
@@ -27,5 +28,15 @@ public class QuizzesController : ControllerBase
     {
         await _mediator.Send(command);
         return Created();
+    }
+
+    [HttpGet("{quizId}/image")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesErrorResponseType(typeof(ErrorResponse))]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> GetQuizImage(Guid quizId)
+    {
+        var (imageData, contextType) = await _mediator.Send(new GetQuizImageByIdQuery(quizId));
+        return File(imageData, contextType);
     }
 }
