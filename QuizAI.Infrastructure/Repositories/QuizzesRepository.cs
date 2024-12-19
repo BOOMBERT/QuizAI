@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using QuizAI.Domain.Entities;
 using QuizAI.Domain.Repositories;
 using QuizAI.Infrastructure.Persistence;
 
@@ -11,6 +12,13 @@ public class QuizzesRepository : IQuizzesRepository
     public QuizzesRepository(AppDbContext context)
     {
         _context = context;
+    }
+
+    public async Task<Quiz?> GetWithCategoriesAsync(Guid quizId)
+    {
+        return await _context.Quizzes
+            .Include(qz => qz.Categories)
+            .FirstOrDefaultAsync(qz => qz.Id == quizId);
     }
 
     public async Task<Guid?> GetImageId(Guid quizId)

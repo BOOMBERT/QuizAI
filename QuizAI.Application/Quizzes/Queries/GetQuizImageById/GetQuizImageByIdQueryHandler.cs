@@ -7,14 +7,14 @@ using QuizAI.Domain.Repositories;
 
 namespace QuizAI.Application.Quizzes.Queries.GetQuizImageById;
 
-public class GetQuizImageByIdHandler : IRequestHandler<GetQuizImageByIdQuery, (byte[], string)>
+public class GetQuizImageByIdQueryHandler : IRequestHandler<GetQuizImageByIdQuery, (byte[], string)>
 {
     private readonly IRepository _repository;
     private readonly IFileStorageService _fileStorageService;
     private readonly IQuizzesRepository _quizzesRepository;
     private readonly IImagesRepository _imagesRepository;
 
-    public GetQuizImageByIdHandler(
+    public GetQuizImageByIdQueryHandler(
         IRepository repository, IFileStorageService fileStorageService, IQuizzesRepository quizzesRepository, IImagesRepository imagesRepository)
     {
         _repository = repository;
@@ -34,7 +34,7 @@ public class GetQuizImageByIdHandler : IRequestHandler<GetQuizImageByIdQuery, (b
         var imageExtension = await _imagesRepository.GetExtensionAsync(imageNameAsGuid)
             ?? throw new NotFoundException($"Image for quiz with ID {request.quizId} could not be found.");
 
-        var imageData = await _fileStorageService.RetrieveFileAsync(imageNameAsGuid, imageExtension);
+        var imageData = await _fileStorageService.RetrieveAsync(imageNameAsGuid, imageExtension);
 
         if (imageExtension == FileExtension.Jpg) imageExtension = FileExtension.Jpeg;
         var contentType = "image/" + imageExtension.TrimStart('.');

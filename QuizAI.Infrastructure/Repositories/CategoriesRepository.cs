@@ -20,4 +20,12 @@ public class CategoriesRepository : ICategoriesRepository
             .Where(c => categoriesNames.Contains(c.Name))
             .ToArrayAsync();
     }
+
+    public async Task<bool> IsAssignedToSingleQuiz(int categoryId)
+    {
+        return await _context.Quizzes
+            .Include(qz => qz.Categories)
+            .Where(qz => qz.Categories.Any(c => c.Id == categoryId))
+            .CountAsync() == 1;
+    }
 }

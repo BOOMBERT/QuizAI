@@ -23,6 +23,11 @@ public class Repository : IRepository
         return await _context.Set<T>().AnyAsync(e => EF.Property<Guid>(e, "Id") == id);
     }
 
+    public void RemoveAsync<T>(T entity) where T : class
+    {
+        _context.Set<T>().Remove(entity);
+    }
+
     public async Task<bool> SaveChangesAsync()
     {
         return await _context.SaveChangesAsync() > 0;

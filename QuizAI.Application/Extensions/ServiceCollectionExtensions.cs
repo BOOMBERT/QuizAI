@@ -35,5 +35,7 @@ public static class ServiceCollectionExtensions
             var imagesMaxSizeInBytes = 2 * 1024 * 1024; // 2MB
             return new ImageService(imagesRepository, fileStorageService, imagesDefaultSize, imagesMaxSizeInBytes);
         });
+
+        services.AddScoped<ICategoryService, CategoryService>();
     }
 }

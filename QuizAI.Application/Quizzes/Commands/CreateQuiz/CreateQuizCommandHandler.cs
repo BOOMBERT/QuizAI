@@ -6,36 +6,26 @@ using QuizAI.Domain.Repositories;
 
 namespace QuizAI.Application.Quizzes.Commands.CreateQuiz;
 
-public class CreateQuizCommandHandler : IRequestHandler<CreateQuizCommand>
+public class CreateQuizCommandHandler : IRequestHandler<CreateQuizCommand, Guid>
 {
     private readonly IMapper _mapper;
     private readonly IRepository _repository;
-    private readonly ICategoriesRepository _categoriesRepository;
     private readonly IImageService _imageServie;
+    private readonly ICategoryService _categoryService;
 
-    public CreateQuizCommandHandler(IMapper mapper, IRepository repository, ICategoriesRepository categoriesRepository, IImageService imageService)
+    public CreateQuizCommandHandler(IMapper mapper, IRepository repository, IImageService imageService, ICategoryService categoryService)
     {
         _mapper = mapper;
         _repository = repository;
-        _categoriesRepository = categoriesRepository;
         _imageServie = imageService;
+        _categoryService = categoryService;
     }
 
-    public async Task Handle(CreateQuizCommand request, CancellationToken cancellationToken)
+    public async Task<Guid> Handle(CreateQuizCommand request, CancellationToken cancellationToken)
     {
         var quiz = _mapper.Map<Quiz>(request);
 
-        if (request.Categories.Count != 0)
-        {
-            var existingCategories = await _categoriesRepository.GetExistingCategoriesAsync(request.Categories);
-            var existingCategoriesNames = existingCategories.Select(ec => ec.Name).ToHashSet();
-
-            var newCategories = request.Categories
-                .Where(name => !existingCategoriesNames.Contains(name))
-                .Select(name => new Category { Name = name });
-
-            quiz.Categories = existingCategories.Concat(newCategories).ToList();
-        }
+        quiz.Categories = await _categoryService.GetOrCreateEntitiesAsync(request.Categories);
 
         if (request.Image != null)
         {
@@ -45,5 +35,7 @@ public class CreateQuizCommandHandler : IRequestHandler<CreateQuizCommand>
 
         await _repository.AddAsync(quiz);
         await _repository.SaveChangesAsync();
+
+        return quiz.Id;
     }
 }
