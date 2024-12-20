@@ -30,12 +30,26 @@ public class FileStorageService : IFileStorageService
 
     public async Task<byte[]> RetrieveAsync(Guid filename, string fileExtension)
     {
+        var filePath = GetFullFilePathIfExists(filename, fileExtension);
+
+        return await File.ReadAllBytesAsync(filePath);
+    }
+
+    public void Delete(Guid filename, string fileExtension)
+    {
+        var filePath = GetFullFilePathIfExists(filename, fileExtension);
+
+        File.Delete(filePath);
+    }
+
+    private string GetFullFilePathIfExists(Guid filename, string fileExtension)
+    {
         var fullFilename = filename.ToString() + fileExtension.ToLower();
         var filePath = Path.Combine(_storagePath, fullFilename);
 
         if (!File.Exists(filePath))
             throw new NotFoundException($"The file {fullFilename} could not be found.");
 
-        return await File.ReadAllBytesAsync(filePath);
+        return filePath;
     }
 }

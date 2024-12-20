@@ -4,6 +4,6 @@ namespace QuizAI.Domain.Repositories;
 
 public interface ICategoriesRepository
 {
-    Task<IEnumerable<Category>> GetExistingCategoriesAsync(IEnumerable<string> categoriesNames);
-    Task<bool> IsAssignedToSingleQuiz(int categoryId);
+    Task<IEnumerable<Category>> GetExistingAsync(IEnumerable<string> categoriesNames);
+    Task<bool> IsAssignedToSingleQuizAsync(int categoryId);
 }

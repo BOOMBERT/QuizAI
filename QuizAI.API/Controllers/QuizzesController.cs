@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using QuizAI.Application.Common;
 using QuizAI.Application.Quizzes.Commands.CreateQuiz;
 using QuizAI.Application.Quizzes.Commands.UpdateQuiz;
+using QuizAI.Application.Quizzes.Commands.UpdateQuizImage;
 using QuizAI.Application.Quizzes.Dtos;
 using QuizAI.Application.Quizzes.Queries.GetQuizById;
 using QuizAI.Application.Quizzes.Queries.GetQuizImageById;
@@ -38,6 +39,18 @@ public class QuizzesController : ControllerBase
     [ProducesErrorResponseType(typeof(ErrorResponse))]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> UpdateQuiz(Guid quizId, UpdateQuizCommand command)
+    {
+        command.SetId(quizId);
+
+        await _mediator.Send(command);
+        return NoContent();
+    }
+
+    [HttpPut("{quizId}/image")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesErrorResponseType(typeof(ErrorResponse))]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> UpdateQuizImage(Guid quizId, UpdateQuizImageCommand command)
     {
         command.SetId(quizId);
 

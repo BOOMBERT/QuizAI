@@ -10,14 +10,14 @@ public class CreateQuizCommandHandler : IRequestHandler<CreateQuizCommand, Guid>
 {
     private readonly IMapper _mapper;
     private readonly IRepository _repository;
-    private readonly IImageService _imageServie;
+    private readonly IImageService _imageService;
     private readonly ICategoryService _categoryService;
 
     public CreateQuizCommandHandler(IMapper mapper, IRepository repository, IImageService imageService, ICategoryService categoryService)
     {
         _mapper = mapper;
         _repository = repository;
-        _imageServie = imageService;
+        _imageService = imageService;
         _categoryService = categoryService;
     }
 
@@ -29,7 +29,7 @@ public class CreateQuizCommandHandler : IRequestHandler<CreateQuizCommand, Guid>
 
         if (request.Image != null)
         {
-            var uploadedImage = await _imageServie.UploadAsync(request.Image);
+            var uploadedImage = await _imageService.UploadAsync(request.Image);
             quiz.Image = uploadedImage;
         }
 

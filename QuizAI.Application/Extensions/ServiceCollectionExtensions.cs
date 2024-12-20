@@ -31,9 +31,10 @@ public static class ServiceCollectionExtensions
         {
             var imagesRepository = provider.GetRequiredService<IImagesRepository>();
             var fileStorageService = provider.GetRequiredService<IFileStorageService>();
+            var repository = provider.GetRequiredService<IRepository>();
             (ushort, ushort) imagesDefaultSize = (800, 800);
             var imagesMaxSizeInBytes = 2 * 1024 * 1024; // 2MB
-            return new ImageService(imagesRepository, fileStorageService, imagesDefaultSize, imagesMaxSizeInBytes);
+            return new ImageService(imagesRepository, fileStorageService, repository, imagesDefaultSize, imagesMaxSizeInBytes);
         });
 
         services.AddScoped<ICategoryService, CategoryService>();

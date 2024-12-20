@@ -28,4 +28,10 @@ public class ImagesRepository : IImagesRepository
             .Select(i => i.FileExtension)
             .FirstOrDefaultAsync();
     }
+
+    public async Task<bool> IsAssignedToAnyQuizAsync(Guid imageId)
+    {
+        return await _context.Quizzes
+            .AnyAsync(qz => qz.ImageId == imageId);
+    }
 }

@@ -6,4 +6,5 @@ namespace QuizAI.Application.Interfaces;
 public interface IImageService
 {
     Task<Image> UploadAsync(IFormFile image);
+    Task DeleteIfNotAssigned(Guid imageId);
 }

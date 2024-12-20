@@ -28,7 +28,7 @@ public class GetQuizImageByIdQueryHandler : IRequestHandler<GetQuizImageByIdQuer
         if (!await _repository.EntityExistsAsync<Quiz>(request.quizId))
             throw new NotFoundException($"Quiz with ID {request.quizId} was not found");
 
-        var imageNameAsGuid = await _quizzesRepository.GetImageId(request.quizId) 
+        var imageNameAsGuid = await _quizzesRepository.GetImageIdAsync(request.quizId) 
             ?? throw new NotFoundException($"Quiz with ID {request.quizId} has no associated image.");
 
         var imageExtension = await _imagesRepository.GetExtensionAsync(imageNameAsGuid)

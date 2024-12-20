@@ -24,7 +24,7 @@ public class UpdateQuizCommandHandler : IRequestHandler<UpdateQuizCommand>
     public async Task Handle(UpdateQuizCommand request, CancellationToken cancellationToken)
     {
         var quiz = await _quizzesRepository.GetWithCategoriesAsync(request.GetId())
-            ?? throw new NotFoundException($"Quiz with ID {request.GetId()} was not found"); ;
+            ?? throw new NotFoundException($"Quiz with ID {request.GetId()} was not found");
 
         await _categoryService.RemoveUnusedAsync(quiz, request.Categories);
 

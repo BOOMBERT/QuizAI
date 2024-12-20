@@ -2,6 +2,7 @@
 using QuizAI.Application.Interfaces;
 using QuizAI.Application.Utils;
 using QuizAI.Domain.Entities;
+using QuizAI.Domain.Exceptions;
 using QuizAI.Domain.Repositories;
 using Shipwreck.Phash;
 using Shipwreck.Phash.Bitmaps;
@@ -12,14 +13,20 @@ public class ImageService : IImageService
 {
     private readonly IImagesRepository _imagesRepository;
     private readonly IFileStorageService _fileStorageService;
+    private readonly IRepository _repository;
     private readonly (ushort width, ushort height)? _imagesDefaultSize;
     private readonly int _imagesMaxSizeInBytes;
 
     public ImageService(
-        IImagesRepository imagesRepository, IFileStorageService fileStorageService, (ushort width, ushort height)? imagesDefaultSize, int imagesMaxSizeInBytes)
+        IImagesRepository imagesRepository, 
+        IFileStorageService fileStorageService, 
+        IRepository repository, 
+        (ushort width, ushort height)? imagesDefaultSize, 
+        int imagesMaxSizeInBytes)
     {
         _imagesRepository = imagesRepository;
         _fileStorageService = fileStorageService;
+        _repository = repository;
         _imagesDefaultSize = imagesDefaultSize;
         _imagesMaxSizeInBytes = imagesMaxSizeInBytes;
     }
@@ -44,6 +51,18 @@ public class ImageService : IImageService
             FileExtension = imageExtension,
             Hash = imageHash
         };
+    }
+
+    public async Task DeleteIfNotAssigned(Guid imageId)
+    {
+        var imageExtension = await _imagesRepository.GetExtensionAsync(imageId) ?? 
+            throw new NotFoundException($"Image with ID {imageId} was not found");
+
+        if (!await _imagesRepository.IsAssignedToAnyQuizAsync(imageId))
+        {
+            await _repository.DeleteAsync<Image>(imageId);
+            _fileStorageService.Delete(imageId, imageExtension);
+        }
     }
 
     private byte[] HashImageByPhash(byte[] imageBytes)

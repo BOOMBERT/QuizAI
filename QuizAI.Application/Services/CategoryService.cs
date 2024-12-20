@@ -15,15 +15,15 @@ public class CategoryService : ICategoryService
         _categoriesRepository = categoriesRepository;
     }
 
-    public async Task<ICollection<Category>> GetOrCreateEntitiesAsync(IEnumerable<string> categoryNames)
+    public async Task<ICollection<Category>> GetOrCreateEntitiesAsync(IEnumerable<string> categoriesNames)
     {
-        if (!categoryNames.Any())
+        if (!categoriesNames.Any())
             return new List<Category>();
 
-        var existingCategories = await _categoriesRepository.GetExistingCategoriesAsync(categoryNames);
+        var existingCategories = await _categoriesRepository.GetExistingAsync(categoriesNames);
         var existingCategoriesNames = existingCategories.Select(ec => ec.Name).ToHashSet();
 
-        var newCategories = categoryNames
+        var newCategories = categoriesNames
             .Where(name => !existingCategoriesNames.Contains(name))
             .Select(name => new Category { Name = name });
 
@@ -40,7 +40,7 @@ public class CategoryService : ICategoryService
         {
             quiz.Categories.Remove(categoryToRemove);
 
-            if (await _categoriesRepository.IsAssignedToSingleQuiz(categoryToRemove.Id))
+            if (await _categoriesRepository.IsAssignedToSingleQuizAsync(categoryToRemove.Id))
                 _repository.RemoveAsync(categoryToRemove);
         }
     }

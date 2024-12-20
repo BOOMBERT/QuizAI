@@ -14,14 +14,14 @@ public class CategoriesRepository : ICategoriesRepository
         _context = context;
     }
 
-    public async Task<IEnumerable<Category>> GetExistingCategoriesAsync(IEnumerable<string> categoriesNames)
+    public async Task<IEnumerable<Category>> GetExistingAsync(IEnumerable<string> categoriesNames)
     {
         return await _context.Categories
             .Where(c => categoriesNames.Contains(c.Name))
             .ToArrayAsync();
     }
 
-    public async Task<bool> IsAssignedToSingleQuiz(int categoryId)
+    public async Task<bool> IsAssignedToSingleQuizAsync(int categoryId)
     {
         return await _context.Quizzes
             .Include(qz => qz.Categories)

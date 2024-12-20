@@ -21,11 +21,18 @@ public class QuizzesRepository : IQuizzesRepository
             .FirstOrDefaultAsync(qz => qz.Id == quizId);
     }
 
-    public async Task<Guid?> GetImageId(Guid quizId)
+    public async Task<Guid?> GetImageIdAsync(Guid quizId)
     {
         return await _context.Quizzes
             .Where(qz => qz.Id == quizId)
             .Select(qz => qz.ImageId)
             .FirstOrDefaultAsync();
+    }
+
+    public async Task UpdateImageAsync(Guid quizId, Guid imageId)
+    {
+        await _context.Quizzes
+            .Where(qz => qz.Id == quizId)
+            .ExecuteUpdateAsync(qz => qz.SetProperty(x => x.ImageId, imageId));
     }
 }
