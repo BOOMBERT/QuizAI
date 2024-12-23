@@ -53,7 +53,7 @@ public class ImageService : IImageService
         };
     }
 
-    public async Task DeleteIfNotAssigned(Guid imageId)
+    public async Task DeleteIfNotAssignedAsync(Guid imageId)
     {
         var imageExtension = await _imagesRepository.GetExtensionAsync(imageId) ?? 
             throw new NotFoundException($"Image with ID {imageId} was not found");

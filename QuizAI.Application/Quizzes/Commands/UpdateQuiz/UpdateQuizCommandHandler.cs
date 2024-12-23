@@ -26,7 +26,7 @@ public class UpdateQuizCommandHandler : IRequestHandler<UpdateQuizCommand>
         var quiz = await _quizzesRepository.GetWithCategoriesAsync(request.GetId())
             ?? throw new NotFoundException($"Quiz with ID {request.GetId()} was not found");
 
-        await _categoryService.RemoveUnusedAsync(quiz, request.Categories);
+        await _categoryService.DeleteIfNotAssignedAsync(quiz, request.Categories);
 
         quiz.Categories = await _categoryService.GetOrCreateEntitiesAsync(request.Categories);
 

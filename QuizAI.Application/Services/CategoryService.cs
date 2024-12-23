@@ -30,7 +30,7 @@ public class CategoryService : ICategoryService
         return existingCategories.Concat(newCategories).ToList();
     }
 
-    public async Task RemoveUnusedAsync(Quiz quiz, IEnumerable<string> requestCategories)
+    public async Task DeleteIfNotAssignedAsync(Quiz quiz, IEnumerable<string> requestCategories)
     {
         var categoriesToRemove = quiz.Categories
             .Where(c => !requestCategories.Contains(c.Name))

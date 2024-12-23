@@ -3,10 +3,8 @@ using Microsoft.AspNetCore.Mvc;
 using QuizAI.Application.Common;
 using QuizAI.Application.Quizzes.Commands.CreateQuiz;
 using QuizAI.Application.Quizzes.Commands.UpdateQuiz;
-using QuizAI.Application.Quizzes.Commands.UpdateQuizImage;
 using QuizAI.Application.Quizzes.Dtos;
 using QuizAI.Application.Quizzes.Queries.GetQuizById;
-using QuizAI.Application.Quizzes.Queries.GetQuizImageById;
 
 namespace QuizAI.API.Controllers;
 
@@ -46,18 +44,6 @@ public class QuizzesController : ControllerBase
         return NoContent();
     }
 
-    [HttpPut("{quizId}/image")]
-    [ProducesResponseType(StatusCodes.Status204NoContent)]
-    [ProducesErrorResponseType(typeof(ErrorResponse))]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> UpdateQuizImage(Guid quizId, UpdateQuizImageCommand command)
-    {
-        command.SetId(quizId);
-
-        await _mediator.Send(command);
-        return NoContent();
-    }
-
     [HttpGet("{quizId}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesErrorResponseType(typeof(ErrorResponse))]
@@ -66,15 +52,5 @@ public class QuizzesController : ControllerBase
     {
         var quiz = await _mediator.Send(new GetQuizByIdQuery(quizId));
         return Ok(quiz);
-    }
-
-    [HttpGet("{quizId}/image")]
-    [ProducesResponseType(StatusCodes.Status200OK)]
-    [ProducesErrorResponseType(typeof(ErrorResponse))]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> GetQuizImage(Guid quizId)
-    {
-        var (imageData, contextType) = await _mediator.Send(new GetQuizImageByIdQuery(quizId));
-        return File(imageData, contextType);
     }
 }

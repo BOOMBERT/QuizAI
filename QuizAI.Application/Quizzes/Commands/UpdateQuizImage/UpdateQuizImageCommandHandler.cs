@@ -40,6 +40,6 @@ public class UpdateQuizImageCommandHandler : IRequestHandler<UpdateQuizImageComm
         await _quizzesRepository.UpdateImageAsync(quizId, newUploadedImage.Id);
 
         if (previousImageId != null)
-            await _imageService.DeleteIfNotAssigned((Guid)previousImageId);
+            await _imageService.DeleteIfNotAssignedAsync((Guid)previousImageId);
     }
 }

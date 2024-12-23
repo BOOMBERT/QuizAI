@@ -5,5 +5,5 @@ namespace QuizAI.Application.Interfaces;
 public interface ICategoryService
 {
     Task<ICollection<Category>> GetOrCreateEntitiesAsync(IEnumerable<string> categoryNames);
-    Task RemoveUnusedAsync(Quiz quiz, IEnumerable<string> requestCategories);
+    Task DeleteIfNotAssignedAsync(Quiz quiz, IEnumerable<string> requestCategories);
 }

@@ -29,7 +29,7 @@ public class QuizzesRepository : IQuizzesRepository
             .FirstOrDefaultAsync();
     }
 
-    public async Task UpdateImageAsync(Guid quizId, Guid imageId)
+    public async Task UpdateImageAsync(Guid quizId, Guid? imageId)
     {
         await _context.Quizzes
             .Where(qz => qz.Id == quizId)
