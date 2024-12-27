@@ -28,6 +28,7 @@ public class QuizzesController : ControllerBase
     [ProducesResponseType(StatusCodes.Status413RequestEntityTooLarge)]
     [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
     [ProducesResponseType(StatusCodes.Status415UnsupportedMediaType)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> CreateQuiz(CreateQuizCommand command)
     {
         var id = await _mediator.Send(command);
@@ -36,6 +37,8 @@ public class QuizzesController : ControllerBase
 
     [HttpGet]
     [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesErrorResponseType(typeof(ErrorResponse))]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<ActionResult<PagedResponse<QuizDto>>> GetAllQuizzes([FromQuery] GetAllQuizzesQuery query)
     {
         var quizzes = await _mediator.Send(query);
@@ -46,6 +49,7 @@ public class QuizzesController : ControllerBase
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesErrorResponseType(typeof(ErrorResponse))]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<ActionResult<QuizDto>> GetQuiz(Guid quizId)
     {
         var quiz = await _mediator.Send(new GetQuizByIdQuery(quizId));
@@ -56,6 +60,7 @@ public class QuizzesController : ControllerBase
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesErrorResponseType(typeof(ErrorResponse))]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> UpdateQuiz(Guid quizId, UpdateQuizCommand command)
     {
         command.SetId(quizId);
@@ -68,7 +73,8 @@ public class QuizzesController : ControllerBase
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesErrorResponseType(typeof(ErrorResponse))]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> DeleteQuiz(Guid quizId, DeleteQuizCommand command)
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> DeleteQuiz(Guid quizId, [FromQuery] DeleteQuizCommand command)
     {
         command.SetId(quizId);
 

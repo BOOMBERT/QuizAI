@@ -22,13 +22,14 @@ namespace QuizAI.API.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesErrorResponseType(typeof(ErrorResponse))]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> GetQuizImage(Guid quizId)
         {
             var (imageData, contextType) = await _mediator.Send(new GetQuizImageByIdQuery(quizId));
             return File(imageData, contextType);
         }
 
-        [HttpPut("{quizId}/image")]
+        [HttpPatch("{quizId}/image")]
         [RequestSizeLimit(5 * 1024 * 1024)] // 5MB
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesErrorResponseType(typeof(ErrorResponse))]
@@ -36,6 +37,7 @@ namespace QuizAI.API.Controllers
         [ProducesResponseType(StatusCodes.Status413RequestEntityTooLarge)]
         [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
         [ProducesResponseType(StatusCodes.Status415UnsupportedMediaType)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> UpdateQuizImage(Guid quizId, UpdateQuizImageCommand command)
         {
             command.SetId(quizId);
@@ -48,7 +50,8 @@ namespace QuizAI.API.Controllers
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesErrorResponseType(typeof(ErrorResponse))]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> DeleteQuizImage(Guid quizId, DeleteQuizImageCommand command)
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> DeleteQuizImage(Guid quizId, [FromQuery] DeleteQuizImageCommand command)
         {
             command.SetId(quizId);
 
