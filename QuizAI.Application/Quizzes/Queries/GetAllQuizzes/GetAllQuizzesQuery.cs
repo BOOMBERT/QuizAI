@@ -1,0 +1,16 @@
+﻿using MediatR;
+using QuizAI.Application.Common;
+using QuizAI.Application.Quizzes.Dtos;
+using QuizAI.Domain.Constants;
+
+namespace QuizAI.Application.Quizzes.Queries.GetAllQuizzes;
+
+public class GetAllQuizzesQuery : IRequest<PagedResponse<QuizDto>>
+{
+    public string? SearchPhrase { get; set; }
+    public int PageNumber { get; set; }
+    public int PageSize { get; set; }
+    public string? SortBy { get; set; }
+    public SortDirection? SortDirection { get; set; }
+    public ICollection<string> FilterCategories { get; set; } = new List<string>();
+}

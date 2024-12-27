@@ -2,8 +2,10 @@
 using Microsoft.AspNetCore.Mvc;
 using QuizAI.Application.Common;
 using QuizAI.Application.Quizzes.Commands.CreateQuiz;
+using QuizAI.Application.Quizzes.Commands.DeleteQuiz;
 using QuizAI.Application.Quizzes.Commands.UpdateQuiz;
 using QuizAI.Application.Quizzes.Dtos;
+using QuizAI.Application.Quizzes.Queries.GetAllQuizzes;
 using QuizAI.Application.Quizzes.Queries.GetQuizById;
 
 namespace QuizAI.API.Controllers;
@@ -32,6 +34,24 @@ public class QuizzesController : ControllerBase
         return CreatedAtAction(nameof(GetQuiz), new { quizId = id }, null);
     }
 
+    [HttpGet]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    public async Task<ActionResult<PagedResponse<QuizDto>>> GetAllQuizzes([FromQuery] GetAllQuizzesQuery query)
+    {
+        var quizzes = await _mediator.Send(query);
+        return Ok(quizzes);
+    }
+
+    [HttpGet("{quizId}")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesErrorResponseType(typeof(ErrorResponse))]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<QuizDto>> GetQuiz(Guid quizId)
+    {
+        var quiz = await _mediator.Send(new GetQuizByIdQuery(quizId));
+        return Ok(quiz);
+    }
+
     [HttpPut("{quizId}")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesErrorResponseType(typeof(ErrorResponse))]
@@ -44,13 +64,15 @@ public class QuizzesController : ControllerBase
         return NoContent();
     }
 
-    [HttpGet("{quizId}")]
-    [ProducesResponseType(StatusCodes.Status200OK)]
+    [HttpDelete("{quizId}")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesErrorResponseType(typeof(ErrorResponse))]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<ActionResult<QuizDto>> GetQuiz(Guid quizId)
+    public async Task<IActionResult> DeleteQuiz(Guid quizId, DeleteQuizCommand command)
     {
-        var quiz = await _mediator.Send(new GetQuizByIdQuery(quizId));
-        return Ok(quiz);
+        command.SetId(quizId);
+
+        await _mediator.Send(command);
+        return NoContent();
     }
 }

@@ -18,6 +18,16 @@ namespace QuizAI.API.Controllers
             _mediator = mediator;
         }
 
+        [HttpGet("{quizId}/image")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesErrorResponseType(typeof(ErrorResponse))]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> GetQuizImage(Guid quizId)
+        {
+            var (imageData, contextType) = await _mediator.Send(new GetQuizImageByIdQuery(quizId));
+            return File(imageData, contextType);
+        }
+
         [HttpPut("{quizId}/image")]
         [RequestSizeLimit(5 * 1024 * 1024)] // 5MB
         [ProducesResponseType(StatusCodes.Status204NoContent)]
@@ -32,16 +42,6 @@ namespace QuizAI.API.Controllers
 
             await _mediator.Send(command);
             return NoContent();
-        }
-
-        [HttpGet("{quizId}/image")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesErrorResponseType(typeof(ErrorResponse))]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> GetQuizImage(Guid quizId)
-        {
-            var (imageData, contextType) = await _mediator.Send(new GetQuizImageByIdQuery(quizId));
-            return File(imageData, contextType);
         }
 
         [HttpDelete("{quizId}/image")]

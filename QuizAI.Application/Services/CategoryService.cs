@@ -1,6 +1,7 @@
 ﻿using QuizAI.Application.Interfaces;
 using QuizAI.Domain.Entities;
 using QuizAI.Domain.Repositories;
+using System.Text.RegularExpressions;
 
 namespace QuizAI.Application.Services;
 
@@ -20,6 +21,8 @@ public class CategoryService : ICategoryService
         if (!categoriesNames.Any())
             return new List<Category>();
 
+        categoriesNames = Standardize(categoriesNames);
+
         var existingCategories = await _categoriesRepository.GetExistingAsync(categoriesNames);
         var existingCategoriesNames = existingCategories.Select(ec => ec.Name).ToHashSet();
 
@@ -30,10 +33,10 @@ public class CategoryService : ICategoryService
         return existingCategories.Concat(newCategories).ToList();
     }
 
-    public async Task DeleteIfNotAssignedAsync(Quiz quiz, IEnumerable<string> requestCategories)
+    public async Task DeleteIfNotUsedAsync(Quiz quiz, IEnumerable<string> newCategories)
     {
         var categoriesToRemove = quiz.Categories
-            .Where(c => !requestCategories.Contains(c.Name))
+            .Where(c => !newCategories.Contains(c.Name))
             .ToList();
 
         foreach (var categoryToRemove in categoriesToRemove)
@@ -43,5 +46,11 @@ public class CategoryService : ICategoryService
             if (await _categoriesRepository.IsAssignedToSingleQuizAsync(categoryToRemove.Id))
                 _repository.RemoveAsync(categoryToRemove);
         }
+    }
+
+    private IEnumerable<string> Standardize(IEnumerable<string> categoriesNames)
+    {
+        return categoriesNames.Select(categoryName => 
+            Regex.Replace(categoryName, @"\s+", " ").ToLower());
     }
 }

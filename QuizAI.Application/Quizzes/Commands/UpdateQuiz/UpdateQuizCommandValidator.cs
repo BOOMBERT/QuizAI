@@ -18,7 +18,7 @@ public class UpdateQuizCommandValidator : AbstractValidator<UpdateQuizCommand>
             .Must(c => c.ToHashSet().Count == c.Count).WithMessage("Categories must be unique.");
 
         RuleForEach(qz => qz.Categories)
-            .Must(i => !string.IsNullOrWhiteSpace(i)).WithMessage("Category cannot be empty or whitespace.")
-            .Must(i => i == null || i.Length <= 64).WithMessage("Each category must not exceed 64 characters.");
+            .Must(c => !string.IsNullOrWhiteSpace(c)).WithMessage("Category cannot be empty or whitespace.")
+            .Must(c => c == null || c.Length <= 64).WithMessage("Each category must not exceed 64 characters.");
     }
 }
