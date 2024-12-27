@@ -10,7 +10,9 @@ public class AppDbContext : DbContext
 
     internal DbSet<Quiz> Quizzes { get; set; }
     internal DbSet<Question> Questions { get; set; }
-    internal DbSet<Answer> Answers { get; set; }
+    internal DbSet<MultipleChoiceAnswer> MultipleChoiceAnswers { get; set; }
+    internal DbSet<OpenEndedAnswer> OpenEndedAnswers { get; set; }
+    internal DbSet<TrueFalseAnswer> TrueFalseAnswers { get; set; }
     internal DbSet<Category> Categories { get; set; }
     internal DbSet<Image> Images { get; set; }
 
@@ -18,7 +20,9 @@ public class AppDbContext : DbContext
     {
         modelBuilder.ApplyConfiguration(new QuizConfiguration());
         modelBuilder.ApplyConfiguration(new QuestionConfiguration());
-        modelBuilder.ApplyConfiguration(new AnswerConfiguration());
+        modelBuilder.ApplyConfiguration(new MultipleChoiceAnswerConfiguration());
+        modelBuilder.ApplyConfiguration(new OpenEndedAnswerConfiguration());
+        modelBuilder.ApplyConfiguration(new TrueFalseAnswerConfiguration());
         modelBuilder.ApplyConfiguration(new CategoryConfiguration());
         modelBuilder.ApplyConfiguration(new ImageConfiguration());
     }

@@ -12,7 +12,7 @@ internal class ImageConfiguration : IEntityTypeConfiguration<Image>
             .HasMaxLength(5);
 
         builder.Property(i => i.Hash)
-            .HasColumnType("VARBINARY(32)");
+            .HasColumnType("VARBINARY(40)");
 
         builder.HasIndex(i => i.Hash)
             .IsUnique();

@@ -15,5 +15,10 @@ public class Question
     public Guid QuizId { get; set; }
     public Quiz Quiz { get; set; }
 
-    public ICollection<Answer> Answers { get; set; } = new List<Answer>();
+    public ICollection<MultipleChoiceAnswer> MultipleChoiceAnswers { get; set; } = new List<MultipleChoiceAnswer>();
+    public ICollection<OpenEndedAnswer> OpenEndedAnswers { get; set; } = new List<OpenEndedAnswer>();
+    public ICollection<TrueFalseAnswer> TrueFalseAnswers { get; set; } = new List<TrueFalseAnswer>();
+
+
+
 }
