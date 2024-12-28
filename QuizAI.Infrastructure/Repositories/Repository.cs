@@ -18,6 +18,11 @@ public class Repository : IRepository
         await _context.Set<T>().AddAsync(entity);
     }
 
+    public async Task AddRangeAsync<T>(IEnumerable<T> entities) where T : class
+    {
+        await _context.Set<T>().AddRangeAsync(entities);
+    }
+
     public async Task<bool> EntityExistsAsync<T>(Guid id) where T : class
     {
         return await _context.Set<T>().AnyAsync(e => EF.Property<Guid>(e, "Id") == id);

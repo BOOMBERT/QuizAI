@@ -18,7 +18,4 @@ public class Question
     public ICollection<MultipleChoiceAnswer> MultipleChoiceAnswers { get; set; } = new List<MultipleChoiceAnswer>();
     public ICollection<OpenEndedAnswer> OpenEndedAnswers { get; set; } = new List<OpenEndedAnswer>();
     public ICollection<TrueFalseAnswer> TrueFalseAnswers { get; set; } = new List<TrueFalseAnswer>();
-
-
-
 }

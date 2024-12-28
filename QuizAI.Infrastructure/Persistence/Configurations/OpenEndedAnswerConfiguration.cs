@@ -9,7 +9,7 @@ internal class OpenEndedAnswerConfiguration : IEntityTypeConfiguration<OpenEnded
     public void Configure(EntityTypeBuilder<OpenEndedAnswer> builder)
     {
         builder.Property(oea => oea.ValidContent)
-            .HasMaxLength(512);
+            .HasMaxLength(1291);
 
         builder.HasOne(oea => oea.Question)
             .WithMany(qn => qn.OpenEndedAnswers)

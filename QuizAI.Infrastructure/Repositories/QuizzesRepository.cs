@@ -94,4 +94,10 @@ public class QuizzesRepository : IQuizzesRepository
             .Where(qz => qz.Id == quizId)
             .ExecuteUpdateAsync(qz => qz.SetProperty(x => x.ImageId, imageId));
     }
+
+    public async Task<int> HowManyQuestions(Guid quizId)
+    {
+        return await _context.Questions
+            .CountAsync(qn => qn.QuizId == quizId);
+    }
 }

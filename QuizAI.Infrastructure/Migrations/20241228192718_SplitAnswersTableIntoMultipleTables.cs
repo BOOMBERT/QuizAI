@@ -40,7 +40,7 @@ namespace QuizAI.Infrastructure.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    ValidContent = table.Column<string>(type: "nvarchar(512)", maxLength: 512, nullable: false),
+                    ValidContent = table.Column<string>(type: "nvarchar(1291)", maxLength: 1291, nullable: false),
                     VerificationByAI = table.Column<bool>(type: "bit", nullable: false),
                     QuestionId = table.Column<int>(type: "int", nullable: false)
                 },

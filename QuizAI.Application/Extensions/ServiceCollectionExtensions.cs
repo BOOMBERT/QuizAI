@@ -1,4 +1,5 @@
-﻿using FluentValidation;
+﻿using AutoMapper;
+using FluentValidation;
 using FluentValidation.AspNetCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -38,5 +39,13 @@ public static class ServiceCollectionExtensions
         });
 
         services.AddScoped<ICategoryService, CategoryService>();
+
+        services.AddScoped<IQuestionService, QuestionService>(provider =>
+        {
+            var repository = provider.GetRequiredService<IRepository>();
+            var quizzesRepository = provider.GetRequiredService<IQuizzesRepository>();
+            byte maxNumberOfQuestions = 20;
+            return new QuestionService(repository, quizzesRepository, maxNumberOfQuestions);
+        });
     }
 }

@@ -15,4 +15,5 @@ public interface IQuizzesRepository
         SortDirection? sortDirection,
         ICollection<string> FilterCategories);
     Task UpdateImageAsync(Guid quizId, Guid? imageId);
+    Task<int> HowManyQuestions(Guid quizId);
 }

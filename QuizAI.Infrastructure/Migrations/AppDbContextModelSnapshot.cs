@@ -120,8 +120,8 @@ namespace QuizAI.Infrastructure.Migrations
 
                     b.Property<string>("ValidContent")
                         .IsRequired()
-                        .HasMaxLength(512)
-                        .HasColumnType("nvarchar(512)");
+                        .HasMaxLength(1291)
+                        .HasColumnType("nvarchar(1291)");
 
                     b.Property<bool>("VerificationByAI")
                         .HasColumnType("bit");

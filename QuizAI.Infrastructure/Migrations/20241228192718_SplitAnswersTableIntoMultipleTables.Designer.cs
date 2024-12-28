@@ -12,7 +12,7 @@ using QuizAI.Infrastructure.Persistence;
 namespace QuizAI.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20241227230008_SplitAnswersTableIntoMultipleTables")]
+    [Migration("20241228192718_SplitAnswersTableIntoMultipleTables")]
     partial class SplitAnswersTableIntoMultipleTables
     {
         /// <inheritdoc />
@@ -123,8 +123,8 @@ namespace QuizAI.Infrastructure.Migrations
 
                     b.Property<string>("ValidContent")
                         .IsRequired()
-                        .HasMaxLength(512)
-                        .HasColumnType("nvarchar(512)");
+                        .HasMaxLength(1291)
+                        .HasColumnType("nvarchar(1291)");
 
                     b.Property<bool>("VerificationByAI")
                         .HasColumnType("bit");
