@@ -33,7 +33,7 @@ public class CategoryService : ICategoryService
         return existingCategories.Concat(newCategories).ToList();
     }
 
-    public async Task DeleteIfNotUsedAsync(Quiz quiz, IEnumerable<string> newCategories)
+    public async Task RemoveUnusedAsync(Quiz quiz, IEnumerable<string> newCategories)
     {
         var categoriesToRemove = quiz.Categories
             .Where(c => !newCategories.Contains(c.Name))
@@ -44,7 +44,7 @@ public class CategoryService : ICategoryService
             quiz.Categories.Remove(categoryToRemove);
 
             if (await _categoriesRepository.IsAssignedToSingleQuizAsync(categoryToRemove.Id))
-                _repository.RemoveAsync(categoryToRemove);
+                _repository.Remove(categoryToRemove);
         }
     }
 

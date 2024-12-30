@@ -16,7 +16,7 @@ namespace QuizAI.API.Controllers
             _mediator = mediator;
         }
 
-        [HttpPost("{quizId}/open-ended-questions")]
+        [HttpPost("{quizId}/questions/open-ended")]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesErrorResponseType(typeof(ErrorResponse))]
         [ProducesResponseType(StatusCodes.Status404NotFound)]

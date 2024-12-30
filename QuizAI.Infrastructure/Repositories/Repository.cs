@@ -35,9 +35,14 @@ public class Repository : IRepository
             .ExecuteDeleteAsync();
     }
 
-    public void RemoveAsync<T>(T entity) where T : class
+    public void Remove<T>(T entity) where T : class
     {
         _context.Set<T>().Remove(entity);
+    }
+
+    public void RemoveRange<T>(IEnumerable<T> entities) where T : class
+    {
+        _context.Set<T>().RemoveRange(entities);
     }
 
     public async Task<bool> SaveChangesAsync()

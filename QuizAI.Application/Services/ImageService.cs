@@ -15,25 +15,21 @@ public class ImageService : IImageService
     private readonly IFileStorageService _fileStorageService;
     private readonly IRepository _repository;
     private readonly (ushort width, ushort height)? _imagesDefaultSize;
-    private readonly int _imagesMaxSizeInBytes;
 
     public ImageService(
         IImagesRepository imagesRepository, 
         IFileStorageService fileStorageService, 
         IRepository repository, 
-        (ushort width, ushort height)? imagesDefaultSize, 
-        int imagesMaxSizeInBytes)
+        (ushort width, ushort height)? imagesDefaultSize)
     {
         _imagesRepository = imagesRepository;
         _fileStorageService = fileStorageService;
         _repository = repository;
         _imagesDefaultSize = imagesDefaultSize;
-        _imagesMaxSizeInBytes = imagesMaxSizeInBytes;
     }
 
     public async Task<Image> UploadAsync(IFormFile image)
     {
-        FileValidationUtil.Validate(image, _imagesMaxSizeInBytes);
         byte[] optimizedImage = await ImageOptimizationUtil.Optimize(image, _imagesDefaultSize);
 
         var imageHash = HashImageByPhash(optimizedImage);

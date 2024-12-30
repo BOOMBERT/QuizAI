@@ -21,7 +21,7 @@ public class GetAllQuizzesQueryValidator : AbstractValidator<GetAllQuizzesQuery>
             .GreaterThanOrEqualTo(1).WithMessage("Page number must be greater than or equal to 1.");
 
         RuleFor(qz => qz.PageSize)
-            .Must(value => allowPageSizes.Contains(value))
+            .Must(ps => allowPageSizes.Contains(ps))
             .WithMessage($"Page size must be in [{string.Join(",", allowPageSizes)}]");
 
         RuleFor(qz => qz.SortDirection)
@@ -35,17 +35,14 @@ public class GetAllQuizzesQueryValidator : AbstractValidator<GetAllQuizzesQuery>
             .When(qz => qz.SortDirection != null);
 
         RuleFor(qz => qz.SortBy)
-            .Must(value => allowedSortByColumnNames
-            .Any(column => string.Equals(column, value, StringComparison.OrdinalIgnoreCase)))
-            .When(q => q.SortBy != null)
+            .Must(sb => allowedSortByColumnNames.Any(asbcn => string.Equals(asbcn, sb, StringComparison.OrdinalIgnoreCase)))
+            .When(qz => qz.SortBy != null)
             .WithMessage($"Sort by is optional, or must be in [{string.Join(",", allowedSortByColumnNames)}].");
 
         RuleFor(qz => qz.FilterCategories)
-            .Must(c => c.Count <= 10).WithMessage("You can specify up to 10 categories.")
-            .Must(c => c.ToHashSet().Count == c.Count).WithMessage("Categories must be unique.");
-
-        RuleForEach(qz => qz.FilterCategories)
-            .Must(c => !string.IsNullOrWhiteSpace(c)).WithMessage("Category cannot be empty or whitespace.")
-            .Must(c => c == null || c.Length <= 64).WithMessage("Each category must not exceed 64 characters.");
+            .Must(fc => fc.Count <= 10).WithMessage("You can specify up to 10 categories.")
+            .Must(fc => fc.Select(fc => fc.ToLower()).ToHashSet().Count == fc.Count).WithMessage("Categories must be unique.")
+            .Must(fc => fc.All(fc => !string.IsNullOrWhiteSpace(fc))).WithMessage("Category cannot be empty or whitespace.")
+            .Must(fc => fc.All(fc => fc.Length <= 64)).WithMessage("Each category must not exceed 64 characters.");
     }
 }

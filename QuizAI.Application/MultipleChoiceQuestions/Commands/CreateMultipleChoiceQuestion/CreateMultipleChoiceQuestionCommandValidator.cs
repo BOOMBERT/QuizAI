@@ -1,4 +1,5 @@
 ﻿using FluentValidation;
+using QuizAI.Application.Extensions;
 
 namespace QuizAI.Application.MultipleChoiceQuestions.Commands.CreateMultipleChoiceQuestion;
 
@@ -7,9 +8,9 @@ public class CreateMultipleChoiceQuestionCommandValidator : AbstractValidator<Cr
     public CreateMultipleChoiceQuestionCommandValidator()
     {
         RuleFor(mcq => mcq.Content)
-            .MaximumLength(255).WithMessage("Question content must be at most 255 characters long.");
+            .IsValidQuestionContent();
 
         RuleFor(mcq => mcq.Answers)
-            .Must(mcq => mcq.Count <= 8).WithMessage("You can specify up to 8 answers.");
+            .IsValidMultipleChoiceAnswers();
     }
 }

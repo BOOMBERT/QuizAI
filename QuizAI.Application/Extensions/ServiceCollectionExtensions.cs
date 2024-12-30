@@ -34,18 +34,18 @@ public static class ServiceCollectionExtensions
             var fileStorageService = provider.GetRequiredService<IFileStorageService>();
             var repository = provider.GetRequiredService<IRepository>();
             (ushort, ushort) imagesDefaultSize = (800, 800);
-            var imagesMaxSizeInBytes = 2 * 1024 * 1024; // 2MB
-            return new ImageService(imagesRepository, fileStorageService, repository, imagesDefaultSize, imagesMaxSizeInBytes);
+            return new ImageService(imagesRepository, fileStorageService, repository, imagesDefaultSize);
         });
 
         services.AddScoped<ICategoryService, CategoryService>();
 
         services.AddScoped<IQuestionService, QuestionService>(provider =>
         {
+            var mapper = provider.GetRequiredService<IMapper>();
             var repository = provider.GetRequiredService<IRepository>();
             var quizzesRepository = provider.GetRequiredService<IQuizzesRepository>();
             byte maxNumberOfQuestions = 20;
-            return new QuestionService(repository, quizzesRepository, maxNumberOfQuestions);
+            return new QuestionService(mapper, repository, quizzesRepository, maxNumberOfQuestions);
         });
     }
 }
