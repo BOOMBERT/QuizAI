@@ -15,6 +15,6 @@ public class DeleteQuestionImageCommandHandler : IRequestHandler<DeleteQuestionI
 
     public async Task Handle(DeleteQuestionImageCommand request, CancellationToken cancellationToken)
     {
-        await _imageService.DeleteAsync(request.GetQuizId(), request.GetQuestionId());
+        await _imageService.DeleteAsync(request.QuizId, request.QuestionId);
     }
 }

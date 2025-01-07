@@ -38,6 +38,26 @@ public class QuestionService : IQuestionService
         return (byte)(existingQuestionsCount + 1);
     }
 
+    public async Task DeleteAsync(Guid quizId, int questionId)
+    {
+        if (!await _repository.EntityExistsAsync<Quiz>(quizId))
+            throw new NotFoundException($"Quiz with ID {quizId} was not found");
+
+        var questions = await _quizzesRepository.GetQuestions(quizId);
+
+        var questionToDelete = questions.FirstOrDefault(qn => qn.Id == questionId)
+            ?? throw new NotFoundException($"Question with ID {questionId} was not found in quiz with ID {quizId}.");
+
+        var questionToDeleteOrder = questionToDelete.Order;
+
+        foreach (var question in questions.Where(qn => qn.Order > questionToDeleteOrder))
+        {
+            question.Order--;
+        }
+
+        _repository.Remove(questionToDelete);
+    }
+
     public ICollection<MultipleChoiceAnswer> RemoveUnusedMultipleChoiceAnswersAndReturnNew(
         Question question, ICollection<CreateMultipleChoiceAnswerDto> requestedNewAnswers)
     {

@@ -49,17 +49,13 @@ namespace QuizAI.API.Controllers
             return NoContent();
         }
 
-        [HttpDelete("{quizId}/questions/{questionId}/image")]
+        [HttpDelete("{QuizId}/questions/{QuestionId}/image")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesErrorResponseType(typeof(ErrorResponse))]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> DeleteQuestionImage(Guid quizId, int questionId)
+        public async Task<IActionResult> DeleteQuestionImage([FromRoute] DeleteQuestionImageCommand command)
         {
-            var command = new DeleteQuestionImageCommand();
-            command.SetQuizId(quizId);
-            command.SetQuestionId(questionId);
-
             await _mediator.Send(command);
             return NoContent();
         }

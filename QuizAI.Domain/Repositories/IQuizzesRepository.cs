@@ -14,6 +14,7 @@ public interface IQuizzesRepository
         string? sortBy,
         SortDirection? sortDirection,
         ICollection<string> FilterCategories);
+    Task<ICollection<Question>> GetQuestions(Guid quizId);
     Task UpdateImageAsync(Guid quizId, Guid? imageId);
     Task<IEnumerable<Guid>> GetQuestionsImagesAsync(Guid quizId);
     Task<int> HowManyQuestions(Guid quizId);

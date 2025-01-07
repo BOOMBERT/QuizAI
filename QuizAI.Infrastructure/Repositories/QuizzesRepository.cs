@@ -88,6 +88,15 @@ public class QuizzesRepository : IQuizzesRepository
         return (quizzes, totalCount);
     }
 
+    public async Task<ICollection<Question>> GetQuestions(Guid quizId)
+    {
+        return await _context.Quizzes
+            .Where(qz => qz.Id == quizId)
+            .Include(qz => qz.Questions)
+            .Select(qz => qz.Questions)
+            .FirstOrDefaultAsync() ?? new List<Question>();
+    }
+
     public async Task UpdateImageAsync(Guid quizId, Guid? imageId)
     {
         await _context.Quizzes

@@ -1,5 +1,6 @@
 ﻿using MediatR;
 using QuizAI.Application.Interfaces;
+using QuizAI.Application.Services;
 using QuizAI.Domain.Entities;
 using QuizAI.Domain.Exceptions;
 using QuizAI.Domain.Repositories;
@@ -10,25 +11,23 @@ public class DeleteQuestionCommandHandler : IRequestHandler<DeleteQuestionComman
 {
     private readonly IRepository _repository;
     private readonly IQuestionsRepository _questionsRepository;
+    private readonly IQuestionService _questionService;
     private readonly IImageService _imageService;
 
-    public DeleteQuestionCommandHandler(IRepository repository, IQuestionsRepository questionsRepository, IImageService imageService)
+    public DeleteQuestionCommandHandler(IRepository repository, IQuestionsRepository questionsRepository, IQuestionService questionService, IImageService imageService)
     {
         _repository = repository;
         _questionsRepository = questionsRepository;
+        _questionService = questionService;
         _imageService = imageService;
     }
 
     public async Task Handle(DeleteQuestionCommand request, CancellationToken cancellationToken)
     {
-        var (quizId, questionId) = (request.GetQuizId(), request.GetQuestionId());
+        var imageId = await _questionsRepository.GetImageIdAsync(request.QuizId, request.QuestionId);
 
-        if (!await _repository.EntityExistsAsync<Quiz>(quizId))
-            throw new NotFoundException($"Quiz with ID {quizId} was not found");
-
-        var imageId = await _questionsRepository.GetImageIdAsync(quizId, questionId);
-
-        await _repository.DeleteAsync<Question>(questionId);
+        await _questionService.DeleteAsync(request.QuizId, request.QuestionId);
+        await _repository.SaveChangesAsync();
 
         if (imageId != null)
             await _imageService.DeleteIfNotAssignedAsync((Guid)imageId);
