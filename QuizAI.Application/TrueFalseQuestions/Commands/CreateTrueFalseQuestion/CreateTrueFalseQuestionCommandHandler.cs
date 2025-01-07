@@ -24,9 +24,13 @@ public class CreateTrueFalseQuestionCommandHandler : IRequestHandler<CreateTrueF
     {
         var orderOfQuestion = await _questionService.GetOrderAsync(request.GetQuizId());
 
-        var question = _mapper.Map<Question>(request);
-        question.Type = QuestionType.TrueFalse;
-        question.Order = orderOfQuestion;
+        var question = new Question
+        {
+            Content = request.Content,
+            Type = QuestionType.TrueFalse,
+            Order = orderOfQuestion,
+            QuizId = request.GetQuizId()
+        };
 
         var trueFalseAnswer = new TrueFalseAnswer
         {

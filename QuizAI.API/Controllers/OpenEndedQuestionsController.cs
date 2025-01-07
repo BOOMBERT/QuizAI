@@ -1,7 +1,9 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using QuizAI.Application.Common;
+using QuizAI.Application.MultipleChoiceQuestions.Commands.UpdateMultipleChoiceQuestion;
 using QuizAI.Application.OpenEndedQuestions.Commands.CreateOpenEndedQuestion;
+using QuizAI.Application.OpenEndedQuestions.Commands.UpdateOpenEndedQuestion;
 
 namespace QuizAI.API.Controllers
 {
@@ -28,6 +30,20 @@ namespace QuizAI.API.Controllers
 
             var id = await _mediator.Send(command);
             return Created();
+        }
+
+        [HttpPut("{quizId}/questions/open-ended/{questionId}")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesErrorResponseType(typeof(ErrorResponse))]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> UpdateOpenEndedQuestion(Guid quizId, int questionId, UpdateOpenEndedQuestionCommand command)
+        {
+            command.SetQuizId(quizId);
+            command.SetQuestionId(questionId);
+
+            await _mediator.Send(command);
+            return NoContent();
         }
     }
 }

@@ -9,7 +9,7 @@ internal class TrueFalseAnswerConfiguration : IEntityTypeConfiguration<TrueFalse
     public void Configure(EntityTypeBuilder<TrueFalseAnswer> builder)
     {
         builder.HasOne(tfa => tfa.Question)
-            .WithMany(qn => qn.TrueFalseAnswers)
-            .HasForeignKey(tfa => tfa.QuestionId);
+            .WithOne(qn => qn.TrueFalseAnswer)
+            .HasForeignKey<TrueFalseAnswer>(tfa => tfa.QuestionId);
     }
 }

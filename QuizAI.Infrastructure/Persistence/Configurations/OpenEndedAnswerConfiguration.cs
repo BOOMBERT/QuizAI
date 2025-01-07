@@ -12,7 +12,7 @@ internal class OpenEndedAnswerConfiguration : IEntityTypeConfiguration<OpenEnded
             .HasMaxLength(1291);
 
         builder.HasOne(oea => oea.Question)
-            .WithMany(qn => qn.OpenEndedAnswers)
-            .HasForeignKey(oea => oea.QuestionId);
+            .WithOne(qn => qn.OpenEndedAnswer)
+            .HasForeignKey<OpenEndedAnswer>(oea => oea.QuestionId);
     }
 }

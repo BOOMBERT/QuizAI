@@ -1,7 +1,9 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using QuizAI.Application.Common;
+using QuizAI.Application.MultipleChoiceQuestions.Commands.UpdateMultipleChoiceQuestion;
 using QuizAI.Application.TrueFalseQuestions.Commands.CreateTrueFalseQuestion;
+using QuizAI.Application.TrueFalseQuestions.Commands.UpdateTrueFalseQuestion;
 
 namespace QuizAI.API.Controllers
 {
@@ -28,6 +30,20 @@ namespace QuizAI.API.Controllers
 
             var id = await _mediator.Send(command);
             return Created();
+        }
+
+        [HttpPut("{quizId}/questions/true-false/{questionId}")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesErrorResponseType(typeof(ErrorResponse))]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> UpdateTrueFalseQuestion(Guid quizId, int questionId, UpdateTrueFalseQuestionCommand command)
+        {
+            command.SetQuizId(quizId);
+            command.SetQuestionId(questionId);
+
+            await _mediator.Send(command);
+            return NoContent();
         }
     }
 }

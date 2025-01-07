@@ -28,7 +28,7 @@ public class UpdateMultipleChoiceQuestionCommandHandler : IRequestHandler<Update
         if (!await _repository.EntityExistsAsync<Quiz>(quizId))
             throw new NotFoundException($"Quiz with ID {quizId} was not found");
 
-        var question = await _questionsRepository.GetMultipleChoiceWithAnswersAsync(quizId, questionId)
+        var question = await _questionsRepository.GetWithAnswerAsync(quizId, questionId, QuestionType.MultipleChoice)
             ?? throw new NotFoundException($"Quiz with ID {quizId} does not contain a Question with ID {questionId}.");
 
         if (question.Content != request.Content)

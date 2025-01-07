@@ -24,9 +24,13 @@ public class CreateOpenEndedQuestionCommandHandler : IRequestHandler<CreateOpenE
     {
         var orderOfQuestion = await _questionService.GetOrderAsync(request.GetQuizId());
 
-        var question = _mapper.Map<Question>(request);
-        question.Type = QuestionType.OpenEnded;
-        question.Order = orderOfQuestion;
+        var question = new Question
+        {
+            Content = request.Content,
+            Type = QuestionType.OpenEnded,
+            Order = orderOfQuestion,
+            QuizId = request.GetQuizId()
+        };
 
         var openEndedAnswer = new OpenEndedAnswer
         {

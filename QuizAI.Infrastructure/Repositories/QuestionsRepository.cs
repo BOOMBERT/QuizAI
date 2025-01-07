@@ -1,7 +1,10 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using QuizAI.Domain.Entities;
+using QuizAI.Domain.Enums;
+using QuizAI.Domain.Exceptions;
 using QuizAI.Domain.Repositories;
 using QuizAI.Infrastructure.Persistence;
+using System.Linq.Expressions;
 
 namespace QuizAI.Infrastructure.Repositories;
 
@@ -14,10 +17,20 @@ public class QuestionsRepository : IQuestionsRepository
         _context = context;
     }
 
-    public async Task<Question?> GetMultipleChoiceWithAnswersAsync(Guid quizId, int questionId)
+    public async Task<Question?> GetWithAnswerAsync(Guid quizId, int questionId, QuestionType questionType)
     {
-        return await _context.Questions
-            .Include(qn => qn.MultipleChoiceAnswers)
-            .FirstOrDefaultAsync(qn => qn.Id == questionId && qn.QuizId == quizId);
+        var baseQuery = _context.Questions.AsQueryable();
+
+        baseQuery = questionType switch
+        {
+            QuestionType.MultipleChoice => baseQuery.Include(qn => qn.MultipleChoiceAnswers),
+            QuestionType.OpenEnded => baseQuery.Include(qn => qn.OpenEndedAnswer),
+            QuestionType.TrueFalse => baseQuery.Include(qn => qn.TrueFalseAnswer),
+            _ => throw new UnsupportedMediaTypeException(
+                $"Unsupported question type {questionType} for quiz with ID {quizId} and question with ID {questionId}"),
+        };
+
+        return await baseQuery
+            .FirstOrDefaultAsync(qn => qn.Id == questionId && qn.QuizId == quizId && qn.Type == questionType);
     }
 }

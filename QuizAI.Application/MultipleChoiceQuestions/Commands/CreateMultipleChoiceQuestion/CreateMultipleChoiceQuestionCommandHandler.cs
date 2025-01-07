@@ -24,9 +24,13 @@ public class CreateMultipleChoiceQuestionCommandHandler : IRequestHandler<Create
     {
         var orderOfQuestion = await _questionService.GetOrderAsync(request.GetQuizId());
 
-        var question = _mapper.Map<Question>(request);
-        question.Type = QuestionType.MultipleChoice;
-        question.Order = orderOfQuestion;
+        var question = new Question
+        {
+            Content = request.Content,
+            Type = QuestionType.MultipleChoice,
+            Order = orderOfQuestion,
+            QuizId = request.GetQuizId()
+        };
 
         var multipleChoiceAnswers = _mapper.Map<IEnumerable<MultipleChoiceAnswer>>(request.Answers);
 

@@ -16,6 +16,6 @@ public class Question
     public Quiz Quiz { get; set; }
 
     public ICollection<MultipleChoiceAnswer> MultipleChoiceAnswers { get; set; } = new List<MultipleChoiceAnswer>();
-    public ICollection<OpenEndedAnswer> OpenEndedAnswers { get; set; } = new List<OpenEndedAnswer>();
-    public ICollection<TrueFalseAnswer> TrueFalseAnswers { get; set; } = new List<TrueFalseAnswer>();
+    public OpenEndedAnswer OpenEndedAnswer { get; set; }
+    public TrueFalseAnswer TrueFalseAnswer { get; set; }
 }

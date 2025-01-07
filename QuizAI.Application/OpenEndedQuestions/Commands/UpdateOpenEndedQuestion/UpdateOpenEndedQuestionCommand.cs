@@ -1,10 +1,11 @@
 ﻿using MediatR;
 
-namespace QuizAI.Application.OpenEndedQuestions.Commands.CreateOpenEndedQuestion;
+namespace QuizAI.Application.OpenEndedQuestions.Commands.UpdateOpenEndedQuestion;
 
-public class CreateOpenEndedQuestionCommand : IRequest<int>
+public class UpdateOpenEndedQuestionCommand : IRequest
 {
     private Guid QuizId { get; set; }
+    private int QuestionId { get; set; }
     public string Content { get; set; } = string.Empty;
     public List<string> Answers { get; set; } = new List<string>();
     public bool VerificationByAI { get; set; }
@@ -17,5 +18,15 @@ public class CreateOpenEndedQuestionCommand : IRequest<int>
     public Guid GetQuizId()
     {
         return QuizId;
+    }
+
+    public void SetQuestionId(int id)
+    {
+        QuestionId = id;
+    }
+
+    public int GetQuestionId()
+    {
+        return QuestionId;
     }
 }
