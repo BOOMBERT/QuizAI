@@ -74,10 +74,11 @@ public class QuizzesController : ControllerBase
     [ProducesErrorResponseType(typeof(ErrorResponse))]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> DeleteQuiz(Guid quizId, [FromQuery] DeleteQuizCommand command)
+    public async Task<IActionResult> DeleteQuiz(Guid quizId)
     {
+        var command = new DeleteQuizCommand();
         command.SetId(quizId);
-
+        
         await _mediator.Send(command);
         return NoContent();
     }

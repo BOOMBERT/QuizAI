@@ -1,35 +1,37 @@
 ﻿using MediatR;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using QuizAI.Application.Common;
+using QuizAI.Application.Questions.Commands.DeleteQuestionImage;
+using QuizAI.Application.Questions.Commands.UpdateQuestionImage;
+using QuizAI.Application.Questions.Queries.GetQuestionImageById;
 using QuizAI.Application.Quizzes.Commands.DeleteQuizImage;
-using QuizAI.Application.Quizzes.Commands.UpdateQuizImage;
-using QuizAI.Application.Quizzes.Queries.GetQuizImageById;
 
 namespace QuizAI.API.Controllers
 {
     [Route("api/quizzes")]
     [ApiController]
-    public class QuizzesImageController : ControllerBase
+    public class QuestionsImageController : ControllerBase
     {
         private readonly IMediator _mediator;
 
-        public QuizzesImageController(IMediator mediator)
+        public QuestionsImageController(IMediator mediator)
         {
             _mediator = mediator;
         }
 
-        [HttpGet("{quizId}/image")]
+        [HttpGet("{quizId}/questions/{questionId}/image")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesErrorResponseType(typeof(ErrorResponse))]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> GetQuizImage(Guid quizId)
+        public async Task<IActionResult> GetQuestionImage(Guid quizId, int questionId)
         {
-            var (imageData, contextType) = await _mediator.Send(new GetQuizImageByIdQuery(quizId));
+            var (imageData, contextType) = await _mediator.Send(new GetQuestionImageByIdQuery(quizId, questionId));
             return File(imageData, contextType);
         }
 
-        [HttpPatch("{quizId}/image")]
+        [HttpPatch("{quizId}/questions/{questionId}/image")]
         [RequestSizeLimit(5 * 1024 * 1024)] // 5MB
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesErrorResponseType(typeof(ErrorResponse))]
@@ -38,23 +40,25 @@ namespace QuizAI.API.Controllers
         [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
         [ProducesResponseType(StatusCodes.Status415UnsupportedMediaType)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> UpdateQuizImage(Guid quizId, UpdateQuizImageCommand command)
+        public async Task<IActionResult> UpdateQuestionImage(Guid quizId, int questionId, UpdateQuestionImageCommand command)
         {
-            command.SetId(quizId);
+            command.SetQuizId(quizId);
+            command.SetQuestionId(questionId);
 
             await _mediator.Send(command);
             return NoContent();
         }
 
-        [HttpDelete("{quizId}/image")]
+        [HttpDelete("{quizId}/questions/{questionId}/image")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesErrorResponseType(typeof(ErrorResponse))]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> DeleteQuizImage(Guid quizId)
+        public async Task<IActionResult> DeleteQuestionImage(Guid quizId, int questionId)
         {
-            var command = new DeleteQuizImageCommand();
-            command.SetId(quizId);
+            var command = new DeleteQuestionImageCommand();
+            command.SetQuizId(quizId);
+            command.SetQuestionId(questionId);
 
             await _mediator.Send(command);
             return NoContent();

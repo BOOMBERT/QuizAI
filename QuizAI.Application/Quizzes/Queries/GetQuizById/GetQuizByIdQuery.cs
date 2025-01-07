@@ -5,5 +5,5 @@ namespace QuizAI.Application.Quizzes.Queries.GetQuizById;
 
 public class GetQuizByIdQuery(Guid quizId) : IRequest<QuizDto>
 {
-    public Guid quizId { get; } = quizId;
+    public Guid QuizId { get; } = quizId;
 }

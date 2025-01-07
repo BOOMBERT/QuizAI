@@ -33,4 +33,21 @@ public class QuestionsRepository : IQuestionsRepository
         return await baseQuery
             .FirstOrDefaultAsync(qn => qn.Id == questionId && qn.QuizId == quizId && qn.Type == questionType);
     }
+
+    public async Task<Guid?> GetImageIdAsync(Guid quizId, int questionId)
+    {
+        var question = await _context.Questions
+            .Where(qn => qn.QuizId == quizId && qn.Id == questionId)
+            .FirstOrDefaultAsync() 
+            ?? throw new NotFoundException($"Question with ID {questionId} in quiz with ID {quizId} was not found.");
+
+        return question.ImageId;
+    }
+
+    public async Task UpdateImageAsync(Guid quizId, int questionId, Guid? imageId)
+    {
+        await _context.Questions
+            .Where(qn => qn.QuizId == quizId && qn.Id == questionId)
+            .ExecuteUpdateAsync(qn => qn.SetProperty(x => x.ImageId, imageId));
+    }
 }

@@ -34,4 +34,10 @@ public class ImagesRepository : IImagesRepository
         return await _context.Quizzes
             .AnyAsync(qz => qz.ImageId == imageId);
     }
+
+    public async Task<bool> IsAssignedToAnyQuestionAsync(Guid imageId)
+    {
+        return await _context.Questions
+            .AnyAsync(qn => qn.ImageId == imageId);
+    }
 }

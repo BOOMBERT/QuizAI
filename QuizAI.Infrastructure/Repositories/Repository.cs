@@ -28,6 +28,11 @@ public class Repository : IRepository
         return await _context.Set<T>().AnyAsync(e => EF.Property<Guid>(e, "Id") == id);
     }
 
+    public async Task<bool> EntityExistsAsync<T>(int id) where T : class
+    {
+        return await _context.Set<T>().AnyAsync(e => EF.Property<int>(e, "Id") == id);
+    }
+
     public async Task DeleteAsync<T>(Guid id) where T : class
     {
         await _context.Set<T>()

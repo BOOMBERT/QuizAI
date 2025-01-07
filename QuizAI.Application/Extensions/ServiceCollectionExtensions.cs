@@ -30,11 +30,13 @@ public static class ServiceCollectionExtensions
 
         services.AddScoped<IImageService, ImageService>(provider =>
         {
-            var imagesRepository = provider.GetRequiredService<IImagesRepository>();
-            var fileStorageService = provider.GetRequiredService<IFileStorageService>();
             var repository = provider.GetRequiredService<IRepository>();
+            var fileStorageService = provider.GetRequiredService<IFileStorageService>();
+            var imagesRepository = provider.GetRequiredService<IImagesRepository>();
+            var quizzesRepository = provider.GetRequiredService<IQuizzesRepository>();
+            var questionsRepository = provider.GetRequiredService<IQuestionsRepository>();
             (ushort, ushort) imagesDefaultSize = (800, 800);
-            return new ImageService(imagesRepository, fileStorageService, repository, imagesDefaultSize);
+            return new ImageService(repository, fileStorageService, imagesRepository, quizzesRepository, questionsRepository, imagesDefaultSize);
         });
 
         services.AddScoped<ICategoryService, CategoryService>();
