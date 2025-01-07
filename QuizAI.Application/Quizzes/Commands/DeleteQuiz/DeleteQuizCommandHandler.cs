@@ -27,10 +27,19 @@ public class DeleteQuizCommandHandler : IRequestHandler<DeleteQuizCommand>
             throw new NotFoundException($"Quiz with ID {quizId} was not found");
 
         var imageId = await _quizzesRepository.GetImageIdAsync(quizId);
-        
+        var uniqueQuestionImages = (await _quizzesRepository.GetQuestionsImagesAsync(quizId)).Distinct();
+
         await _repository.DeleteAsync<Quiz>(quizId);
 
-        if (imageId != null)
+        if (imageId != null && !uniqueQuestionImages.Contains((Guid)imageId))
             await _imageService.DeleteIfNotAssignedAsync((Guid)imageId);
+
+        if (uniqueQuestionImages.Any())
+        {
+            foreach (var questionImage in uniqueQuestionImages)
+            {
+                await _imageService.DeleteIfNotAssignedAsync(questionImage);
+            }
+        }
     }
 }

@@ -40,6 +40,13 @@ public class Repository : IRepository
             .ExecuteDeleteAsync();
     }
 
+    public async Task DeleteAsync<T>(int id) where T : class
+    {
+        await _context.Set<T>()
+            .Where(e => EF.Property<int>(e, "Id") == id)
+            .ExecuteDeleteAsync();
+    }
+
     public void Remove<T>(T entity) where T : class
     {
         _context.Set<T>().Remove(entity);

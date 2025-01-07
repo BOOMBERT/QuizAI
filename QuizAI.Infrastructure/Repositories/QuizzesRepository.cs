@@ -95,6 +95,14 @@ public class QuizzesRepository : IQuizzesRepository
             .ExecuteUpdateAsync(qz => qz.SetProperty(x => x.ImageId, imageId));
     }
 
+    public async Task<IEnumerable<Guid>> GetQuestionsImagesAsync(Guid quizId)
+    {
+        return await _context.Questions
+            .Where(qn => qn.QuizId == quizId && qn.ImageId != null)
+            .Select(qn => (Guid)qn.ImageId!)
+            .ToArrayAsync();
+    }
+
     public async Task<int> HowManyQuestions(Guid quizId)
     {
         return await _context.Questions
