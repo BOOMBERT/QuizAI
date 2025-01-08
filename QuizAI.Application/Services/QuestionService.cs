@@ -28,7 +28,7 @@ public class QuestionService : IQuestionService
         if (!await _repository.EntityExistsAsync<Quiz>(quizId))
             throw new NotFoundException($"Quiz with ID {quizId} was not found");
 
-        var existingQuestionsCount = await _quizzesRepository.HowManyQuestions(quizId);
+        var existingQuestionsCount = await _quizzesRepository.HowManyQuestionsAsync(quizId);
         if (existingQuestionsCount >= _maxNumberOfQuestions)
             throw new ConflictException(
                 $"Quiz with ID {quizId} cannot have a new question " +
@@ -43,7 +43,7 @@ public class QuestionService : IQuestionService
         if (!await _repository.EntityExistsAsync<Quiz>(quizId))
             throw new NotFoundException($"Quiz with ID {quizId} was not found");
 
-        var questions = await _quizzesRepository.GetQuestions(quizId);
+        var questions = await _quizzesRepository.GetQuestionsAsync(quizId);
 
         var questionToDelete = questions.FirstOrDefault(qn => qn.Id == questionId)
             ?? throw new NotFoundException($"Question with ID {questionId} was not found in quiz with ID {quizId}.");

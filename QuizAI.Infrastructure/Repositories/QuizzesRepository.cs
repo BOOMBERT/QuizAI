@@ -88,13 +88,23 @@ public class QuizzesRepository : IQuizzesRepository
         return (quizzes, totalCount);
     }
 
-    public async Task<ICollection<Question>> GetQuestions(Guid quizId)
+    public async Task<ICollection<Question>> GetQuestionsAsync(Guid quizId)
     {
         return await _context.Quizzes
             .Where(qz => qz.Id == quizId)
             .Include(qz => qz.Questions)
             .Select(qz => qz.Questions)
             .FirstOrDefaultAsync() ?? new List<Question>();
+    }
+
+    public async Task<ICollection<Question>> GetQuestionsWithAnswersAsync(Guid quizId)
+    {
+        return await _context.Questions
+            .Include(qn => qn.MultipleChoiceAnswers)
+            .Include(qn => qn.OpenEndedAnswer)
+            .Include(qn => qn.TrueFalseAnswer)
+            .Where(qn => qn.QuizId == quizId)
+            .ToListAsync();
     }
 
     public async Task UpdateImageAsync(Guid quizId, Guid? imageId)
@@ -104,7 +114,7 @@ public class QuizzesRepository : IQuizzesRepository
             .ExecuteUpdateAsync(qz => qz.SetProperty(x => x.ImageId, imageId));
     }
 
-    public async Task<IEnumerable<Guid>> GetQuestionsImagesAsync(Guid quizId)
+    public async Task<IEnumerable<Guid>> GetQuestionsImagesNamesAsync(Guid quizId)
     {
         return await _context.Questions
             .Where(qn => qn.QuizId == quizId && qn.ImageId != null)
@@ -112,7 +122,7 @@ public class QuizzesRepository : IQuizzesRepository
             .ToArrayAsync();
     }
 
-    public async Task<int> HowManyQuestions(Guid quizId)
+    public async Task<int> HowManyQuestionsAsync(Guid quizId)
     {
         return await _context.Questions
             .CountAsync(qn => qn.QuizId == quizId);
