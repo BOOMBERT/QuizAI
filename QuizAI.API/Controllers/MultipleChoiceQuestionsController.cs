@@ -27,8 +27,8 @@ namespace QuizAI.API.Controllers
         {
             command.SetQuizId(quizId);
 
-            var id = await _mediator.Send(command);
-            return Created();
+            var order = await _mediator.Send(command);
+            return CreatedAtAction("GetQuestionByOrder", "Questions", new { QuizId = quizId, orderNumber = order }, null);
         }
 
         [HttpPut("{quizId}/questions/multiple-choice/{questionId}")]

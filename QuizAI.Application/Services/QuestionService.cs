@@ -12,14 +12,14 @@ public class QuestionService : IQuestionService
 {
     private readonly IMapper _mapper;
     private readonly IRepository _repository;
-    private readonly IQuizzesRepository _quizzesRepository;
+    private readonly IQuestionsRepository _questionsRepository;
     private readonly byte _maxNumberOfQuestions;
 
-    public QuestionService(IMapper mapper, IRepository repository, IQuizzesRepository quizzesRepository, byte maxNumberOfQuestions)
+    public QuestionService(IMapper mapper, IRepository repository, IQuestionsRepository questionsRepository, byte maxNumberOfQuestions)
     {
         _mapper = mapper;
         _repository = repository;
-        _quizzesRepository = quizzesRepository;
+        _questionsRepository = questionsRepository;
         _maxNumberOfQuestions = maxNumberOfQuestions;
     }
 
@@ -28,7 +28,7 @@ public class QuestionService : IQuestionService
         if (!await _repository.EntityExistsAsync<Quiz>(quizId))
             throw new NotFoundException($"Quiz with ID {quizId} was not found");
 
-        var existingQuestionsCount = await _quizzesRepository.HowManyQuestionsAsync(quizId);
+        var existingQuestionsCount = await _questionsRepository.HowManyAsync(quizId);
         if (existingQuestionsCount >= _maxNumberOfQuestions)
             throw new ConflictException(
                 $"Quiz with ID {quizId} cannot have a new question " +
@@ -43,7 +43,7 @@ public class QuestionService : IQuestionService
         if (!await _repository.EntityExistsAsync<Quiz>(quizId))
             throw new NotFoundException($"Quiz with ID {quizId} was not found");
 
-        var questions = await _quizzesRepository.GetQuestionsAsync(quizId);
+        var questions = await _questionsRepository.GetAsync(quizId);
 
         var questionToDelete = questions.FirstOrDefault(qn => qn.Id == questionId)
             ?? throw new NotFoundException($"Question with ID {questionId} was not found in quiz with ID {quizId}.");

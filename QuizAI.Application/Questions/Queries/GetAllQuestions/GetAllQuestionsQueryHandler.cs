@@ -12,13 +12,13 @@ public class GetAllQuestionsQueryHandler : IRequestHandler<GetAllQuestionsQuery,
 {
     private readonly IMapper _mapper;
     private readonly IRepository _repository;
-    private readonly IQuizzesRepository _quizzesRepository;
+    private readonly IQuestionsRepository _questionsRepository;
 
-    public GetAllQuestionsQueryHandler(IMapper mapper, IRepository repository, IQuizzesRepository quizzesRepository)
+    public GetAllQuestionsQueryHandler(IMapper mapper, IRepository repository, IQuestionsRepository questionsRepository)
     {
         _mapper = mapper;
         _repository = repository;
-        _quizzesRepository = quizzesRepository;
+        _questionsRepository = questionsRepository;
     }
 
     public async Task<IEnumerable<QuestionWithAnswerDto>> Handle(GetAllQuestionsQuery request, CancellationToken cancellationToken)
@@ -26,7 +26,7 @@ public class GetAllQuestionsQueryHandler : IRequestHandler<GetAllQuestionsQuery,
         if (!await _repository.EntityExistsAsync<Quiz>(request.QuizId))
             throw new NotFoundException($"Quiz with ID {request.QuizId} was not found");
 
-        var questionsWithAnswers = await _quizzesRepository.GetQuestionsWithAnswersAsync(request.QuizId);
+        var questionsWithAnswers = await _questionsRepository.GetAsync(request.QuizId, true);
         var questionsWithAnswersToReturn = new List<QuestionWithAnswerDto>();
 
         foreach (var question in questionsWithAnswers)

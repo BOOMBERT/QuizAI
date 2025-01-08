@@ -42,6 +42,6 @@ public class CreateOpenEndedQuestionCommandHandler : IRequestHandler<CreateOpenE
         await _repository.AddAsync(openEndedAnswer);
         await _repository.SaveChangesAsync();
 
-        return question.Id;
+        return orderOfQuestion;
     }
 }

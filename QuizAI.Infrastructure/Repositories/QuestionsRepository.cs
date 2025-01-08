@@ -17,6 +17,22 @@ public class QuestionsRepository : IQuestionsRepository
         _context = context;
     }
 
+    public async Task<ICollection<Question>> GetAsync(Guid quizId, bool answers = false)
+    {
+        var baseQuery = _context.Questions
+            .Where(qn => qn.QuizId == quizId);
+
+        if (answers)
+        {
+            baseQuery = baseQuery
+                .Include(qn => qn.MultipleChoiceAnswers)
+                .Include(qn => qn.OpenEndedAnswer)
+                .Include(qn => qn.TrueFalseAnswer);
+        }
+
+        return await baseQuery.ToListAsync();
+    }
+
     public async Task<Question?> GetWithAnswerAsync(Guid quizId, int questionId, QuestionType questionType)
     {
         var baseQuery = _context.Questions.AsQueryable();
@@ -34,6 +50,22 @@ public class QuestionsRepository : IQuestionsRepository
             .FirstOrDefaultAsync(qn => qn.Id == questionId && qn.QuizId == quizId && qn.Type == questionType);
     }
 
+    public async Task<Question?> GetByOrderAsync(Guid quizId, int order)
+    {
+        return await _context.Questions
+            .AsNoTracking()
+            .Where(qn => qn.QuizId == quizId && qn.Order == order)
+            .FirstOrDefaultAsync();
+    }
+
+    public async Task<IEnumerable<string>> GetMultipleChoiceAnswersContentAsync(int questionId)
+    {
+        return await _context.MultipleChoiceAnswers
+            .Where(mca => mca.QuestionId == questionId)
+            .Select(mca => mca.Content)
+            .ToArrayAsync();
+    }
+
     public async Task<Guid?> GetImageIdAsync(Guid quizId, int questionId)
     {
         var question = await _context.Questions
@@ -44,25 +76,24 @@ public class QuestionsRepository : IQuestionsRepository
         return question.ImageId;
     }
 
-    public async Task<Question?> GetByOrderAsync(Guid quizId, int order)
+    public async Task<IEnumerable<Guid>> GetImagesNamesAsync(Guid quizId)
     {
         return await _context.Questions
-            .Where(qn => qn.QuizId == quizId && qn.Order == order)
-            .FirstOrDefaultAsync();
+            .Where(qn => qn.QuizId == quizId && qn.ImageId != null)
+            .Select(qn => (Guid)qn.ImageId!)
+            .ToArrayAsync();
     }
 
-    public async Task UpdateImageAsync(Guid quizId, int questionId, Guid? imageId)
+    public async Task UpdateImageAsync(int questionId, Guid? imageId)
     {
         await _context.Questions
-            .Where(qn => qn.QuizId == quizId && qn.Id == questionId)
+            .Where(qn => qn.Id == questionId)
             .ExecuteUpdateAsync(qn => qn.SetProperty(x => x.ImageId, imageId));
     }
 
-    public async Task<IEnumerable<string>> GetMultipleChoiceAnswersContentAsync(int questionId)
+    public async Task<int> HowManyAsync(Guid quizId)
     {
-        return await _context.MultipleChoiceAnswers
-            .Where(mca => mca.QuestionId == questionId)
-            .Select(mca => mca.Content)
-            .ToArrayAsync();
+        return await _context.Questions
+            .CountAsync(qn => qn.QuizId == quizId);
     }
 }

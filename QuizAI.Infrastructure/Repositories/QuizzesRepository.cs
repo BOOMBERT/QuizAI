@@ -23,14 +23,6 @@ public class QuizzesRepository : IQuizzesRepository
             .FirstOrDefaultAsync(qz => qz.Id == quizId);
     }
 
-    public async Task<Guid?> GetImageIdAsync(Guid quizId)
-    {
-        return await _context.Quizzes
-            .Where(qz => qz.Id == quizId)
-            .Select(qz => qz.ImageId)
-            .FirstOrDefaultAsync();
-    }
-
     public async Task<(IEnumerable<Quiz>, int)> GetAllMatchingAsync(
         string? searchPhrase,
         int pageSize,
@@ -88,23 +80,12 @@ public class QuizzesRepository : IQuizzesRepository
         return (quizzes, totalCount);
     }
 
-    public async Task<ICollection<Question>> GetQuestionsAsync(Guid quizId)
+    public async Task<Guid?> GetImageIdAsync(Guid quizId)
     {
         return await _context.Quizzes
             .Where(qz => qz.Id == quizId)
-            .Include(qz => qz.Questions)
-            .Select(qz => qz.Questions)
-            .FirstOrDefaultAsync() ?? new List<Question>();
-    }
-
-    public async Task<ICollection<Question>> GetQuestionsWithAnswersAsync(Guid quizId)
-    {
-        return await _context.Questions
-            .Include(qn => qn.MultipleChoiceAnswers)
-            .Include(qn => qn.OpenEndedAnswer)
-            .Include(qn => qn.TrueFalseAnswer)
-            .Where(qn => qn.QuizId == quizId)
-            .ToListAsync();
+            .Select(qz => qz.ImageId)
+            .FirstOrDefaultAsync();
     }
 
     public async Task UpdateImageAsync(Guid quizId, Guid? imageId)
@@ -112,19 +93,5 @@ public class QuizzesRepository : IQuizzesRepository
         await _context.Quizzes
             .Where(qz => qz.Id == quizId)
             .ExecuteUpdateAsync(qz => qz.SetProperty(x => x.ImageId, imageId));
-    }
-
-    public async Task<IEnumerable<Guid>> GetQuestionsImagesNamesAsync(Guid quizId)
-    {
-        return await _context.Questions
-            .Where(qn => qn.QuizId == quizId && qn.ImageId != null)
-            .Select(qn => (Guid)qn.ImageId!)
-            .ToArrayAsync();
-    }
-
-    public async Task<int> HowManyQuestionsAsync(Guid quizId)
-    {
-        return await _context.Questions
-            .CountAsync(qn => qn.QuizId == quizId);
     }
 }

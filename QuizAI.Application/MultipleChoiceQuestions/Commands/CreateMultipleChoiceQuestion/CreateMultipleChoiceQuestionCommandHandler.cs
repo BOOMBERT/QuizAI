@@ -42,6 +42,6 @@ public class CreateMultipleChoiceQuestionCommandHandler : IRequestHandler<Create
         await _repository.AddRangeAsync(multipleChoiceAnswers);
         await _repository.SaveChangesAsync();
 
-        return question.Id;
+        return orderOfQuestion;
     }
 }

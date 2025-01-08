@@ -41,6 +41,6 @@ public class CreateTrueFalseQuestionCommandHandler : IRequestHandler<CreateTrueF
         await _repository.AddAsync(trueFalseAnswer);
         await _repository.SaveChangesAsync();
 
-        return question.Id;
+        return orderOfQuestion;
     }
 }

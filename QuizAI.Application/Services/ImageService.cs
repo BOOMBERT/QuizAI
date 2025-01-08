@@ -97,7 +97,7 @@ public class ImageService : IImageService
         }
         else
         {
-            await _questionsRepository.UpdateImageAsync(quizId, (int)questionId, newUploadedImage.Id);
+            await _questionsRepository.UpdateImageAsync((int)questionId, newUploadedImage.Id);
         }
 
         if (previousImageId != null)
@@ -123,7 +123,7 @@ public class ImageService : IImageService
             imageId = await _questionsRepository.GetImageIdAsync(quizId, (int)questionId) 
                 ?? throw new NotFoundException($"Question with ID {questionId} in quiz with ID {quizId} has no associated image.");
 
-            await _questionsRepository.UpdateImageAsync(quizId, (int)questionId, null);
+            await _questionsRepository.UpdateImageAsync((int)questionId, null);
         }
 
         await DeleteIfNotAssignedAsync(imageId);

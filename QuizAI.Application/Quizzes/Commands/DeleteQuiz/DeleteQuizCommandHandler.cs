@@ -10,12 +10,14 @@ public class DeleteQuizCommandHandler : IRequestHandler<DeleteQuizCommand>
 {
     private readonly IRepository _repository;
     private readonly IQuizzesRepository _quizzesRepository;
+    private readonly IQuestionsRepository _questionsRepository;
     private readonly IImageService _imageService;
 
-    public DeleteQuizCommandHandler(IRepository repository, IQuizzesRepository quizzesRepository, IImageService imageService)
+    public DeleteQuizCommandHandler(IRepository repository, IQuizzesRepository quizzesRepository, IQuestionsRepository questionsRepository, IImageService imageService)
     {
         _repository = repository;
         _quizzesRepository = quizzesRepository;
+        _questionsRepository = questionsRepository;
         _imageService = imageService;
     }
 
@@ -27,7 +29,7 @@ public class DeleteQuizCommandHandler : IRequestHandler<DeleteQuizCommand>
             throw new NotFoundException($"Quiz with ID {quizId} was not found");
 
         var imageId = await _quizzesRepository.GetImageIdAsync(quizId);
-        var uniqueQuestionImages = (await _quizzesRepository.GetQuestionsImagesNamesAsync(quizId)).Distinct();
+        var uniqueQuestionImages = (await _questionsRepository.GetImagesNamesAsync(quizId)).Distinct();
 
         await _repository.DeleteAsync<Quiz>(quizId);
 

@@ -8,13 +8,11 @@ namespace QuizAI.Application.Questions.Commands.UpdateQuestionOrder;
 public class UpdateQuestionOrderCommandHandler : IRequestHandler<UpdateQuestionOrderCommand>
 {
     private readonly IRepository _repository;
-    private readonly IQuizzesRepository _quizzesRepository;
     private readonly IQuestionsRepository _questionsRepository;
 
-    public UpdateQuestionOrderCommandHandler(IRepository repository, IQuizzesRepository quizzesRepository, IQuestionsRepository questionsRepository)
+    public UpdateQuestionOrderCommandHandler(IRepository repository, IQuestionsRepository questionsRepository)
     {
         _repository = repository;
-        _quizzesRepository = quizzesRepository;
         _questionsRepository = questionsRepository;
     }
 
@@ -25,7 +23,7 @@ public class UpdateQuestionOrderCommandHandler : IRequestHandler<UpdateQuestionO
         if (!await _repository.EntityExistsAsync<Quiz>(quizId))
             throw new NotFoundException($"Quiz with ID {quizId} was not found");
 
-        var questions = await _quizzesRepository.GetQuestionsAsync(quizId);
+        var questions = await _questionsRepository.GetAsync(quizId);
 
         if (questions.Count == 0)
         {
