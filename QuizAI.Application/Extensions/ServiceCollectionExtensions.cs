@@ -49,5 +49,7 @@ public static class ServiceCollectionExtensions
             byte maxNumberOfQuestions = 20;
             return new QuestionService(mapper, repository, questionsRepository, maxNumberOfQuestions);
         });
+
+        services.AddScoped<IQuizService, QuizService>();
     }
 }

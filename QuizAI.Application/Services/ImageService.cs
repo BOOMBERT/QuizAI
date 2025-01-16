@@ -46,7 +46,7 @@ public class ImageService : IImageService
 
         if (questionId == null)
         {
-            imageNameAsGuid = await _quizzesRepository.GetImageIdAsync(quizId) 
+            imageNameAsGuid = await _repository.GetFieldAsync<Quiz, Guid?>(quizId, "ImageId")
                 ?? throw new NotFoundException($"Quiz with ID {quizId} has no associated image.");
         }
         else
@@ -57,7 +57,7 @@ public class ImageService : IImageService
             questionErrorMessageContext = $"question with ID {questionId} in ";
         }
 
-        var imageExtension = await _imagesRepository.GetExtensionAsync(imageNameAsGuid)
+        var imageExtension = await _repository.GetFieldAsync<Image, string>(imageNameAsGuid, "FileExtension")
             ?? throw new NotFoundException($"Image for {questionErrorMessageContext}quiz with ID {quizId} could not be found.");
 
         var imageData = await _fileStorageService.RetrieveAsync(imageNameAsGuid, imageExtension);
@@ -76,7 +76,7 @@ public class ImageService : IImageService
 
         if (questionId == null)
         {
-            previousImageId = await _quizzesRepository.GetImageIdAsync(quizId);
+            previousImageId = await _repository.GetFieldAsync<Quiz, Guid?>(quizId, "ImageId");
         }
         else
         {
@@ -113,7 +113,7 @@ public class ImageService : IImageService
 
         if (questionId == null)
         {
-            imageId = await _quizzesRepository.GetImageIdAsync(quizId) 
+            imageId = await _repository.GetFieldAsync<Quiz, Guid?>(quizId, "ImageId") 
                 ?? throw new NotFoundException($"Quiz with ID {quizId} has no associated image.");
 
             await _quizzesRepository.UpdateImageAsync(quizId, null);
@@ -152,7 +152,7 @@ public class ImageService : IImageService
 
     public async Task DeleteIfNotAssignedAsync(Guid imageId)
     {
-        var imageExtension = await _imagesRepository.GetExtensionAsync(imageId) ?? 
+        var imageExtension = await _repository.GetFieldAsync<Image, string>(imageId, "FileExtension") ?? 
             throw new NotFoundException($"Image with ID {imageId} was not found");
 
         if (!await _imagesRepository.IsAssignedToAnyQuizAsync(imageId) && !await _imagesRepository.IsAssignedToAnyQuestionAsync(imageId))

@@ -6,7 +6,9 @@ public class Quiz
     public string Name { get; set; }
     public string? Description { get; set; }
     public DateTime CreationDate { get; set; }
-
+    public bool IsDeprecated { get; set; }
+    public Guid? LatestVersionId { get; set; }
+    
     public Guid? ImageId { get; set; }    
     public Image? Image { get; set; }
 

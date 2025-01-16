@@ -5,7 +5,7 @@ namespace QuizAI.Domain.Repositories;
 
 public interface IQuestionsRepository
 {
-    Task<ICollection<Question>> GetAsync(Guid quizId, bool answers = false);
+    Task<ICollection<Question>> GetAllAsync(Guid quizId, bool answers = false);
     Task<Question?> GetWithAnswerAsync(Guid quizId, int questionId, QuestionType questionType);
     Task<Question?> GetByOrderAsync(Guid quizId, int order);
     Task<IEnumerable<string>> GetMultipleChoiceAnswersContentAsync(int questionId);

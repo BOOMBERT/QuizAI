@@ -16,11 +16,25 @@ public class QuizzesRepository : IQuizzesRepository
         _context = context;
     }
 
-    public async Task<Quiz?> GetWithCategoriesAsync(Guid quizId)
+    public async Task<Quiz?> GetAsync(Guid quizId, bool includeCategories = false, bool includeQuestionsWithAnswers = false)
     {
-        return await _context.Quizzes
-            .Include(qz => qz.Categories)
-            .FirstOrDefaultAsync(qz => qz.Id == quizId);
+        var baseQuery = _context.Quizzes.AsQueryable();
+
+        if (includeCategories)
+            baseQuery = baseQuery.Include(qz => qz.Categories);
+        
+        if (includeQuestionsWithAnswers)
+        {
+            baseQuery = baseQuery
+                .Include(qz => qz.Questions)
+                    .ThenInclude(qn => qn.TrueFalseAnswer)
+                .Include(qz => qz.Questions)
+                    .ThenInclude(qn => qn.MultipleChoiceAnswers)
+                .Include(qz => qz.Questions)
+                    .ThenInclude(qn => qn.OpenEndedAnswer);
+        }
+
+        return await baseQuery.FirstOrDefaultAsync(qz => qz.Id == quizId);
     }
 
     public async Task<(IEnumerable<Quiz>, int)> GetAllMatchingAsync(
@@ -80,18 +94,17 @@ public class QuizzesRepository : IQuizzesRepository
         return (quizzes, totalCount);
     }
 
-    public async Task<Guid?> GetImageIdAsync(Guid quizId)
-    {
-        return await _context.Quizzes
-            .Where(qz => qz.Id == quizId)
-            .Select(qz => qz.ImageId)
-            .FirstOrDefaultAsync();
-    }
-
     public async Task UpdateImageAsync(Guid quizId, Guid? imageId)
     {
         await _context.Quizzes
             .Where(qz => qz.Id == quizId)
             .ExecuteUpdateAsync(qz => qz.SetProperty(x => x.ImageId, imageId));
+    }
+
+    public async Task UpdateLatestVersionIdAsync(Guid oldLatestVersionId, Guid newLatestVersionId)
+    {
+        await _context.Quizzes
+            .Where(qz => qz.LatestVersionId == oldLatestVersionId)
+            .ExecuteUpdateAsync(qz => qz.SetProperty(x => x.LatestVersionId, newLatestVersionId));
     }
 }

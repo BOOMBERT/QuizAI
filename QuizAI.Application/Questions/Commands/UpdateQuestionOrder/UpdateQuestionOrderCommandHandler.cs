@@ -23,7 +23,7 @@ public class UpdateQuestionOrderCommandHandler : IRequestHandler<UpdateQuestionO
         if (!await _repository.EntityExistsAsync<Quiz>(quizId))
             throw new NotFoundException($"Quiz with ID {quizId} was not found");
 
-        var questions = await _questionsRepository.GetAsync(quizId);
+        var questions = await _questionsRepository.GetAllAsync(quizId);
 
         if (questions.Count == 0)
         {

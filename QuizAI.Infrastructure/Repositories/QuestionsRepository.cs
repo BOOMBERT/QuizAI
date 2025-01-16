@@ -17,7 +17,7 @@ public class QuestionsRepository : IQuestionsRepository
         _context = context;
     }
 
-    public async Task<ICollection<Question>> GetAsync(Guid quizId, bool answers = false)
+    public async Task<ICollection<Question>> GetAllAsync(Guid quizId, bool answers = false)
     {
         var baseQuery = _context.Questions
             .Where(qn => qn.QuizId == quizId);

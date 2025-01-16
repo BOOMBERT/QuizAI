@@ -23,6 +23,14 @@ public class Repository : IRepository
         await _context.Set<T>().AddRangeAsync(entities);
     }
 
+    public async Task<TField?> GetFieldAsync<TEntity, TField>(Guid id, string fieldName) where TEntity : class
+    {
+        return await _context.Set<TEntity>()
+            .Where(e => EF.Property<Guid>(e, "Id") == id)
+            .Select(e => EF.Property<TField>(e, fieldName))
+            .FirstOrDefaultAsync();
+    }
+
     public async Task<bool> EntityExistsAsync<T>(Guid id) where T : class
     {
         return await _context.Set<T>().AnyAsync(e => EF.Property<Guid>(e, "Id") == id);

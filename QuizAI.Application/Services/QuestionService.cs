@@ -43,7 +43,7 @@ public class QuestionService : IQuestionService
         if (!await _repository.EntityExistsAsync<Quiz>(quizId))
             throw new NotFoundException($"Quiz with ID {quizId} was not found");
 
-        var questions = await _questionsRepository.GetAsync(quizId);
+        var questions = await _questionsRepository.GetAllAsync(quizId);
 
         var questionToDelete = questions.FirstOrDefault(qn => qn.Id == questionId)
             ?? throw new NotFoundException($"Question with ID {questionId} was not found in quiz with ID {quizId}.");

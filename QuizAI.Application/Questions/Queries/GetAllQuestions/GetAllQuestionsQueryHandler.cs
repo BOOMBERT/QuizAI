@@ -26,7 +26,7 @@ public class GetAllQuestionsQueryHandler : IRequestHandler<GetAllQuestionsQuery,
         if (!await _repository.EntityExistsAsync<Quiz>(request.QuizId))
             throw new NotFoundException($"Quiz with ID {request.QuizId} was not found");
 
-        var questionsWithAnswers = await _questionsRepository.GetAsync(request.QuizId, true);
+        var questionsWithAnswers = await _questionsRepository.GetAllAsync(request.QuizId, true);
         var questionsWithAnswersToReturn = new List<QuestionWithAnswerDto>();
 
         foreach (var question in questionsWithAnswers)

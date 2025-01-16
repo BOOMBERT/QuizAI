@@ -21,14 +21,6 @@ public class ImagesRepository : IImagesRepository
             .FirstOrDefaultAsync();
     }
 
-    public async Task<string?> GetExtensionAsync(Guid id)
-    {
-        return await _context.Images
-            .Where(i => i.Id == id)
-            .Select(i => i.FileExtension)
-            .FirstOrDefaultAsync();
-    }
-
     public async Task<bool> IsAssignedToAnyQuizAsync(Guid imageId)
     {
         return await _context.Quizzes
