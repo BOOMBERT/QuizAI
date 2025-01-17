@@ -1,8 +1,9 @@
 ﻿using MediatR;
+using QuizAI.Application.Common;
 
 namespace QuizAI.Application.Quizzes.Commands.UpdateQuiz;
 
-public class UpdateQuizCommand : IRequest
+public class UpdateQuizCommand : IRequest<NewQuizId>
 {
     private Guid Id { get; set; }
     public required string Name { get; set; }

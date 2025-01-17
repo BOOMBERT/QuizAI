@@ -4,5 +4,5 @@ namespace QuizAI.Application.Interfaces;
 
 public interface IQuizService
 {
-    Task DeprecateAsync(Quiz oldQuiz, Guid newQuizId);
+    Task<Quiz> GetNewAndDeprecateOldAsync(Guid oldQuizId);
 }

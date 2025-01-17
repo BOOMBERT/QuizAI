@@ -1,5 +1,6 @@
 ﻿using MediatR;
 using QuizAI.Application.Interfaces;
+using QuizAI.Application.Services;
 using QuizAI.Domain.Entities;
 using QuizAI.Domain.Exceptions;
 using QuizAI.Domain.Repositories;
@@ -9,37 +10,27 @@ namespace QuizAI.Application.Quizzes.Commands.DeleteQuiz;
 public class DeleteQuizCommandHandler : IRequestHandler<DeleteQuizCommand>
 {
     private readonly IRepository _repository;
-    private readonly IQuestionsRepository _questionsRepository;
-    private readonly IImageService _imageService;
+    private readonly IQuizzesRepository _quizzesRepository;
+    private readonly ICategoryService _categoryService;
 
-    public DeleteQuizCommandHandler(IRepository repository, IQuestionsRepository questionsRepository, IImageService imageService)
+    public DeleteQuizCommandHandler(IRepository repository, IQuizzesRepository quizzesRepository, ICategoryService categoryService)
     {
         _repository = repository;
-        _questionsRepository = questionsRepository;
-        _imageService = imageService;
+        _quizzesRepository = quizzesRepository;
+        _categoryService = categoryService;
     }
 
     public async Task Handle(DeleteQuizCommand request, CancellationToken cancellationToken)
     {
-        var quizId = request.GetId();
+        var quiz = await _quizzesRepository.GetAsync(request.GetId(), true) 
+            ?? throw new NotFoundException($"Quiz with ID {request.GetId()} was not found");
+        
+        if (quiz.IsDeprecated)
+            throw new NotFoundException($"Quiz with ID {request.GetId()} was not found");
 
-        if (!await _repository.EntityExistsAsync<Quiz>(quizId))
-            throw new NotFoundException($"Quiz with ID {quizId} was not found");
+        await _categoryService.RemoveUnusedAsync(quiz, Enumerable.Empty<string>());
+        quiz.IsDeprecated = true;
 
-        var imageId = await _repository.GetFieldAsync<Quiz, Guid?>(quizId, "ImageId");
-        var uniqueQuizQuestionsImages = (await _questionsRepository.GetImagesNamesAsync(quizId)).Distinct();
-
-        await _repository.DeleteAsync<Quiz>(quizId);
-
-        if (imageId != null && !uniqueQuizQuestionsImages.Contains((Guid)imageId))
-            await _imageService.DeleteIfNotAssignedAsync((Guid)imageId);
-
-        if (uniqueQuizQuestionsImages.Any())
-        {
-            foreach (var questionImage in uniqueQuizQuestionsImages)
-            {
-                await _imageService.DeleteIfNotAssignedAsync(questionImage);
-            }
-        }
+        await _repository.SaveChangesAsync();
     }
 }

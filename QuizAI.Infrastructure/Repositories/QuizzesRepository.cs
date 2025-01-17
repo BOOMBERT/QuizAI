@@ -46,8 +46,9 @@ public class QuizzesRepository : IQuizzesRepository
         ICollection<string> FilterCategories
         )
     {
-        var baseQuery = _context.Quizzes.
-            Include(qz => qz.Categories)
+        var baseQuery = _context.Quizzes
+            .Where(qz => qz.IsDeprecated == false)
+            .Include(qz => qz.Categories)
             .AsQueryable();
 
         if (FilterCategories.Count > 0)

@@ -31,27 +31,23 @@ public class Repository : IRepository
             .FirstOrDefaultAsync();
     }
 
+    public async Task<TField?> GetFieldAsync<TEntity, TField>(int id, string fieldName) where TEntity : class
+    {
+        return await _context.Set<TEntity>()
+            .Where(e => EF.Property<int>(e, "Id") == id)
+            .Select(e => EF.Property<TField>(e, fieldName))
+            .FirstOrDefaultAsync();
+    }
+
     public async Task<bool> EntityExistsAsync<T>(Guid id) where T : class
     {
         return await _context.Set<T>().AnyAsync(e => EF.Property<Guid>(e, "Id") == id);
-    }
-
-    public async Task<bool> EntityExistsAsync<T>(int id) where T : class
-    {
-        return await _context.Set<T>().AnyAsync(e => EF.Property<int>(e, "Id") == id);
     }
 
     public async Task DeleteAsync<T>(Guid id) where T : class
     {
         await _context.Set<T>()
             .Where(e => EF.Property<Guid>(e, "Id") == id)
-            .ExecuteDeleteAsync();
-    }
-
-    public async Task DeleteAsync<T>(int id) where T : class
-    {
-        await _context.Set<T>()
-            .Where(e => EF.Property<int>(e, "Id") == id)
             .ExecuteDeleteAsync();
     }
 

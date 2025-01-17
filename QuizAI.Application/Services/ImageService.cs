@@ -69,19 +69,8 @@ public class ImageService : IImageService
 
     public async Task UpdateAsync(IFormFile image, Guid quizId, int? questionId = null)
     {
-        if (!await _repository.EntityExistsAsync<Quiz>(quizId))
-            throw new NotFoundException($"Quiz with ID {quizId} was not found");
-
-        Guid? previousImageId;
-
-        if (questionId == null)
-        {
-            previousImageId = await _repository.GetFieldAsync<Quiz, Guid?>(quizId, "ImageId");
-        }
-        else
-        {
-            previousImageId = await _questionsRepository.GetImageIdAsync(quizId, (int)questionId);
-        }
+        if (questionId != null && await _repository.GetFieldAsync<Question, Guid>((int)questionId, "QuizId") != quizId)
+            throw new NotFoundException($"Question with ID {questionId} in quiz with ID {quizId} was not found.");
 
         var newUploadedImage = await UploadAsync(image);
 
@@ -97,43 +86,33 @@ public class ImageService : IImageService
         }
         else
         {
-            await _questionsRepository.UpdateImageAsync((int)questionId, newUploadedImage.Id);
+            await _questionsRepository.UpdateImageAsync(quizId, (int)questionId, newUploadedImage.Id);
         }
-
-        if (previousImageId != null)
-            await DeleteIfNotAssignedAsync((Guid)previousImageId);
     }
 
     public async Task DeleteAsync(Guid quizId, int? questionId = null)
     {
-        if (!await _repository.EntityExistsAsync<Quiz>(quizId))
-            throw new NotFoundException($"Quiz with ID {quizId} was not found");
-
-        Guid imageId;
-
         if (questionId == null)
         {
-            imageId = await _repository.GetFieldAsync<Quiz, Guid?>(quizId, "ImageId") 
-                ?? throw new NotFoundException($"Quiz with ID {quizId} has no associated image.");
+            if (await _repository.GetFieldAsync<Quiz, Guid?>(quizId, "ImageId") == null)
+                throw new NotFoundException($"Quiz with ID {quizId} has no associated image.");
 
             await _quizzesRepository.UpdateImageAsync(quizId, null);
         }
         else
         {
-            imageId = await _questionsRepository.GetImageIdAsync(quizId, (int)questionId) 
-                ?? throw new NotFoundException($"Question with ID {questionId} in quiz with ID {quizId} has no associated image.");
+            if (await _questionsRepository.GetImageIdAsync(quizId, (int)questionId) == null)
+                throw new NotFoundException($"Question with ID {questionId} in quiz with ID {quizId} has no associated image.");
 
-            await _questionsRepository.UpdateImageAsync((int)questionId, null);
+            await _questionsRepository.UpdateImageAsync(quizId, (int)questionId, null);
         }
-
-        await DeleteIfNotAssignedAsync(imageId);
     }
 
     public async Task<Image> UploadAsync(IFormFile image)
     {
         byte[] optimizedImage = await ImageOptimizationUtil.Optimize(image, _imagesDefaultSize);
 
-        var imageHash = HashImageByPhash(optimizedImage);
+        var imageHash = HashByPhash(optimizedImage);
         var imageInDb = await _imagesRepository.GetAsync(imageHash);
 
         if (imageInDb != null)
@@ -162,7 +141,7 @@ public class ImageService : IImageService
         }
     }
 
-    private byte[] HashImageByPhash(byte[] imageBytes)
+    private byte[] HashByPhash(byte[] imageBytes)
     {
         using (var bitmap = new System.Drawing.Bitmap(new MemoryStream(imageBytes)))
         {

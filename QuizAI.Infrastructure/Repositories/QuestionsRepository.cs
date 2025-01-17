@@ -76,18 +76,10 @@ public class QuestionsRepository : IQuestionsRepository
         return question.ImageId;
     }
 
-    public async Task<IEnumerable<Guid>> GetImagesNamesAsync(Guid quizId)
-    {
-        return await _context.Questions
-            .Where(qn => qn.QuizId == quizId && qn.ImageId != null)
-            .Select(qn => (Guid)qn.ImageId!)
-            .ToArrayAsync();
-    }
-
-    public async Task UpdateImageAsync(int questionId, Guid? imageId)
+    public async Task UpdateImageAsync(Guid quizId, int questionId, Guid? imageId)
     {
         await _context.Questions
-            .Where(qn => qn.Id == questionId)
+            .Where(qn => qn.QuizId == quizId && qn.Id == questionId)
             .ExecuteUpdateAsync(qn => qn.SetProperty(x => x.ImageId, imageId));
     }
 

@@ -10,8 +10,7 @@ public interface IQuestionsRepository
     Task<Question?> GetByOrderAsync(Guid quizId, int order);
     Task<IEnumerable<string>> GetMultipleChoiceAnswersContentAsync(int questionId);
     Task<Guid?> GetImageIdAsync(Guid quizId, int questionId);
-    Task<IEnumerable<Guid>> GetImagesNamesAsync(Guid quizId);
-    Task UpdateImageAsync(int questionId, Guid? imageId);
+    Task UpdateImageAsync(Guid quizId, int questionId, Guid? imageId);
     Task<int> HowManyAsync(Guid quizId);
 
 }

@@ -1,8 +1,9 @@
 ﻿using MediatR;
+using QuizAI.Application.Common;
 
 namespace QuizAI.Application.Quizzes.Commands.DeleteQuizImage;
 
-public class DeleteQuizImageCommand : IRequest
+public class DeleteQuizImageCommand : IRequest<NewQuizId>
 {
     private Guid Id { get; set; }
 

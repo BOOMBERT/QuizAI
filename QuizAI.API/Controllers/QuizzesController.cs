@@ -57,7 +57,7 @@ public class QuizzesController : ControllerBase
     }
 
     [HttpPut("{quizId}")]
-    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesErrorResponseType(typeof(ErrorResponse))]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -65,8 +65,8 @@ public class QuizzesController : ControllerBase
     {
         command.SetId(quizId);
 
-        await _mediator.Send(command);
-        return NoContent();
+        var newQuizId = await _mediator.Send(command);
+        return Ok(newQuizId);
     }
 
     [HttpDelete("{quizId}")]

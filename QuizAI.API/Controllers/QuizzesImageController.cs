@@ -31,7 +31,7 @@ namespace QuizAI.API.Controllers
 
         [HttpPatch("{quizId}/image")]
         [RequestSizeLimit(5 * 1024 * 1024)] // 5MB
-        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesErrorResponseType(typeof(ErrorResponse))]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status413RequestEntityTooLarge)]
@@ -42,12 +42,12 @@ namespace QuizAI.API.Controllers
         {
             command.SetId(quizId);
 
-            await _mediator.Send(command);
-            return NoContent();
+            var newQuizId = await _mediator.Send(command);
+            return Ok(newQuizId);
         }
 
         [HttpDelete("{quizId}/image")]
-        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesErrorResponseType(typeof(ErrorResponse))]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -56,8 +56,8 @@ namespace QuizAI.API.Controllers
             var command = new DeleteQuizImageCommand();
             command.SetId(quizId);
 
-            await _mediator.Send(command);
-            return NoContent();
+            var newQuizId = await _mediator.Send(command);
+            return Ok(newQuizId);
         }
     }
 }
