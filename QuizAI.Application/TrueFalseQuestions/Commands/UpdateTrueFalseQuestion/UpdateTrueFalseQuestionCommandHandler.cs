@@ -1,4 +1,7 @@
 ﻿using MediatR;
+using QuizAI.Application.Common;
+using QuizAI.Application.Interfaces;
+using QuizAI.Application.Services;
 using QuizAI.Domain.Entities;
 using QuizAI.Domain.Enums;
 using QuizAI.Domain.Exceptions;
@@ -6,34 +9,38 @@ using QuizAI.Domain.Repositories;
 
 namespace QuizAI.Application.TrueFalseQuestions.Commands.UpdateTrueFalseQuestion;
 
-public class UpdateTrueFalseQuestionCommandHandler : IRequestHandler<UpdateTrueFalseQuestionCommand>
+public class UpdateTrueFalseQuestionCommandHandler : IRequestHandler<UpdateTrueFalseQuestionCommand, NewQuizId>
 {
     private readonly IRepository _repository;
-    private readonly IQuestionsRepository _questionsRepository;
+    private readonly IQuizService _quizService;
+    private readonly IQuestionService _questionService;
 
-    public UpdateTrueFalseQuestionCommandHandler(IRepository repository, IQuestionsRepository questionsRepository)
+    public UpdateTrueFalseQuestionCommandHandler(IRepository repository, IQuizService quizService, IQuestionService questionService)
     {
         _repository = repository;
-        _questionsRepository = questionsRepository;
+        _quizService = quizService;
+        _questionService = questionService;
     }
 
-    public async Task Handle(UpdateTrueFalseQuestionCommand request, CancellationToken cancellationToken)
+    public async Task<NewQuizId> Handle(UpdateTrueFalseQuestionCommand request, CancellationToken cancellationToken)
     {
-        var (quizId, questionId) = (request.GetQuizId(), request.GetQuestionId());
+        var newQuiz = await _quizService.GetNewWithCopiedQuestionsAndDeprecateOldAsync(request.GetQuizId(), request.GetQuestionId());
+        
+        var questionToUpdate = newQuiz.Questions.First(qn => qn.Id == request.GetQuestionId());
 
-        if (!await _repository.EntityExistsAsync<Quiz>(quizId))
-            throw new NotFoundException($"Quiz with ID {quizId} was not found");
+        if (questionToUpdate.Content != request.Content)
+            questionToUpdate.Content = request.Content;
 
-        var question = await _questionsRepository.GetWithAnswerAsync(quizId, questionId, QuestionType.TrueFalse)
-            ?? throw new NotFoundException($"Quiz with ID {quizId} does not contain a Question with ID {questionId}.");
+        var answerOfQuestionToUpdate = questionToUpdate.TrueFalseAnswer;
+        
+        if (answerOfQuestionToUpdate.IsCorrect != request.IsCorrect)
+            answerOfQuestionToUpdate.IsCorrect = request.IsCorrect;
 
-        if (question.Content != request.Content)
-            question.Content = request.Content;
+        _questionService.ResetIds(newQuiz.Questions);
 
-        var answer = question.TrueFalseAnswer;
-        if (answer.IsCorrect != request.IsCorrect)
-            answer.IsCorrect = request.IsCorrect;
-
+        await _repository.AddAsync(newQuiz);
         await _repository.SaveChangesAsync();
+
+        return new NewQuizId(newQuiz.Id);
     }
 }

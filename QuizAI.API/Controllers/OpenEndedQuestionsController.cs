@@ -19,31 +19,31 @@ namespace QuizAI.API.Controllers
         }
 
         [HttpPost("{quizId}/questions/open-ended")]
-        [ProducesResponseType(StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesErrorResponseType(typeof(ErrorResponse))]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status409Conflict)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> CreateOpenEndedQuestion(Guid quizId, CreateOpenEndedQuestionCommand command)
+        public async Task<ActionResult<NewQuizId>> CreateOpenEndedQuestion(Guid quizId, CreateOpenEndedQuestionCommand command)
         {
             command.SetQuizId(quizId);
 
-            var order = await _mediator.Send(command);
-            return CreatedAtAction("GetQuestionByOrder", "Questions", new { QuizId = quizId, orderNumber = order }, null);
+            var newQuizId = await _mediator.Send(command);
+            return Ok(newQuizId);
         }
 
         [HttpPut("{quizId}/questions/open-ended/{questionId}")]
-        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesErrorResponseType(typeof(ErrorResponse))]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> UpdateOpenEndedQuestion(Guid quizId, int questionId, UpdateOpenEndedQuestionCommand command)
+        public async Task<ActionResult<NewQuizId>> UpdateOpenEndedQuestion(Guid quizId, int questionId, UpdateOpenEndedQuestionCommand command)
         {
             command.SetQuizId(quizId);
             command.SetQuestionId(questionId);
 
-            await _mediator.Send(command);
-            return NoContent();
+            var newQuizId = await _mediator.Send(command);
+            return Ok(newQuizId);
         }
     }
 }

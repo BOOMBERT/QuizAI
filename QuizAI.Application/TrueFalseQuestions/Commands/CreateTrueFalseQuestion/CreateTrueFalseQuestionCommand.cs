@@ -1,8 +1,9 @@
 ﻿using MediatR;
+using QuizAI.Application.Common;
 
 namespace QuizAI.Application.TrueFalseQuestions.Commands.CreateTrueFalseQuestion;
 
-public class CreateTrueFalseQuestionCommand : IRequest<int>
+public class CreateTrueFalseQuestionCommand : IRequest<NewQuizId>
 {
     private Guid QuizId { get; set; }
     public string Content { get; set; } = string.Empty;

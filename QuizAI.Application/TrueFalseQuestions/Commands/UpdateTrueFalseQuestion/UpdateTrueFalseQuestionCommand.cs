@@ -1,9 +1,10 @@
 ﻿using MediatR;
+using QuizAI.Application.Common;
 using QuizAI.Application.MultipleChoiceQuestions.Dtos;
 
 namespace QuizAI.Application.TrueFalseQuestions.Commands.UpdateTrueFalseQuestion;
 
-public class UpdateTrueFalseQuestionCommand : IRequest
+public class UpdateTrueFalseQuestionCommand : IRequest<NewQuizId>
 {
     private Guid QuizId { get; set; }
     private int QuestionId { get; set; }

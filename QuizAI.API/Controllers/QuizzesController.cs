@@ -61,7 +61,7 @@ public class QuizzesController : ControllerBase
     [ProducesErrorResponseType(typeof(ErrorResponse))]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> UpdateQuiz(Guid quizId, UpdateQuizCommand command)
+    public async Task<ActionResult<NewQuizId>> UpdateQuiz(Guid quizId, UpdateQuizCommand command)
     {
         command.SetId(quizId);
 

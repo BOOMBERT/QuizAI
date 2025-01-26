@@ -1,8 +1,9 @@
 ﻿using MediatR;
+using QuizAI.Application.Common;
 
 namespace QuizAI.Application.OpenEndedQuestions.Commands.CreateOpenEndedQuestion;
 
-public class CreateOpenEndedQuestionCommand : IRequest<int>
+public class CreateOpenEndedQuestionCommand : IRequest<NewQuizId>
 {
     private Guid QuizId { get; set; }
     public string Content { get; set; } = string.Empty;

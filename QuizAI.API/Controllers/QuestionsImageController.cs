@@ -40,7 +40,7 @@ namespace QuizAI.API.Controllers
         [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
         [ProducesResponseType(StatusCodes.Status415UnsupportedMediaType)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> UpdateQuestionImage(Guid quizId, int questionId, UpdateQuestionImageCommand command)
+        public async Task<ActionResult<NewQuizId>> UpdateQuestionImage(Guid quizId, int questionId, UpdateQuestionImageCommand command)
         {
             command.SetQuizId(quizId);
             command.SetQuestionId(questionId);
@@ -54,7 +54,7 @@ namespace QuizAI.API.Controllers
         [ProducesErrorResponseType(typeof(ErrorResponse))]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> DeleteQuestionImage([FromRoute] DeleteQuestionImageCommand command)
+        public async Task<ActionResult<NewQuizId>> DeleteQuestionImage([FromRoute] DeleteQuestionImageCommand command)
         {
             var newQuizId = await _mediator.Send(command);
             return Ok(newQuizId);

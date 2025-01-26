@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using MediatR;
+using QuizAI.Application.Common;
 using QuizAI.Application.Interfaces;
 using QuizAI.Application.Services;
 using QuizAI.Domain.Entities;
@@ -9,34 +10,38 @@ using QuizAI.Domain.Repositories;
 
 namespace QuizAI.Application.MultipleChoiceQuestions.Commands.UpdateMultipleChoiceQuestion;
 
-public class UpdateMultipleChoiceQuestionCommandHandler : IRequestHandler<UpdateMultipleChoiceQuestionCommand>
+public class UpdateMultipleChoiceQuestionCommandHandler : IRequestHandler<UpdateMultipleChoiceQuestionCommand, NewQuizId>
 {
+    private readonly IMapper _mapper;
     private readonly IRepository _repository;
+    private readonly IQuizService _quizService;
     private readonly IQuestionService _questionService;
-    private readonly IQuestionsRepository _questionsRepository;
 
-    public UpdateMultipleChoiceQuestionCommandHandler(IRepository repository, IQuestionService questionService, IQuestionsRepository questionsRepository)
+    public UpdateMultipleChoiceQuestionCommandHandler(IMapper mapper, IRepository repository, IQuizService quizService, IQuestionService questionService)
     {
+        _mapper = mapper;
         _repository = repository;
+        _quizService = quizService;
         _questionService = questionService;
-        _questionsRepository = questionsRepository;
     }
-    public async Task Handle(UpdateMultipleChoiceQuestionCommand request, CancellationToken cancellationToken)
+    public async Task<NewQuizId> Handle(UpdateMultipleChoiceQuestionCommand request, CancellationToken cancellationToken)
     {
-        var (quizId, questionId) = (request.GetQuizId(), request.GetQuestionId());
+        var newQuiz = await _quizService.GetNewWithCopiedQuestionsAndDeprecateOldAsync(request.GetQuizId(), request.GetQuestionId());
 
-        if (!await _repository.EntityExistsAsync<Quiz>(quizId))
-            throw new NotFoundException($"Quiz with ID {quizId} was not found");
+        var questionToUpdate = newQuiz.Questions.First(qn => qn.Id == request.GetQuestionId());
 
-        var question = await _questionsRepository.GetWithAnswerAsync(quizId, questionId, QuestionType.MultipleChoice)
-            ?? throw new NotFoundException($"Quiz with ID {quizId} does not contain a Question with ID {questionId}.");
+        if (questionToUpdate.Content != request.Content)
+            questionToUpdate.Content = request.Content;
 
-        if (question.Content != request.Content)
-            question.Content = request.Content;
+        var newAnswers = _mapper.Map<ICollection<MultipleChoiceAnswer>>(request.Answers);
 
-        var newAnswers = _questionService.RemoveUnusedMultipleChoiceAnswersAndReturnNew(question, request.Answers);
-        await _questionService.UpdateOrAddNewAnswersAsync(question, newAnswers);
+        questionToUpdate.MultipleChoiceAnswers = newAnswers;
 
+        _questionService.ResetIds(newQuiz.Questions);
+
+        await _repository.AddAsync(newQuiz);
         await _repository.SaveChangesAsync();
+
+        return new NewQuizId(newQuiz.Id);
     }
 }

@@ -1,27 +1,31 @@
 ﻿using AutoMapper;
 using MediatR;
+using QuizAI.Application.Common;
 using QuizAI.Application.Interfaces;
+using QuizAI.Application.Services;
 using QuizAI.Domain.Entities;
 using QuizAI.Domain.Enums;
 using QuizAI.Domain.Repositories;
 
 namespace QuizAI.Application.OpenEndedQuestions.Commands.CreateOpenEndedQuestion;
 
-public class CreateOpenEndedQuestionCommandHandler : IRequestHandler<CreateOpenEndedQuestionCommand, int>
+public class CreateOpenEndedQuestionCommandHandler : IRequestHandler<CreateOpenEndedQuestionCommand, NewQuizId>
 {
-    private readonly IMapper _mapper;
     private readonly IRepository _repository;
+    private readonly IQuizService _quizService;
     private readonly IQuestionService _questionService;
 
-    public CreateOpenEndedQuestionCommandHandler(IMapper mapper, IRepository repository, IQuestionService questionService)
+    public CreateOpenEndedQuestionCommandHandler(IRepository repository, IQuizService quizService, IQuestionService questionService)
     {
-        _mapper = mapper;
         _repository = repository;
+        _quizService = quizService;
         _questionService = questionService;
     }
 
-    public async Task<int> Handle(CreateOpenEndedQuestionCommand request, CancellationToken cancellationToken)
+    public async Task<NewQuizId> Handle(CreateOpenEndedQuestionCommand request, CancellationToken cancellationToken)
     {
+        var newQuiz = await _quizService.GetNewWithCopiedQuestionsAndDeprecateOldAsync(request.GetQuizId());
+
         var orderOfQuestion = await _questionService.GetOrderForNewQuestionAsync(request.GetQuizId());
 
         var question = new Question
@@ -29,7 +33,7 @@ public class CreateOpenEndedQuestionCommandHandler : IRequestHandler<CreateOpenE
             Content = request.Content,
             Type = QuestionType.OpenEnded,
             Order = orderOfQuestion,
-            QuizId = request.GetQuizId()
+            QuizId = newQuiz.Id
         };
 
         var openEndedAnswer = new OpenEndedAnswer
@@ -39,9 +43,12 @@ public class CreateOpenEndedQuestionCommandHandler : IRequestHandler<CreateOpenE
             Question = question
         };
 
+        _questionService.ResetIds(newQuiz.Questions);
+
+        await _repository.AddAsync(newQuiz);
         await _repository.AddAsync(openEndedAnswer);
         await _repository.SaveChangesAsync();
 
-        return orderOfQuestion;
+        return new NewQuizId(newQuiz.Id);
     }
 }

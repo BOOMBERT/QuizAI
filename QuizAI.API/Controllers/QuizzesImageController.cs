@@ -38,7 +38,7 @@ namespace QuizAI.API.Controllers
         [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
         [ProducesResponseType(StatusCodes.Status415UnsupportedMediaType)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> UpdateQuizImage(Guid quizId, UpdateQuizImageCommand command)
+        public async Task<ActionResult<NewQuizId>> UpdateQuizImage(Guid quizId, UpdateQuizImageCommand command)
         {
             command.SetId(quizId);
 
@@ -51,7 +51,7 @@ namespace QuizAI.API.Controllers
         [ProducesErrorResponseType(typeof(ErrorResponse))]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> DeleteQuizImage(Guid quizId)
+        public async Task<ActionResult<NewQuizId>> DeleteQuizImage(Guid quizId)
         {
             var command = new DeleteQuizImageCommand();
             command.SetId(quizId);

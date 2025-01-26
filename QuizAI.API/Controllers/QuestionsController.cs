@@ -64,7 +64,7 @@ namespace QuizAI.API.Controllers
         [ProducesErrorResponseType(typeof(ErrorResponse))]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> DeleteQuestion([FromRoute] DeleteQuestionCommand command)
+        public async Task<ActionResult<NewQuizId>> DeleteQuestion([FromRoute] DeleteQuestionCommand command)
         {
             var newQuizId = await _mediator.Send(command);
             return Ok(newQuizId);

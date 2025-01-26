@@ -33,10 +33,9 @@ public static class ServiceCollectionExtensions
             var repository = provider.GetRequiredService<IRepository>();
             var fileStorageService = provider.GetRequiredService<IFileStorageService>();
             var imagesRepository = provider.GetRequiredService<IImagesRepository>();
-            var quizzesRepository = provider.GetRequiredService<IQuizzesRepository>();
             var questionsRepository = provider.GetRequiredService<IQuestionsRepository>();
             (ushort, ushort) imagesDefaultSize = (800, 800);
-            return new ImageService(repository, fileStorageService, imagesRepository, quizzesRepository, questionsRepository, imagesDefaultSize);
+            return new ImageService(repository, fileStorageService, imagesRepository, questionsRepository, imagesDefaultSize);
         });
 
         services.AddScoped<ICategoryService, CategoryService>();

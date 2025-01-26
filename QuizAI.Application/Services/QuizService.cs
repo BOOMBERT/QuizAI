@@ -35,16 +35,16 @@ public class QuizService : IQuizService
         return newQuiz;
     }
 
-    public async Task<Quiz> GetNewWithCopiedQuestionsAndDeprecateOldAsync(Guid quizId, int questionId)
+    public async Task<Quiz> GetNewWithCopiedQuestionsAndDeprecateOldAsync(Guid oldQuizId, int? questionId = null)
     {
-        var oldQuiz = await _quizzesRepository.GetAsync(quizId, true, true)
-            ?? throw new NotFoundException($"Quiz with ID {quizId} was not found");
+        var oldQuiz = await _quizzesRepository.GetAsync(oldQuizId, true, true)
+            ?? throw new NotFoundException($"Quiz with ID {oldQuizId} was not found");
 
         if (oldQuiz.IsDeprecated)
-            throw new NotFoundException($"Quiz with ID {quizId} was not found");
+            throw new NotFoundException($"Quiz with ID {oldQuizId} was not found");
 
-        if (!oldQuiz.Questions.Any(qn => qn.Id == questionId))
-            throw new NotFoundException($"Question with ID {questionId} in quiz with ID {quizId} was not found.");
+        if (questionId != null && !oldQuiz.Questions.Any(qn => qn.Id == questionId))
+            throw new NotFoundException($"Question with ID {questionId} in quiz with ID {oldQuizId} was not found.");
 
         var newQuiz = new Quiz
         {

@@ -1,9 +1,10 @@
 ﻿using MediatR;
+using QuizAI.Application.Common;
 using QuizAI.Application.MultipleChoiceQuestions.Dtos;
 
 namespace QuizAI.Application.MultipleChoiceQuestions.Commands.UpdateMultipleChoiceQuestion;
 
-public class UpdateMultipleChoiceQuestionCommand : IRequest
+public class UpdateMultipleChoiceQuestionCommand : IRequest<NewQuizId>
 {
     private Guid QuizId { get; set; }
     private int QuestionId { get; set; }

@@ -1,4 +1,7 @@
 ﻿using MediatR;
+using QuizAI.Application.Common;
+using QuizAI.Application.Interfaces;
+using QuizAI.Application.Services;
 using QuizAI.Domain.Entities;
 using QuizAI.Domain.Enums;
 using QuizAI.Domain.Exceptions;
@@ -6,38 +9,41 @@ using QuizAI.Domain.Repositories;
 
 namespace QuizAI.Application.OpenEndedQuestions.Commands.UpdateOpenEndedQuestion;
 
-public class UpdateOpenEndedQuestionCommandHandler : IRequestHandler<UpdateOpenEndedQuestionCommand>
+public class UpdateOpenEndedQuestionCommandHandler : IRequestHandler<UpdateOpenEndedQuestionCommand, NewQuizId>
 {
     private readonly IRepository _repository;
-    private readonly IQuestionsRepository _questionsRepository;
+    private readonly IQuizService _quizService;
+    private readonly IQuestionService _questionService;
 
-    public UpdateOpenEndedQuestionCommandHandler(IRepository repository, IQuestionsRepository questionsRepository)
+    public UpdateOpenEndedQuestionCommandHandler(IRepository repository, IQuizService quizService, IQuestionService questionService)
     {
         _repository = repository;
-        _questionsRepository = questionsRepository;
+        _quizService = quizService;
+        _questionService = questionService;
     }
 
-    public async Task Handle(UpdateOpenEndedQuestionCommand request, CancellationToken cancellationToken)
+    public async Task<NewQuizId> Handle(UpdateOpenEndedQuestionCommand request, CancellationToken cancellationToken)
     {
-        var (quizId, questionId) = (request.GetQuizId(), request.GetQuestionId());
+        var newQuiz = await _quizService.GetNewWithCopiedQuestionsAndDeprecateOldAsync(request.GetQuizId(), request.GetQuestionId());
 
-        if (!await _repository.EntityExistsAsync<Quiz>(quizId))
-            throw new NotFoundException($"Quiz with ID {quizId} was not found");
+        var questionToUpdate = newQuiz.Questions.First(qn => qn.Id == request.GetQuestionId());
 
-        var question = await _questionsRepository.GetWithAnswerAsync(quizId, questionId, QuestionType.OpenEnded)
-            ?? throw new NotFoundException($"Quiz with ID {quizId} does not contain a Question with ID {questionId}.");
+        if (questionToUpdate.Content != request.Content)
+            questionToUpdate.Content = request.Content;
 
-        if (question.Content != request.Content)
-            question.Content = request.Content;
+        var answerOfQuestionToUpdate = questionToUpdate.OpenEndedAnswer;
 
-        var answer = question.OpenEndedAnswer;
+        if (answerOfQuestionToUpdate.ValidContent != request.Answers)
+            answerOfQuestionToUpdate.ValidContent = request.Answers;
 
-        if (answer.ValidContent != request.Answers)
-            answer.ValidContent = request.Answers;
+        if (answerOfQuestionToUpdate.VerificationByAI != request.VerificationByAI)
+            answerOfQuestionToUpdate.VerificationByAI = request.VerificationByAI;
 
-        if (answer.VerificationByAI != request.VerificationByAI)
-            answer.VerificationByAI = request.VerificationByAI;
+        _questionService.ResetIds(newQuiz.Questions);
 
+        await _repository.AddAsync(newQuiz);
         await _repository.SaveChangesAsync();
+
+        return new NewQuizId(newQuiz.Id);
     }
 }
