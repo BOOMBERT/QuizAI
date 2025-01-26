@@ -11,11 +11,13 @@ public class QuizService : IQuizService
 {
     private readonly IMapper _mapper;
     private readonly IQuizzesRepository _quizzesRepository;
+    private readonly ICategoryService _categoryService;
 
-    public QuizService(IMapper mapper, IQuizzesRepository quizzesRepository)
+    public QuizService(IMapper mapper, IQuizzesRepository quizzesRepository, ICategoryService categoryService)
     {
         _mapper = mapper;
         _quizzesRepository = quizzesRepository;
+        _categoryService = categoryService;
     }
 
     public async Task<Quiz> GetNewAndDeprecateOldAsync(Guid oldQuizId)
@@ -27,6 +29,32 @@ public class QuizService : IQuizService
             throw new NotFoundException($"Quiz with ID {oldQuizId} was not found");
 
         var newQuiz = _mapper.Map<Quiz>(oldQuiz);
+
+        await DeprecateAsync(oldQuiz, newQuiz.Id);
+
+        return newQuiz;
+    }
+
+    public async Task<Quiz> GetNewWithCopiedQuestionsAndDeprecateOldAsync(Guid quizId, int questionId)
+    {
+        var oldQuiz = await _quizzesRepository.GetAsync(quizId, true, true)
+            ?? throw new NotFoundException($"Quiz with ID {quizId} was not found");
+
+        if (oldQuiz.IsDeprecated)
+            throw new NotFoundException($"Quiz with ID {quizId} was not found");
+
+        if (!oldQuiz.Questions.Any(qn => qn.Id == questionId))
+            throw new NotFoundException($"Question with ID {questionId} in quiz with ID {quizId} was not found.");
+
+        var newQuiz = new Quiz
+        {
+            Id = Guid.NewGuid(),
+            Name = oldQuiz.Name,
+            Description = oldQuiz.Description,
+            ImageId = oldQuiz.ImageId,
+            Categories = await _categoryService.GetOrCreateEntitiesAsync(oldQuiz.Categories.Select(c => c.Name)),
+            Questions = _mapper.Map<ICollection<Question>>(oldQuiz.Questions)
+        };
 
         await DeprecateAsync(oldQuiz, newQuiz.Id);
 

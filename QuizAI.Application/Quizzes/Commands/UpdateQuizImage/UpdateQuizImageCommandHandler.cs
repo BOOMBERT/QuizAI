@@ -24,9 +24,11 @@ public class UpdateQuizImageCommandHandler : IRequestHandler<UpdateQuizImageComm
         var newQuiz = await _quizService.GetNewAndDeprecateOldAsync(request.GetId());
 
         await _repository.AddAsync(newQuiz);
-        await _repository.SaveChangesAsync();
 
-        await _imageService.UpdateAsync(request.Image, newQuiz.Id);
+        var newImage = await _imageService.UploadAsync(request.Image);
+        newQuiz.ImageId = newImage.Id;
+
+        await _repository.SaveChangesAsync();
 
         return new NewQuizId(newQuiz.Id);
     }

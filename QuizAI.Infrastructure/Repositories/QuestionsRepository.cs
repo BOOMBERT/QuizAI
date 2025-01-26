@@ -76,13 +76,6 @@ public class QuestionsRepository : IQuestionsRepository
         return question.ImageId;
     }
 
-    public async Task UpdateImageAsync(Guid quizId, int questionId, Guid? imageId)
-    {
-        await _context.Questions
-            .Where(qn => qn.QuizId == quizId && qn.Id == questionId)
-            .ExecuteUpdateAsync(qn => qn.SetProperty(x => x.ImageId, imageId));
-    }
-
     public async Task<int> HowManyAsync(Guid quizId)
     {
         return await _context.Questions

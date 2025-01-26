@@ -22,7 +22,7 @@ public class CreateMultipleChoiceQuestionCommandHandler : IRequestHandler<Create
 
     public async Task<int> Handle(CreateMultipleChoiceQuestionCommand request, CancellationToken cancellationToken)
     {
-        var orderOfQuestion = await _questionService.GetOrderAsync(request.GetQuizId());
+        var orderOfQuestion = await _questionService.GetOrderForNewQuestionAsync(request.GetQuizId());
 
         var question = new Question
         {

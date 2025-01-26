@@ -33,7 +33,7 @@ namespace QuizAI.API.Controllers
 
         [HttpPatch("{quizId}/questions/{questionId}/image")]
         [RequestSizeLimit(5 * 1024 * 1024)] // 5MB
-        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesErrorResponseType(typeof(ErrorResponse))]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status413RequestEntityTooLarge)]
@@ -45,19 +45,19 @@ namespace QuizAI.API.Controllers
             command.SetQuizId(quizId);
             command.SetQuestionId(questionId);
 
-            await _mediator.Send(command);
-            return NoContent();
+            var newQuizId = await _mediator.Send(command);
+            return Ok(newQuizId);
         }
 
         [HttpDelete("{QuizId}/questions/{QuestionId}/image")]
-        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesErrorResponseType(typeof(ErrorResponse))]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> DeleteQuestionImage([FromRoute] DeleteQuestionImageCommand command)
         {
-            await _mediator.Send(command);
-            return NoContent();
+            var newQuizId = await _mediator.Send(command);
+            return Ok(newQuizId);
         }
     }
 }

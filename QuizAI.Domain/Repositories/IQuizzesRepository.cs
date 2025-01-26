@@ -13,6 +13,5 @@ public interface IQuizzesRepository
         string? sortBy,
         SortDirection? sortDirection,
         ICollection<string> FilterCategories);
-    Task UpdateImageAsync(Guid quizId, Guid? imageId);
     Task UpdateLatestVersionIdAsync(Guid oldLatestVersionId, Guid newLatestVersionId);
 }

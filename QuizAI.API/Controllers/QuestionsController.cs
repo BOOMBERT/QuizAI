@@ -60,14 +60,14 @@ namespace QuizAI.API.Controllers
         }
 
         [HttpDelete("{QuestionId}")]
-        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesErrorResponseType(typeof(ErrorResponse))]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> DeleteQuestion([FromRoute] DeleteQuestionCommand command)
         {
-            await _mediator.Send(command);
-            return NoContent();
+            var newQuizId = await _mediator.Send(command);
+            return Ok(newQuizId);
         }
     }
 }

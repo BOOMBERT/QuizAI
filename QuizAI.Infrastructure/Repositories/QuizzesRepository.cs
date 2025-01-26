@@ -95,13 +95,6 @@ public class QuizzesRepository : IQuizzesRepository
         return (quizzes, totalCount);
     }
 
-    public async Task UpdateImageAsync(Guid quizId, Guid? imageId)
-    {
-        await _context.Quizzes
-            .Where(qz => qz.Id == quizId)
-            .ExecuteUpdateAsync(qz => qz.SetProperty(x => x.ImageId, imageId));
-    }
-
     public async Task UpdateLatestVersionIdAsync(Guid oldLatestVersionId, Guid newLatestVersionId)
     {
         await _context.Quizzes

@@ -1,4 +1,5 @@
 ﻿using MediatR;
+using QuizAI.Application.Common;
 using QuizAI.Application.Interfaces;
 using QuizAI.Application.Services;
 using QuizAI.Domain.Entities;
@@ -7,29 +8,30 @@ using QuizAI.Domain.Repositories;
 
 namespace QuizAI.Application.Questions.Commands.DeleteQuestion;
 
-public class DeleteQuestionCommandHandler : IRequestHandler<DeleteQuestionCommand>
+public class DeleteQuestionCommandHandler : IRequestHandler<DeleteQuestionCommand, NewQuizId>
 {
     private readonly IRepository _repository;
-    private readonly IQuestionsRepository _questionsRepository;
+    private readonly IQuizService _quizService;
     private readonly IQuestionService _questionService;
-    private readonly IImageService _imageService;
 
-    public DeleteQuestionCommandHandler(IRepository repository, IQuestionsRepository questionsRepository, IQuestionService questionService, IImageService imageService)
+    public DeleteQuestionCommandHandler(IRepository repository, IQuizService quizService, IQuestionService questionService)
     {
         _repository = repository;
-        _questionsRepository = questionsRepository;
+        _quizService = quizService;
         _questionService = questionService;
-        _imageService = imageService;
     }
 
-    public async Task Handle(DeleteQuestionCommand request, CancellationToken cancellationToken)
+    public async Task<NewQuizId> Handle(DeleteQuestionCommand request, CancellationToken cancellationToken)
     {
-        var imageId = await _questionsRepository.GetImageIdAsync(request.QuizId, request.QuestionId);
+        var newQuiz = await _quizService.GetNewWithCopiedQuestionsAndDeprecateOldAsync(request.QuizId, request.QuestionId);
+        
+        _questionService.RemoveAndAdjustOrder(newQuiz, request.QuestionId);
 
-        await _questionService.DeleteAsync(request.QuizId, request.QuestionId);
+        _questionService.ResetIds(newQuiz.Questions);
+
+        await _repository.AddAsync(newQuiz);
         await _repository.SaveChangesAsync();
 
-        if (imageId != null)
-            await _imageService.DeleteIfNotAssignedAsync((Guid)imageId);
+        return new NewQuizId(newQuiz.Id);
     }
 }

@@ -22,7 +22,7 @@ public class CreateOpenEndedQuestionCommandHandler : IRequestHandler<CreateOpenE
 
     public async Task<int> Handle(CreateOpenEndedQuestionCommand request, CancellationToken cancellationToken)
     {
-        var orderOfQuestion = await _questionService.GetOrderAsync(request.GetQuizId());
+        var orderOfQuestion = await _questionService.GetOrderForNewQuestionAsync(request.GetQuizId());
 
         var question = new Question
         {

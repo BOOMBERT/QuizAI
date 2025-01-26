@@ -13,13 +13,11 @@ public class DeleteQuizImageCommandHandler : IRequestHandler<DeleteQuizImageComm
 {
     private readonly IRepository _repository;
     private readonly IQuizService _quizService;
-    private readonly IImageService _imageService;
 
-    public DeleteQuizImageCommandHandler(IRepository repository, IQuizService quizService, IImageService imageService)
+    public DeleteQuizImageCommandHandler(IRepository repository, IQuizService quizService)
     {
         _repository = repository;
         _quizService = quizService;
-        _imageService = imageService;
     }
 
     public async Task<NewQuizId> Handle(DeleteQuizImageCommand request, CancellationToken cancellationToken)

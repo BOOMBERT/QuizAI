@@ -1,9 +1,10 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Http;
+using QuizAI.Application.Common;
 
 namespace QuizAI.Application.Questions.Commands.UpdateQuestionImage;
 
-public class UpdateQuestionImageCommand : IRequest
+public class UpdateQuestionImageCommand : IRequest<NewQuizId>
 {
     private Guid QuizId { get; set; }
     private int QuestionId { get; set; }

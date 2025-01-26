@@ -1,8 +1,10 @@
 ﻿using AutoMapper;
 using MediatR;
+using QuizAI.Application.Common;
 using QuizAI.Application.Interfaces;
 using QuizAI.Application.MultipleChoiceQuestions.Dtos;
 using QuizAI.Domain.Entities;
+using QuizAI.Domain.Enums;
 using QuizAI.Domain.Exceptions;
 using QuizAI.Domain.Repositories;
 
@@ -23,7 +25,7 @@ public class QuestionService : IQuestionService
         _maxNumberOfQuestions = maxNumberOfQuestions;
     }
 
-    public async Task<byte> GetOrderAsync(Guid quizId)
+    public async Task<byte> GetOrderForNewQuestionAsync(Guid quizId)
     {
         if (!await _repository.EntityExistsAsync<Quiz>(quizId))
             throw new NotFoundException($"Quiz with ID {quizId} was not found");
@@ -38,24 +40,16 @@ public class QuestionService : IQuestionService
         return (byte)(existingQuestionsCount + 1);
     }
 
-    public async Task DeleteAsync(Guid quizId, int questionId)
+    public void RemoveAndAdjustOrder(Quiz quiz, int questionToDeleteId)
     {
-        if (!await _repository.EntityExistsAsync<Quiz>(quizId))
-            throw new NotFoundException($"Quiz with ID {quizId} was not found");
+        var questionToDelete = quiz.Questions.First(qn => qn.Id == questionToDeleteId);
+        
+        quiz.Questions.Remove(questionToDelete);
 
-        var questions = await _questionsRepository.GetAllAsync(quizId);
-
-        var questionToDelete = questions.FirstOrDefault(qn => qn.Id == questionId)
-            ?? throw new NotFoundException($"Question with ID {questionId} was not found in quiz with ID {quizId}.");
-
-        var questionToDeleteOrder = questionToDelete.Order;
-
-        foreach (var question in questions.Where(qn => qn.Order > questionToDeleteOrder))
+        foreach (var question in quiz.Questions.Where(qn => qn.Order > questionToDelete.Order))
         {
             question.Order--;
         }
-
-        _repository.Remove(questionToDelete);
     }
 
     public ICollection<MultipleChoiceAnswer> RemoveUnusedMultipleChoiceAnswersAndReturnNew(
@@ -85,6 +79,32 @@ public class QuestionService : IQuestionService
             {
                 newAnswer.Question = question;
                 await _repository.AddAsync(newAnswer);
+            }
+        }
+    }
+
+    public void ResetIds(IEnumerable<Question> questions)
+    {
+        foreach (var question in questions)
+        {
+            question.Id = 0;
+
+            switch (question.Type)
+            {
+                case QuestionType.MultipleChoice:
+                    foreach (var multipleChoiceAnswer in question.MultipleChoiceAnswers)
+                    {
+                        multipleChoiceAnswer.Id = 0;
+                    }
+                    break;
+
+                case QuestionType.OpenEnded:
+                    question.OpenEndedAnswer.Id = 0;
+                    break;
+
+                case QuestionType.TrueFalse:
+                    question.TrueFalseAnswer.Id = 0;
+                    break;
             }
         }
     }
