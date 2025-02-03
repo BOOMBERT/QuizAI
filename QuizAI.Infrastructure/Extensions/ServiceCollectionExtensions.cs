@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using QuizAI.Domain.Entities;
 using QuizAI.Domain.Repositories;
 using QuizAI.Infrastructure.Persistence;
 using QuizAI.Infrastructure.Repositories;
@@ -13,6 +14,9 @@ public static class ServiceCollectionExtensions
     {
         var connectionString = configuration.GetConnectionString("QuizAIDatabase");
         services.AddDbContext<AppDbContext>(options => options.UseSqlServer(connectionString));
+
+        services.AddIdentityApiEndpoints<User>()
+            .AddEntityFrameworkStores<AppDbContext>();
 
         services.AddScoped<IRepository, Repository>();
         services.AddScoped<ICategoriesRepository, CategoriesRepository>();

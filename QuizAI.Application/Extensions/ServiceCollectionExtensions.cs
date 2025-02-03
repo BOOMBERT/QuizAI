@@ -5,6 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using QuizAI.Application.Interfaces;
 using QuizAI.Application.Services;
+using QuizAI.Application.Users;
 using QuizAI.Domain.Repositories;
 
 namespace QuizAI.Application.Extensions;
@@ -19,6 +20,9 @@ public static class ServiceCollectionExtensions
         services.AddAutoMapper(applicationAssembly);
         services.AddValidatorsFromAssembly(applicationAssembly)
             .AddFluentValidationAutoValidation();
+
+        services.AddHttpContextAccessor();
+        services.AddScoped<IUserContext, UserContext>();
 
         var storageFolderName = "Uploads";
 
