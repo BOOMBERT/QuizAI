@@ -13,6 +13,6 @@ public class Quiz
     public Image? Image { get; set; }
 
     public ICollection<Category> Categories { get; set; } = new List<Category>();
-
     public ICollection<Question> Questions { get; set; } = new List<Question>();
+    public ICollection<QuizAttempt> QuizAttempts { get; set; } = new List<QuizAttempt>();
 }

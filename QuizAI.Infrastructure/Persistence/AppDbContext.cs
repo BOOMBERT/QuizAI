@@ -16,6 +16,8 @@ public class AppDbContext : IdentityDbContext<User>
     internal DbSet<TrueFalseAnswer> TrueFalseAnswers { get; set; }
     internal DbSet<Category> Categories { get; set; }
     internal DbSet<Image> Images { get; set; }
+    internal DbSet<QuizAttempt> QuizAttempts { get; set; }
+    internal DbSet<UserAnswer> UserAnswers { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -28,5 +30,7 @@ public class AppDbContext : IdentityDbContext<User>
         modelBuilder.ApplyConfiguration(new TrueFalseAnswerConfiguration());
         modelBuilder.ApplyConfiguration(new CategoryConfiguration());
         modelBuilder.ApplyConfiguration(new ImageConfiguration());
+        modelBuilder.ApplyConfiguration(new QuizAttemptConfiguration());
+        modelBuilder.ApplyConfiguration(new UserAnswerConfiguration());
     }
 }
