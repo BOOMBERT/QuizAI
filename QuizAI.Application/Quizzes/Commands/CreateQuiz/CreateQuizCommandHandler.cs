@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using MediatR;
 using QuizAI.Application.Interfaces;
+using QuizAI.Application.Users;
 using QuizAI.Domain.Entities;
 using QuizAI.Domain.Repositories;
 
@@ -12,19 +13,25 @@ public class CreateQuizCommandHandler : IRequestHandler<CreateQuizCommand, Guid>
     private readonly IRepository _repository;
     private readonly IImageService _imageService;
     private readonly ICategoryService _categoryService;
+    private readonly IUserContext _userContext;
 
-    public CreateQuizCommandHandler(IMapper mapper, IRepository repository, IImageService imageService, ICategoryService categoryService)
+    public CreateQuizCommandHandler(
+        IMapper mapper, IRepository repository, IImageService imageService, ICategoryService categoryService, IUserContext userContext)
     {
         _mapper = mapper;
         _repository = repository;
         _imageService = imageService;
         _categoryService = categoryService;
+        _userContext = userContext;
     }
 
     public async Task<Guid> Handle(CreateQuizCommand request, CancellationToken cancellationToken)
     {
+        var currentUser = _userContext.GetCurrentUser();
+
         var quiz = _mapper.Map<Quiz>(request);
 
+        quiz.CreatorId = currentUser.Id;
         quiz.Categories = await _categoryService.GetOrCreateEntitiesAsync(request.Categories);
 
         if (request.Image != null)

@@ -26,6 +26,8 @@ public class CreateOpenEndedQuestionCommandHandler : IRequestHandler<CreateOpenE
     {
         var newQuiz = await _quizService.GetNewWithCopiedQuestionsAndDeprecateOldAsync(request.GetQuizId());
 
+        newQuiz.QuestionCount += 1;
+
         var orderOfQuestion = await _questionService.GetOrderForNewQuestionAsync(request.GetQuizId());
 
         var question = new Question

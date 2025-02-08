@@ -17,6 +17,11 @@ internal class QuizConfiguration : IEntityTypeConfiguration<Quiz>
         builder.Property(qz => qz.CreationDate)
             .HasDefaultValueSql("GETUTCDATE()");
 
+        builder.HasOne(qz => qz.Creator)
+            .WithMany(u => u.CreatedQuizzes)
+            .HasForeignKey(qz => qz.CreatorId)
+            .OnDelete(DeleteBehavior.NoAction);
+
         builder.HasOne(qz => qz.Image)
             .WithMany(i => i.Quizzes)
             .HasForeignKey(qz => qz.ImageId);

@@ -95,6 +95,13 @@ public class QuizzesRepository : IQuizzesRepository
         return (quizzes, totalCount);
     }
 
+    public async Task<QuizAttempt?> GetUnfinishedQuizAttemptAsync(Guid quizId, string userId)
+    {
+        return await _context.QuizAttempts
+            .Where(qa => qa.QuizId == quizId && qa.UserId == userId && qa.FinishedAt == null)
+            .FirstOrDefaultAsync();
+    }
+
     public async Task UpdateLatestVersionIdAsync(Guid oldLatestVersionId, Guid newLatestVersionId)
     {
         await _context.Quizzes

@@ -1,4 +1,5 @@
 ﻿using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using QuizAI.Application.Common;
@@ -11,6 +12,7 @@ namespace QuizAI.API.Controllers
 {
     [Route("api/quizzes")]
     [ApiController]
+    [Authorize]
     public class QuestionsImageController : ControllerBase
     {
         private readonly IMediator _mediator;

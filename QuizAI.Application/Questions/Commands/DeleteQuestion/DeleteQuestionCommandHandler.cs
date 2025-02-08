@@ -24,7 +24,9 @@ public class DeleteQuestionCommandHandler : IRequestHandler<DeleteQuestionComman
     public async Task<NewQuizId> Handle(DeleteQuestionCommand request, CancellationToken cancellationToken)
     {
         var newQuiz = await _quizService.GetNewWithCopiedQuestionsAndDeprecateOldAsync(request.QuizId, request.QuestionId);
-        
+
+        newQuiz.QuestionCount -= 1;
+
         _questionService.RemoveAndAdjustOrder(newQuiz, request.QuestionId);
 
         _questionService.ResetIds(newQuiz.Questions);

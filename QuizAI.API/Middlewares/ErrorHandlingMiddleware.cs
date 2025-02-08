@@ -16,6 +16,11 @@ public class ErrorHandlingMiddleware : IMiddleware
         try
         {
             await next.Invoke(context);
+
+            if (context.Response.StatusCode == StatusCodes.Status401Unauthorized)
+            {
+                throw new UnauthorizedException("User is not authenticated");
+            }
         }
         catch (Exception ex)
         {

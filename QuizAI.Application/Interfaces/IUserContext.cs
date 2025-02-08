@@ -4,5 +4,5 @@ namespace QuizAI.Application.Interfaces;
 
 public interface IUserContext
 {
-    CurrentUser? GetCurrentUser();
+    CurrentUser GetCurrentUser();
 }

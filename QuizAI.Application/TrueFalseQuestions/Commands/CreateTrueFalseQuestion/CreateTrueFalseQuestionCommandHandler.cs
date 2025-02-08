@@ -25,7 +25,9 @@ public class CreateTrueFalseQuestionCommandHandler : IRequestHandler<CreateTrueF
     public async Task<NewQuizId> Handle(CreateTrueFalseQuestionCommand request, CancellationToken cancellationToken)
     {
         var newQuiz = await _quizService.GetNewWithCopiedQuestionsAndDeprecateOldAsync(request.GetQuizId());
-        
+
+        newQuiz.QuestionCount += 1;
+
         var orderOfQuestion = await _questionService.GetOrderForNewQuestionAsync(request.GetQuizId());
 
         var question = new Question

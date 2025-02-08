@@ -1,4 +1,5 @@
 ﻿using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using QuizAI.Application.Common;
 using QuizAI.Application.MultipleChoiceQuestions.Commands.CreateMultipleChoiceQuestion;
@@ -8,6 +9,7 @@ namespace QuizAI.API.Controllers
 {
     [Route("api/quizzes")]
     [ApiController]
+    [Authorize]
     public class MultipleChoiceQuestionsController : ControllerBase
     {
         private readonly IMediator _mediator;

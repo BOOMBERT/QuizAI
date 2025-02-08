@@ -14,13 +14,13 @@ public class UserContext : IUserContext
         _httpContextAccessor = httpContextAccessor;
     }
 
-    public CurrentUser? GetCurrentUser()
+    public CurrentUser GetCurrentUser()
     {
         var user = _httpContextAccessor?.HttpContext?.User 
             ?? throw new NotFoundException("The user could not be retrieved from HttpContext.");
 
         if (user.Identity == null || !user.Identity.IsAuthenticated)
-            return null;
+            throw new UnauthorizedException("User is not authenticated");
 
         var userId = user.FindFirst(c => c.Type == ClaimTypes.NameIdentifier)!.Value;
         var email = user.FindFirst(c => c.Type == ClaimTypes.Email)!.Value;

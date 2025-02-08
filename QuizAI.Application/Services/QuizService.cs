@@ -51,6 +51,8 @@ public class QuizService : IQuizService
             Id = Guid.NewGuid(),
             Name = oldQuiz.Name,
             Description = oldQuiz.Description,
+            QuestionCount = oldQuiz.QuestionCount,
+            CreatorId = oldQuiz.CreatorId,
             ImageId = oldQuiz.ImageId,
             Categories = await _categoryService.GetOrCreateEntitiesAsync(oldQuiz.Categories.Select(c => c.Name)),
             Questions = _mapper.Map<ICollection<Question>>(oldQuiz.Questions)

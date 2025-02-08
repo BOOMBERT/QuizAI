@@ -13,5 +13,6 @@ public interface IQuizzesRepository
         string? sortBy,
         SortDirection? sortDirection,
         ICollection<string> FilterCategories);
+    Task<QuizAttempt?> GetUnfinishedQuizAttemptAsync(Guid quizId, string userId);
     Task UpdateLatestVersionIdAsync(Guid oldLatestVersionId, Guid newLatestVersionId);
 }

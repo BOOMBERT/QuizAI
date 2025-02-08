@@ -8,5 +8,7 @@ public record QuizDto(
     bool HasImage, 
     IEnumerable<string> Categories, 
     bool IsDeprecated, 
-    Guid? LatestVersionId
+    Guid? LatestVersionId,
+    int QuestionCount,
+    string CreatorId
     );
