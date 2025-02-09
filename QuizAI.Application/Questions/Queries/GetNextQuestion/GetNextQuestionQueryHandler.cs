@@ -39,7 +39,7 @@ public class GetNextQuestionQueryHandler : IRequestHandler<GetNextQuestionQuery,
         if (quiz.QuestionCount == 0)
             throw new NotFoundException($"No questions found for quiz with ID {request.QuizId}");
         
-        var unfinishedQuizAttempt = await _quizzesRepository.GetUnfinishedQuizAttemptAsync(request.QuizId, currentUser.Id);
+        var unfinishedQuizAttempt = await _quizzesRepository.GetUnfinishedAttemptAsync(request.QuizId, currentUser.Id);
 
         int currentOrder = 1;
 

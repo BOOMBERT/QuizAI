@@ -9,7 +9,7 @@ using QuizAI.Domain.Repositories;
 
 namespace QuizAI.Application.MultipleChoiceQuestions.Commands.CreateMultipleChoiceQuestion;
 
-public class CreateMultipleChoiceQuestionCommandHandler : IRequestHandler<CreateMultipleChoiceQuestionCommand, NewQuizId>
+public class CreateMultipleChoiceQuestionCommandHandler : IRequestHandler<CreateMultipleChoiceQuestionCommand, LatestQuizId>
 {
     private readonly IMapper _mapper;
     private readonly IRepository _repository;
@@ -24,20 +24,19 @@ public class CreateMultipleChoiceQuestionCommandHandler : IRequestHandler<Create
         _questionService = questionService;
     }
 
-    public async Task<NewQuizId> Handle(CreateMultipleChoiceQuestionCommand request, CancellationToken cancellationToken)
+    public async Task<LatestQuizId> Handle(CreateMultipleChoiceQuestionCommand request, CancellationToken cancellationToken)
     {
-        var newQuiz = await _quizService.GetNewWithCopiedQuestionsAndDeprecateOldAsync(request.GetQuizId());
+        var (quiz, createdNewQuiz) = await _quizService.GetValidOrDeprecateAndCreateWithQuestionsAsync(request.GetQuizId());
 
-        newQuiz.QuestionCount += 1;
-
-        var orderOfQuestion = await _questionService.GetOrderForNewQuestionAsync(request.GetQuizId());
+        _questionService.ValidateQuestionLimit(quiz.QuestionCount);
+        quiz.QuestionCount += 1;
 
         var question = new Question
         {
             Content = request.Content,
             Type = QuestionType.MultipleChoice,
-            Order = orderOfQuestion,
-            QuizId = newQuiz.Id
+            Order = (byte)quiz.QuestionCount,
+            QuizId = quiz.Id
         };
 
         var multipleChoiceAnswers = _mapper.Map<IEnumerable<MultipleChoiceAnswer>>(request.Answers);
@@ -47,12 +46,15 @@ public class CreateMultipleChoiceQuestionCommandHandler : IRequestHandler<Create
             multipleChoiceAnswer.Question = question;
         }
 
-        _questionService.ResetIds(newQuiz.Questions);
+        if (createdNewQuiz)
+        {
+            _questionService.ResetIds(quiz.Questions);
+            await _repository.AddAsync(quiz);
+        }
 
-        await _repository.AddAsync(newQuiz);
         await _repository.AddRangeAsync(multipleChoiceAnswers);
         await _repository.SaveChangesAsync();
 
-        return new NewQuizId(newQuiz.Id);
+        return new LatestQuizId(quiz.Id);
     }
 }

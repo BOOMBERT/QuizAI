@@ -6,7 +6,7 @@ using QuizAI.Domain.Repositories;
 
 namespace QuizAI.Application.Quizzes.Commands.UpdateQuizImage;
 
-public class UpdateQuizImageCommandHandler : IRequestHandler<UpdateQuizImageCommand, NewQuizId>
+public class UpdateQuizImageCommandHandler : IRequestHandler<UpdateQuizImageCommand, LatestQuizId>
 {
     private readonly IRepository _repository;
     private readonly IQuizService _quizService;
@@ -19,17 +19,25 @@ public class UpdateQuizImageCommandHandler : IRequestHandler<UpdateQuizImageComm
         _imageService = imageService;
     }
 
-    public async Task<NewQuizId> Handle(UpdateQuizImageCommand request, CancellationToken cancellationToken)
+    public async Task<LatestQuizId> Handle(UpdateQuizImageCommand request, CancellationToken cancellationToken)
     {
-        var newQuiz = await _quizService.GetNewAndDeprecateOldAsync(request.GetId());
+        var (quiz, createdNewQuiz) = await _quizService.GetValidOrDeprecateAndCreateAsync(request.GetId());
 
-        await _repository.AddAsync(newQuiz);
+        if (createdNewQuiz)
+        {
+            await _repository.AddAsync(quiz);
+        }
+        else
+        {
+            if (quiz.ImageId != null)
+                await _imageService.DeleteIfNotAssignedAsync((Guid)quiz.ImageId, request.GetId());
+        }
 
         var newImage = await _imageService.UploadAsync(request.Image);
-        newQuiz.ImageId = newImage.Id;
+        quiz.ImageId = newImage.Id;
 
         await _repository.SaveChangesAsync();
 
-        return new NewQuizId(newQuiz.Id);
+        return new LatestQuizId(quiz.Id);
     }
 }

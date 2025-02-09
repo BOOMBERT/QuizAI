@@ -3,7 +3,7 @@ using QuizAI.Application.Common;
 
 namespace QuizAI.Application.Quizzes.Commands.UpdateQuiz;
 
-public class UpdateQuizCommand : IRequest<NewQuizId>
+public class UpdateQuizCommand : IRequest<LatestQuizId>
 {
     private Guid Id { get; set; }
     public required string Name { get; set; }

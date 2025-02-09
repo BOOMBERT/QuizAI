@@ -4,7 +4,7 @@ using QuizAI.Application.MultipleChoiceQuestions.Dtos;
 
 namespace QuizAI.Application.TrueFalseQuestions.Commands.UpdateTrueFalseQuestion;
 
-public class UpdateTrueFalseQuestionCommand : IRequest<NewQuizId>
+public class UpdateTrueFalseQuestionCommand : IRequest<LatestQuizId>
 {
     private Guid QuizId { get; set; }
     private int QuestionId { get; set; }

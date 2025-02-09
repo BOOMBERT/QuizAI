@@ -9,7 +9,7 @@ using QuizAI.Domain.Repositories;
 
 namespace QuizAI.Application.TrueFalseQuestions.Commands.CreateTrueFalseQuestion;
 
-public class CreateTrueFalseQuestionCommandHandler : IRequestHandler<CreateTrueFalseQuestionCommand, NewQuizId>
+public class CreateTrueFalseQuestionCommandHandler : IRequestHandler<CreateTrueFalseQuestionCommand, LatestQuizId>
 {
     private readonly IRepository _repository;
     private readonly IQuizService _quizService;
@@ -22,20 +22,19 @@ public class CreateTrueFalseQuestionCommandHandler : IRequestHandler<CreateTrueF
         _questionService = questionService;
     }
 
-    public async Task<NewQuizId> Handle(CreateTrueFalseQuestionCommand request, CancellationToken cancellationToken)
+    public async Task<LatestQuizId> Handle(CreateTrueFalseQuestionCommand request, CancellationToken cancellationToken)
     {
-        var newQuiz = await _quizService.GetNewWithCopiedQuestionsAndDeprecateOldAsync(request.GetQuizId());
+        var (quiz, createdNewQuiz) = await _quizService.GetValidOrDeprecateAndCreateWithQuestionsAsync(request.GetQuizId());
 
-        newQuiz.QuestionCount += 1;
-
-        var orderOfQuestion = await _questionService.GetOrderForNewQuestionAsync(request.GetQuizId());
+        _questionService.ValidateQuestionLimit(quiz.QuestionCount);
+        quiz.QuestionCount += 1;
 
         var question = new Question
         {
             Content = request.Content,
             Type = QuestionType.TrueFalse,
-            Order = orderOfQuestion,
-            QuizId = newQuiz.Id
+            Order = (byte)quiz.QuestionCount,
+            QuizId = quiz.Id
         };
 
         var trueFalseAnswer = new TrueFalseAnswer
@@ -44,12 +43,15 @@ public class CreateTrueFalseQuestionCommandHandler : IRequestHandler<CreateTrueF
             Question = question
         };
 
-        _questionService.ResetIds(newQuiz.Questions);
+        if (createdNewQuiz)
+        {
+            _questionService.ResetIds(quiz.Questions);
+            await _repository.AddAsync(quiz);
+        }
 
-        await _repository.AddAsync(newQuiz);
         await _repository.AddAsync(trueFalseAnswer);
         await _repository.SaveChangesAsync();
 
-        return new NewQuizId(newQuiz.Id);
+        return new LatestQuizId(quiz.Id);
     }
 }

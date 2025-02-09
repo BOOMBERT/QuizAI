@@ -9,7 +9,7 @@ using QuizAI.Domain.Repositories;
 
 namespace QuizAI.Application.OpenEndedQuestions.Commands.UpdateOpenEndedQuestion;
 
-public class UpdateOpenEndedQuestionCommandHandler : IRequestHandler<UpdateOpenEndedQuestionCommand, NewQuizId>
+public class UpdateOpenEndedQuestionCommandHandler : IRequestHandler<UpdateOpenEndedQuestionCommand, LatestQuizId>
 {
     private readonly IRepository _repository;
     private readonly IQuizService _quizService;
@@ -22,11 +22,11 @@ public class UpdateOpenEndedQuestionCommandHandler : IRequestHandler<UpdateOpenE
         _questionService = questionService;
     }
 
-    public async Task<NewQuizId> Handle(UpdateOpenEndedQuestionCommand request, CancellationToken cancellationToken)
+    public async Task<LatestQuizId> Handle(UpdateOpenEndedQuestionCommand request, CancellationToken cancellationToken)
     {
-        var newQuiz = await _quizService.GetNewWithCopiedQuestionsAndDeprecateOldAsync(request.GetQuizId(), request.GetQuestionId());
+        var (quiz, createdNewQuiz) = await _quizService.GetValidOrDeprecateAndCreateWithQuestionsAsync(request.GetQuizId(), request.GetQuestionId());
 
-        var questionToUpdate = newQuiz.Questions.First(qn => qn.Id == request.GetQuestionId());
+        var questionToUpdate = quiz.Questions.First(qn => qn.Id == request.GetQuestionId());
 
         if (questionToUpdate.Content != request.Content)
             questionToUpdate.Content = request.Content;
@@ -39,11 +39,14 @@ public class UpdateOpenEndedQuestionCommandHandler : IRequestHandler<UpdateOpenE
         if (answerOfQuestionToUpdate.VerificationByAI != request.VerificationByAI)
             answerOfQuestionToUpdate.VerificationByAI = request.VerificationByAI;
 
-        _questionService.ResetIds(newQuiz.Questions);
+        if (createdNewQuiz)
+        {
+            _questionService.ResetIds(quiz.Questions);
+            await _repository.AddAsync(quiz);
+        }
 
-        await _repository.AddAsync(newQuiz);
         await _repository.SaveChangesAsync();
 
-        return new NewQuizId(newQuiz.Id);
+        return new LatestQuizId(quiz.Id);
     }
 }

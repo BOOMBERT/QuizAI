@@ -26,7 +26,7 @@ namespace QuizAI.API.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status409Conflict)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<ActionResult<NewQuizId>> CreateOpenEndedQuestion(Guid quizId, CreateOpenEndedQuestionCommand command)
+        public async Task<ActionResult<LatestQuizId>> CreateOpenEndedQuestion(Guid quizId, CreateOpenEndedQuestionCommand command)
         {
             command.SetQuizId(quizId);
 
@@ -39,7 +39,7 @@ namespace QuizAI.API.Controllers
         [ProducesErrorResponseType(typeof(ErrorResponse))]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<ActionResult<NewQuizId>> UpdateOpenEndedQuestion(Guid quizId, int questionId, UpdateOpenEndedQuestionCommand command)
+        public async Task<ActionResult<LatestQuizId>> UpdateOpenEndedQuestion(Guid quizId, int questionId, UpdateOpenEndedQuestionCommand command)
         {
             command.SetQuizId(quizId);
             command.SetQuestionId(questionId);

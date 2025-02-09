@@ -13,7 +13,8 @@ internal class QuestionConfiguration : IEntityTypeConfiguration<Question>
 
         builder.HasOne(qn => qn.Image)
             .WithMany(i => i.Questions)
-            .HasForeignKey(qn => qn.ImageId);
+            .HasForeignKey(qn => qn.ImageId)
+            .OnDelete(DeleteBehavior.SetNull);
 
         builder.HasOne(qn => qn.Quiz)
             .WithMany(qz => qz.Questions)

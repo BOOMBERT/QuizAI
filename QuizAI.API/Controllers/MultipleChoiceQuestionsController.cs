@@ -25,7 +25,7 @@ namespace QuizAI.API.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status409Conflict)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<ActionResult<NewQuizId>> CreateMultipleChoiceQuestion(Guid quizId, CreateMultipleChoiceQuestionCommand command)
+        public async Task<ActionResult<LatestQuizId>> CreateMultipleChoiceQuestion(Guid quizId, CreateMultipleChoiceQuestionCommand command)
         {
             command.SetQuizId(quizId);
 
@@ -38,7 +38,7 @@ namespace QuizAI.API.Controllers
         [ProducesErrorResponseType(typeof(ErrorResponse))]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<ActionResult<NewQuizId>> UpdateMultipleChoiceQuestion(Guid quizId, int questionId, UpdateMultipleChoiceQuestionCommand command)
+        public async Task<ActionResult<LatestQuizId>> UpdateMultipleChoiceQuestion(Guid quizId, int questionId, UpdateMultipleChoiceQuestionCommand command)
         {
             command.SetQuizId(quizId);
             command.SetQuestionId(questionId);

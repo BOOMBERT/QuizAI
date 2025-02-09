@@ -33,12 +33,21 @@ public class QuestionsRepository : IQuestionsRepository
         return await baseQuery.ToListAsync();
     }
 
-    public async Task<Question?> GetByOrderAsync(Guid quizId, int order)
+    public async Task<Question?> GetByOrderAsync(Guid quizId, int order, bool answers = false)
     {
-        return await _context.Questions
+        var baseQuery = _context.Questions
             .AsNoTracking()
-            .Where(qn => qn.QuizId == quizId && qn.Order == order)
-            .FirstOrDefaultAsync();
+            .Where(qn => qn.QuizId == quizId && qn.Order == order);
+
+        if (answers)
+        {
+            baseQuery = baseQuery
+                .Include(qn => qn.MultipleChoiceAnswers)
+                .Include(qn => qn.OpenEndedAnswer)
+                .Include(qn => qn.TrueFalseAnswer);
+        }
+
+        return await baseQuery.FirstOrDefaultAsync();
     }
 
     public async Task<IEnumerable<string>> GetMultipleChoiceAnswersContentAsync(int questionId)
@@ -57,11 +66,5 @@ public class QuestionsRepository : IQuestionsRepository
             ?? throw new NotFoundException($"Question with ID {questionId} in quiz with ID {quizId} was not found.");
 
         return question.ImageId;
-    }
-
-    public async Task<int> HowManyAsync(Guid quizId)
-    {
-        return await _context.Questions
-            .CountAsync(qn => qn.QuizId == quizId);
     }
 }

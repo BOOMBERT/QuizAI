@@ -4,7 +4,7 @@ using QuizAI.Application.Common;
 
 namespace QuizAI.Application.Questions.Commands.UpdateQuestionImage;
 
-public class UpdateQuestionImageCommand : IRequest<NewQuizId>
+public class UpdateQuestionImageCommand : IRequest<LatestQuizId>
 {
     private Guid QuizId { get; set; }
     private int QuestionId { get; set; }

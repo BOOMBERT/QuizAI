@@ -26,7 +26,7 @@ namespace QuizAI.API.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status409Conflict)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<ActionResult<NewQuizId>> CreateTrueFalseQuestion(Guid quizId, CreateTrueFalseQuestionCommand command)
+        public async Task<ActionResult<LatestQuizId>> CreateTrueFalseQuestion(Guid quizId, CreateTrueFalseQuestionCommand command)
         {
             command.SetQuizId(quizId);
 
@@ -39,7 +39,7 @@ namespace QuizAI.API.Controllers
         [ProducesErrorResponseType(typeof(ErrorResponse))]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<ActionResult<NewQuizId>> UpdateTrueFalseQuestion(Guid quizId, int questionId, UpdateTrueFalseQuestionCommand command)
+        public async Task<ActionResult<LatestQuizId>> UpdateTrueFalseQuestion(Guid quizId, int questionId, UpdateTrueFalseQuestionCommand command)
         {
             command.SetQuizId(quizId);
             command.SetQuestionId(questionId);

@@ -8,7 +8,7 @@ using QuizAI.Domain.Repositories;
 
 namespace QuizAI.Application.Questions.Commands.UpdateQuestionImage;
 
-public class UpdateQuestionImageCommandHandler : IRequestHandler<UpdateQuestionImageCommand, NewQuizId>
+public class UpdateQuestionImageCommandHandler : IRequestHandler<UpdateQuestionImageCommand, LatestQuizId>
 {
     private readonly IRepository _repository;
     private readonly IQuizService _quizService;
@@ -23,19 +23,31 @@ public class UpdateQuestionImageCommandHandler : IRequestHandler<UpdateQuestionI
         _questionService = questionService;
     }
 
-    public async Task<NewQuizId> Handle(UpdateQuestionImageCommand request, CancellationToken cancellationToken)
+    public async Task<LatestQuizId> Handle(UpdateQuestionImageCommand request, CancellationToken cancellationToken)
     {
         var (quizId, questionId) = (request.GetQuizId(), request.GetQuestionId());
-        var newQuiz = await _quizService.GetNewWithCopiedQuestionsAndDeprecateOldAsync(quizId, questionId);
+        var (quiz, createdNewQuiz) = await _quizService.GetValidOrDeprecateAndCreateWithQuestionsAsync(quizId, questionId);
 
         var newImage = await _imageService.UploadAsync(request.Image);
-        newQuiz.Questions.First(qn => qn.Id == questionId).ImageId = newImage.Id;
 
-        _questionService.ResetIds(newQuiz.Questions);
+        var question = quiz.Questions.First(qn => qn.Id == questionId);
+        var previousImageId = question.ImageId;
 
-        await _repository.AddAsync(newQuiz);
+        question.ImageId = newImage.Id;
+
+        if (createdNewQuiz)
+        {
+            _questionService.ResetIds(quiz.Questions);
+            await _repository.AddAsync(quiz);
+        }
+        else
+        {
+            if (previousImageId != null)
+                await _imageService.DeleteIfNotAssignedAsync((Guid)previousImageId, null, question.Id);
+        }
+
         await _repository.SaveChangesAsync();
 
-        return new NewQuizId(newQuiz.Id);
+        return new LatestQuizId(quiz.Id);
     }
 }

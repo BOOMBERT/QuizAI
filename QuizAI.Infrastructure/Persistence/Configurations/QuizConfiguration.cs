@@ -24,7 +24,8 @@ internal class QuizConfiguration : IEntityTypeConfiguration<Quiz>
 
         builder.HasOne(qz => qz.Image)
             .WithMany(i => i.Quizzes)
-            .HasForeignKey(qz => qz.ImageId);
+            .HasForeignKey(qz => qz.ImageId)
+            .OnDelete(DeleteBehavior.SetNull);
 
         builder.HasMany(qz => qz.Categories)
             .WithMany(c => c.Quizzes)

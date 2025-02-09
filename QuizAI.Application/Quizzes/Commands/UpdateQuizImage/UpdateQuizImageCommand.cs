@@ -4,7 +4,7 @@ using QuizAI.Application.Common;
 
 namespace QuizAI.Application.Quizzes.Commands.UpdateQuizImage;
 
-public class UpdateQuizImageCommand : IRequest<NewQuizId>
+public class UpdateQuizImageCommand : IRequest<LatestQuizId>
 {
     private Guid Id { get; set; }
     public required IFormFile Image { get; set; }

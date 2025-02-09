@@ -3,7 +3,7 @@ using QuizAI.Application.Common;
 
 namespace QuizAI.Application.Quizzes.Commands.DeleteQuizImage;
 
-public class DeleteQuizImageCommand : IRequest<NewQuizId>
+public class DeleteQuizImageCommand : IRequest<LatestQuizId>
 {
     private Guid Id { get; set; }
 

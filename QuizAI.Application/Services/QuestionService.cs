@@ -3,6 +3,7 @@ using MediatR;
 using QuizAI.Application.Common;
 using QuizAI.Application.Interfaces;
 using QuizAI.Application.MultipleChoiceQuestions.Dtos;
+using QuizAI.Application.Questions.Dtos;
 using QuizAI.Domain.Entities;
 using QuizAI.Domain.Enums;
 using QuizAI.Domain.Exceptions;
@@ -14,62 +15,28 @@ public class QuestionService : IQuestionService
 {
     private readonly IMapper _mapper;
     private readonly IRepository _repository;
-    private readonly IQuestionsRepository _questionsRepository;
     private readonly byte _maxNumberOfQuestions;
 
-    public QuestionService(IMapper mapper, IRepository repository, IQuestionsRepository questionsRepository, byte maxNumberOfQuestions)
+    public QuestionService(IMapper mapper, IRepository repository, byte maxNumberOfQuestions)
     {
         _mapper = mapper;
         _repository = repository;
-        _questionsRepository = questionsRepository;
         _maxNumberOfQuestions = maxNumberOfQuestions;
     }
 
-    public async Task<byte> GetOrderForNewQuestionAsync(Guid quizId)
+    public void RemoveUnusedMultipleChoiceAnswers(Question question, ICollection<CreateMultipleChoiceAnswerDto> requestedNewAnswers)
     {
-        if (!await _repository.EntityExistsAsync<Quiz>(quizId))
-            throw new NotFoundException($"Quiz with ID {quizId} was not found");
-
-        var existingQuestionsCount = await _questionsRepository.HowManyAsync(quizId);
-        if (existingQuestionsCount >= _maxNumberOfQuestions)
-            throw new ConflictException(
-                $"Quiz with ID {quizId} cannot have a new question " +
-                $"because the number of questions would exceed the maximum limit of {_maxNumberOfQuestions}."
-            );
-
-        return (byte)(existingQuestionsCount + 1);
-    }
-
-    public void RemoveAndAdjustOrder(Quiz quiz, int questionToDeleteId)
-    {
-        var questionToDelete = quiz.Questions.First(qn => qn.Id == questionToDeleteId);
-        
-        quiz.Questions.Remove(questionToDelete);
-
-        foreach (var question in quiz.Questions.Where(qn => qn.Order > questionToDelete.Order))
-        {
-            question.Order--;
-        }
-    }
-
-    public ICollection<MultipleChoiceAnswer> RemoveUnusedMultipleChoiceAnswersAndReturnNew(
-        Question question, ICollection<CreateMultipleChoiceAnswerDto> requestedNewAnswers)
-    {
-        var newAnswers = _mapper.Map<ICollection<MultipleChoiceAnswer>>(requestedNewAnswers);
-
         var answersToRemove = question.MultipleChoiceAnswers
-            .Where(ea => !newAnswers.Any(na => na.Content == ea.Content));
+            .Where(mca => !requestedNewAnswers.Any(na => na.Content == mca.Content));
 
         _repository.RemoveRange(answersToRemove);
-
-        return newAnswers;
     }
 
     public async Task UpdateOrAddNewAnswersAsync(Question question, ICollection<MultipleChoiceAnswer> newAnswers)
     {
         foreach (var newAnswer in newAnswers)
         {
-            var existingAnswer = question.MultipleChoiceAnswers.FirstOrDefault(ea => ea.Content == newAnswer.Content);
+            var existingAnswer = question.MultipleChoiceAnswers.FirstOrDefault(mca => mca.Content == newAnswer.Content);
             if (existingAnswer != null)
             {
                 if (existingAnswer.IsCorrect != newAnswer.IsCorrect)
@@ -80,6 +47,40 @@ public class QuestionService : IQuestionService
                 newAnswer.Question = question;
                 await _repository.AddAsync(newAnswer);
             }
+        }
+    }
+
+    public void ValidateQuestionLimit(int questionCount)
+    {
+        if (questionCount >= _maxNumberOfQuestions)
+            throw new ConflictException(
+                $"Cannot add a new question as it would exceed the maximum limit of {_maxNumberOfQuestions}."
+            );
+    }
+
+    public void RemoveAndAdjustOrder(Quiz quiz, Question questionToDelete)
+    {
+        quiz.Questions.Remove(questionToDelete);
+
+        foreach (var question in quiz.Questions.Where(qn => qn.Order > questionToDelete.Order))
+        {
+            question.Order--;
+        }
+    }
+
+    public void ChangeOrders(Quiz quiz, ICollection<UpdateQuestionOrderDto> orderChanges)
+    {
+        var questionsById = quiz.Questions.ToDictionary(qn => qn.Id, qn => qn);
+
+        foreach (var orderChange in orderChanges)
+        {
+            if (!questionsById.ContainsKey(orderChange.QuestionId))
+            {
+                throw new NotFoundException($"Question with ID {orderChange.QuestionId} was not found in quiz with ID {quiz.Id}.");
+            }
+
+            var question = questionsById[orderChange.QuestionId];
+            question.Order = (byte)orderChange.NewOrder;
         }
     }
 
@@ -107,5 +108,25 @@ public class QuestionService : IQuestionService
                     break;
             }
         }
+    }
+
+    public QuestionWithAnswerDto MapToQuestionWithAnswerDto(Question question)
+    {
+        return new QuestionWithAnswerDto(
+               question.Id,
+               question.Content,
+               question.Type,
+               question.Order,
+               question.ImageId != null,
+               question.Type == QuestionType.MultipleChoice
+                   ? question.MultipleChoiceAnswers.Select(_mapper.Map<MultipleChoiceAnswerDto>)
+                   : Enumerable.Empty<MultipleChoiceAnswerDto>(),
+               question.Type == QuestionType.OpenEnded
+                   ? _mapper.Map<OpenEndedAnswerDto>(question.OpenEndedAnswer)
+                   : null,
+               question.Type == QuestionType.TrueFalse
+                   ? _mapper.Map<TrueFalseAnswerDto>(question.TrueFalseAnswer)
+                   : null
+           );
     }
 }

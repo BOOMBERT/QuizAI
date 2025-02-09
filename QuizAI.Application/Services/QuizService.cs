@@ -10,63 +10,71 @@ namespace QuizAI.Application.Services;
 public class QuizService : IQuizService
 {
     private readonly IMapper _mapper;
+    private readonly IRepository _repository;
     private readonly IQuizzesRepository _quizzesRepository;
     private readonly ICategoryService _categoryService;
 
-    public QuizService(IMapper mapper, IQuizzesRepository quizzesRepository, ICategoryService categoryService)
+    public QuizService(IMapper mapper, IRepository repository, IQuizzesRepository quizzesRepository, ICategoryService categoryService)
     {
         _mapper = mapper;
+        _repository = repository;
         _quizzesRepository = quizzesRepository;
         _categoryService = categoryService;
     }
 
-    public async Task<Quiz> GetNewAndDeprecateOldAsync(Guid oldQuizId)
+    public async Task<(Quiz, bool)> GetValidOrDeprecateAndCreateAsync(Guid currentQuizId)
     {
-        var oldQuiz = await _quizzesRepository.GetAsync(oldQuizId, true, true)
-            ?? throw new NotFoundException($"Quiz with ID {oldQuizId} was not found");
+        var currentQuiz = await _quizzesRepository.GetAsync(currentQuizId, true, true)
+            ?? throw new NotFoundException($"Quiz with ID {currentQuizId} was not found");
 
-        if (oldQuiz.IsDeprecated)
-            throw new NotFoundException($"Quiz with ID {oldQuizId} was not found");
+        if (currentQuiz.IsDeprecated)
+            throw new NotFoundException($"Quiz with ID {currentQuizId} was not found");
 
-        var newQuiz = _mapper.Map<Quiz>(oldQuiz);
+        if (!await _quizzesRepository.HasAnyAttemptsAsync(currentQuiz.Id))
+            return (currentQuiz, false);
 
-        await DeprecateAsync(oldQuiz, newQuiz.Id);
+        var newQuiz = _mapper.Map<Quiz>(currentQuiz);
 
-        return newQuiz;
+        await DeprecateAsync(currentQuiz, newQuiz.Id);
+
+        return (newQuiz, true);
     }
 
-    public async Task<Quiz> GetNewWithCopiedQuestionsAndDeprecateOldAsync(Guid oldQuizId, int? questionId = null)
+    public async Task<(Quiz, bool)> GetValidOrDeprecateAndCreateWithQuestionsAsync(Guid currentQuizId, int? questionId = null)
     {
-        var oldQuiz = await _quizzesRepository.GetAsync(oldQuizId, true, true)
-            ?? throw new NotFoundException($"Quiz with ID {oldQuizId} was not found");
+        var currentQuiz = await _quizzesRepository.GetAsync(currentQuizId, true, true)
+            ?? throw new NotFoundException($"Quiz with ID {currentQuizId} was not found");
 
-        if (oldQuiz.IsDeprecated)
-            throw new NotFoundException($"Quiz with ID {oldQuizId} was not found");
+        if (currentQuiz.IsDeprecated)
+            throw new NotFoundException($"Quiz with ID {currentQuizId} was not found");
 
-        if (questionId != null && !oldQuiz.Questions.Any(qn => qn.Id == questionId))
-            throw new NotFoundException($"Question with ID {questionId} in quiz with ID {oldQuizId} was not found.");
+        if (questionId != null && !currentQuiz.Questions.Any(qn => qn.Id == questionId))
+            throw new NotFoundException($"Question with ID {questionId} in quiz with ID {currentQuizId} was not found.");
+
+        if (!await _quizzesRepository.HasAnyAttemptsAsync(currentQuiz.Id))
+            return (currentQuiz, false);
 
         var newQuiz = new Quiz
         {
             Id = Guid.NewGuid(),
-            Name = oldQuiz.Name,
-            Description = oldQuiz.Description,
-            QuestionCount = oldQuiz.QuestionCount,
-            CreatorId = oldQuiz.CreatorId,
-            ImageId = oldQuiz.ImageId,
-            Categories = await _categoryService.GetOrCreateEntitiesAsync(oldQuiz.Categories.Select(c => c.Name)),
-            Questions = _mapper.Map<ICollection<Question>>(oldQuiz.Questions)
+            Name = currentQuiz.Name,
+            Description = currentQuiz.Description,
+            QuestionCount = currentQuiz.QuestionCount,
+            CreatorId = currentQuiz.CreatorId,
+            ImageId = currentQuiz.ImageId,
+            Categories = await _categoryService.GetOrCreateEntitiesAsync(currentQuiz.Categories.Select(c => c.Name)),
+            Questions = _mapper.Map<ICollection<Question>>(currentQuiz.Questions)
         };
 
-        await DeprecateAsync(oldQuiz, newQuiz.Id);
+        await DeprecateAsync(currentQuiz, newQuiz.Id);
 
-        return newQuiz;
+        return (newQuiz, true);
     }
 
     private async Task DeprecateAsync(Quiz oldQuiz, Guid newQuizId)
     {
         await _quizzesRepository.UpdateLatestVersionIdAsync(oldQuiz.Id, newQuizId);
-        
+
         oldQuiz.LatestVersionId = newQuizId;
         oldQuiz.Categories.Clear();
         oldQuiz.IsDeprecated = true;

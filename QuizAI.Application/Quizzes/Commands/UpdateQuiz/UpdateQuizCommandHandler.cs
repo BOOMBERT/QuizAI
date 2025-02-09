@@ -10,7 +10,7 @@ using QuizAI.Domain.Repositories;
 
 namespace QuizAI.Application.Quizzes.Commands.UpdateQuiz;
 
-public class UpdateQuizCommandHandler : IRequestHandler<UpdateQuizCommand, NewQuizId>
+public class UpdateQuizCommandHandler : IRequestHandler<UpdateQuizCommand, LatestQuizId>
 {
     private readonly IMapper _mapper;
     private readonly IRepository _repository;
@@ -25,20 +25,22 @@ public class UpdateQuizCommandHandler : IRequestHandler<UpdateQuizCommand, NewQu
         _categoryService = categoryService;
     }
 
-    public async Task<NewQuizId> Handle(UpdateQuizCommand request, CancellationToken cancellationToken)
+    public async Task<LatestQuizId> Handle(UpdateQuizCommand request, CancellationToken cancellationToken)
     {
-        var newQuiz = await _quizService.GetNewAndDeprecateOldAsync(request.GetId());
+        var (quizToUpdate, createdNewQuiz) = await _quizService.GetValidOrDeprecateAndCreateAsync(request.GetId());
 
-        await _categoryService.RemoveUnusedAsync(newQuiz, request.Categories);
+        await _categoryService.RemoveUnusedAsync(quizToUpdate, request.Categories);
 
-        newQuiz.Categories = await _categoryService.GetOrCreateEntitiesAsync(
-            request.Categories.Except(newQuiz.Categories.Select(c => c.Name)));
+        quizToUpdate.Categories = await _categoryService.GetOrCreateEntitiesAsync(
+            request.Categories.Except(quizToUpdate.Categories.Select(c => c.Name)));
 
-        _mapper.Map(request, newQuiz);
+        _mapper.Map(request, quizToUpdate);
 
-        await _repository.AddAsync(newQuiz);
+        if (createdNewQuiz)
+            await _repository.AddAsync(quizToUpdate);
+        
         await _repository.SaveChangesAsync();
 
-        return new NewQuizId(newQuiz.Id);
+        return new LatestQuizId(quizToUpdate.Id);
     }
 }

@@ -3,7 +3,7 @@ using QuizAI.Application.Common;
 
 namespace QuizAI.Application.OpenEndedQuestions.Commands.CreateOpenEndedQuestion;
 
-public class CreateOpenEndedQuestionCommand : IRequest<NewQuizId>
+public class CreateOpenEndedQuestionCommand : IRequest<LatestQuizId>
 {
     private Guid QuizId { get; set; }
     public string Content { get; set; } = string.Empty;

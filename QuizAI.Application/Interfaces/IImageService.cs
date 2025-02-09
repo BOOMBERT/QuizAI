@@ -7,5 +7,5 @@ public interface IImageService
 {
     Task<(byte[], string)> GetDataToReturnAsync(Guid quizId, int? questionId = null);
     Task<Image> UploadAsync(IFormFile image);
-    Task DeleteIfNotAssignedAsync(Guid imageId);
+    Task DeleteIfNotAssignedAsync(Guid imageId, Guid? quizIdToSkip = null, int? questionIdToSkip = null);
 }

@@ -9,29 +9,37 @@ using QuizAI.Domain.Repositories;
 
 namespace QuizAI.Application.Quizzes.Commands.DeleteQuizImage;
 
-public class DeleteQuizImageCommandHandler : IRequestHandler<DeleteQuizImageCommand, NewQuizId>
+public class DeleteQuizImageCommandHandler : IRequestHandler<DeleteQuizImageCommand, LatestQuizId>
 {
     private readonly IRepository _repository;
     private readonly IQuizService _quizService;
+    private readonly IImageService _imageService;
 
-    public DeleteQuizImageCommandHandler(IRepository repository, IQuizService quizService)
+    public DeleteQuizImageCommandHandler(IRepository repository, IQuizService quizService, IImageService imageService)
     {
         _repository = repository;
         _quizService = quizService;
+        _imageService = imageService;
     }
 
-    public async Task<NewQuizId> Handle(DeleteQuizImageCommand request, CancellationToken cancellationToken)
+    public async Task<LatestQuizId> Handle(DeleteQuizImageCommand request, CancellationToken cancellationToken)
     {
-        var newQuiz = await _quizService.GetNewAndDeprecateOldAsync(request.GetId());
+        var (quiz, createdNewQuiz) = await _quizService.GetValidOrDeprecateAndCreateAsync(request.GetId());
 
-        if (await _repository.GetFieldAsync<Quiz, Guid?>(request.GetId(), "ImageId") == null)
-            throw new NotFoundException($"Quiz with ID {request.GetId()} has no associated image.");
+        var imageId = quiz.ImageId ?? throw new NotFoundException($"Quiz with ID {request.GetId()} has no associated image.");
+        quiz.ImageId = null;
 
-        newQuiz.ImageId = null;
+        if (!createdNewQuiz)
+        {
+            await _imageService.DeleteIfNotAssignedAsync(imageId, quiz.Id);
+        }
+        else
+        {
+            await _repository.AddAsync(quiz);
+        }
 
-        await _repository.AddAsync(newQuiz);
         await _repository.SaveChangesAsync();
 
-        return new NewQuizId(newQuiz.Id);
+        return new LatestQuizId(quiz.Id);
     }
 }

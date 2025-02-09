@@ -8,32 +8,43 @@ using QuizAI.Domain.Repositories;
 
 namespace QuizAI.Application.Questions.Commands.DeleteQuestion;
 
-public class DeleteQuestionCommandHandler : IRequestHandler<DeleteQuestionCommand, NewQuizId>
+public class DeleteQuestionCommandHandler : IRequestHandler<DeleteQuestionCommand, LatestQuizId>
 {
     private readonly IRepository _repository;
     private readonly IQuizService _quizService;
     private readonly IQuestionService _questionService;
+    private readonly IImageService _imageService;
 
-    public DeleteQuestionCommandHandler(IRepository repository, IQuizService quizService, IQuestionService questionService)
+    public DeleteQuestionCommandHandler(IRepository repository, IQuizService quizService, IQuestionService questionService, IImageService imageService)
     {
         _repository = repository;
         _quizService = quizService;
         _questionService = questionService;
+        _imageService = imageService;
     }
 
-    public async Task<NewQuizId> Handle(DeleteQuestionCommand request, CancellationToken cancellationToken)
+    public async Task<LatestQuizId> Handle(DeleteQuestionCommand request, CancellationToken cancellationToken)
     {
-        var newQuiz = await _quizService.GetNewWithCopiedQuestionsAndDeprecateOldAsync(request.QuizId, request.QuestionId);
+        var (quiz, createdNewQuiz) = await _quizService.GetValidOrDeprecateAndCreateWithQuestionsAsync(request.QuizId, request.QuestionId);
 
-        newQuiz.QuestionCount -= 1;
+        quiz.QuestionCount -= 1;
 
-        _questionService.RemoveAndAdjustOrder(newQuiz, request.QuestionId);
+        var questionToDelete = quiz.Questions.First(qn => qn.Id == request.QuestionId);
+        _questionService.RemoveAndAdjustOrder(quiz, questionToDelete);
 
-        _questionService.ResetIds(newQuiz.Questions);
+        if (createdNewQuiz)
+        {    
+            _questionService.ResetIds(quiz.Questions);
+            await _repository.AddAsync(quiz);
+        }
+        else
+        {
+            if (questionToDelete.ImageId != null)
+                await _imageService.DeleteIfNotAssignedAsync((Guid)questionToDelete.ImageId, null, request.QuestionId);
+        }
 
-        await _repository.AddAsync(newQuiz);
         await _repository.SaveChangesAsync();
 
-        return new NewQuizId(newQuiz.Id);
+        return new LatestQuizId(quiz.Id);
     }
 }

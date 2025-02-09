@@ -10,7 +10,7 @@ using QuizAI.Domain.Repositories;
 
 namespace QuizAI.Application.MultipleChoiceQuestions.Commands.UpdateMultipleChoiceQuestion;
 
-public class UpdateMultipleChoiceQuestionCommandHandler : IRequestHandler<UpdateMultipleChoiceQuestionCommand, NewQuizId>
+public class UpdateMultipleChoiceQuestionCommandHandler : IRequestHandler<UpdateMultipleChoiceQuestionCommand, LatestQuizId>
 {
     private readonly IMapper _mapper;
     private readonly IRepository _repository;
@@ -24,24 +24,32 @@ public class UpdateMultipleChoiceQuestionCommandHandler : IRequestHandler<Update
         _quizService = quizService;
         _questionService = questionService;
     }
-    public async Task<NewQuizId> Handle(UpdateMultipleChoiceQuestionCommand request, CancellationToken cancellationToken)
+    public async Task<LatestQuizId> Handle(UpdateMultipleChoiceQuestionCommand request, CancellationToken cancellationToken)
     {
-        var newQuiz = await _quizService.GetNewWithCopiedQuestionsAndDeprecateOldAsync(request.GetQuizId(), request.GetQuestionId());
+        var (quiz, createdNewQuiz) = await _quizService.GetValidOrDeprecateAndCreateWithQuestionsAsync(request.GetQuizId(), request.GetQuestionId());
 
-        var questionToUpdate = newQuiz.Questions.First(qn => qn.Id == request.GetQuestionId());
+        var questionToUpdate = quiz.Questions.First(qn => qn.Id == request.GetQuestionId());
 
         if (questionToUpdate.Content != request.Content)
             questionToUpdate.Content = request.Content;
 
         var newAnswers = _mapper.Map<ICollection<MultipleChoiceAnswer>>(request.Answers);
 
-        questionToUpdate.MultipleChoiceAnswers = newAnswers;
+        if (createdNewQuiz)
+        {
+            questionToUpdate.MultipleChoiceAnswers = newAnswers;
 
-        _questionService.ResetIds(newQuiz.Questions);
+            _questionService.ResetIds(quiz.Questions);
+            await _repository.AddAsync(quiz);
+        }
+        else
+        {
+            _questionService.RemoveUnusedMultipleChoiceAnswers(questionToUpdate, request.Answers);
+            await _questionService.UpdateOrAddNewAnswersAsync(questionToUpdate, newAnswers);
+        }
 
-        await _repository.AddAsync(newQuiz);
         await _repository.SaveChangesAsync();
 
-        return new NewQuizId(newQuiz.Id);
+        return new LatestQuizId(quiz.Id);
     }
 }

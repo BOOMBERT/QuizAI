@@ -3,7 +3,7 @@ using QuizAI.Application.Common;
 
 namespace QuizAI.Application.TrueFalseQuestions.Commands.CreateTrueFalseQuestion;
 
-public class CreateTrueFalseQuestionCommand : IRequest<NewQuizId>
+public class CreateTrueFalseQuestionCommand : IRequest<LatestQuizId>
 {
     private Guid QuizId { get; set; }
     public string Content { get; set; } = string.Empty;

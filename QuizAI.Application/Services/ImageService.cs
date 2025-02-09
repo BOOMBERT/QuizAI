@@ -89,12 +89,13 @@ public class ImageService : IImageService
         return newUploadedImage;
     }
 
-    public async Task DeleteIfNotAssignedAsync(Guid imageId)
+    public async Task DeleteIfNotAssignedAsync(Guid imageId, Guid? quizIdToSkip = null, int? questionIdToSkip = null)
     {
         var imageExtension = await _repository.GetFieldAsync<Image, string>(imageId, "FileExtension") ?? 
             throw new NotFoundException($"Image with ID {imageId} was not found");
 
-        if (!await _imagesRepository.IsAssignedToAnyQuizAsync(imageId) && !await _imagesRepository.IsAssignedToAnyQuestionAsync(imageId))
+        if (!await _imagesRepository.IsAssignedToAnyQuizAsync(imageId, quizIdToSkip) && 
+            !await _imagesRepository.IsAssignedToAnyQuestionAsync(imageId, questionIdToSkip))
         {
             await _repository.DeleteAsync<Image>(imageId);
             _fileStorageService.Delete(imageId, imageExtension);

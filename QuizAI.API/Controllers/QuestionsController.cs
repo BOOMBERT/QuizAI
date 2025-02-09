@@ -25,7 +25,7 @@ namespace QuizAI.API.Controllers
             _mediator = mediator;
         }
 
-        [HttpGet("all")]
+        [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesErrorResponseType(typeof(ErrorResponse))]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -36,7 +36,7 @@ namespace QuizAI.API.Controllers
             return Ok(questions);
         }
 
-        [HttpGet]
+        [HttpGet("next")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesErrorResponseType(typeof(ErrorResponse))]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -53,7 +53,7 @@ namespace QuizAI.API.Controllers
         [ProducesResponseType(StatusCodes.Status409Conflict)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<ActionResult<QuestionDto>> GetQuestionByOrder(Guid QuizId, int orderNumber)
+        public async Task<ActionResult<QuestionWithAnswerDto>> GetQuestionByOrder(Guid QuizId, int orderNumber)
         {
             var question = await _mediator.Send(new GetQuestionByOrderQuery(QuizId, orderNumber));
             return Ok(question);
@@ -78,7 +78,7 @@ namespace QuizAI.API.Controllers
         [ProducesErrorResponseType(typeof(ErrorResponse))]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<ActionResult<NewQuizId>> DeleteQuestion([FromRoute] DeleteQuestionCommand command)
+        public async Task<ActionResult<LatestQuizId>> DeleteQuestion([FromRoute] DeleteQuestionCommand command)
         {
             var newQuizId = await _mediator.Send(command);
             return Ok(newQuizId);

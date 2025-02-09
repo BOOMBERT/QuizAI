@@ -4,7 +4,7 @@ using QuizAI.Application.MultipleChoiceQuestions.Dtos;
 
 namespace QuizAI.Application.MultipleChoiceQuestions.Commands.UpdateMultipleChoiceQuestion;
 
-public class UpdateMultipleChoiceQuestionCommand : IRequest<NewQuizId>
+public class UpdateMultipleChoiceQuestionCommand : IRequest<LatestQuizId>
 {
     private Guid QuizId { get; set; }
     private int QuestionId { get; set; }

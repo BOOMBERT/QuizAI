@@ -9,7 +9,7 @@ using QuizAI.Domain.Repositories;
 
 namespace QuizAI.Application.TrueFalseQuestions.Commands.UpdateTrueFalseQuestion;
 
-public class UpdateTrueFalseQuestionCommandHandler : IRequestHandler<UpdateTrueFalseQuestionCommand, NewQuizId>
+public class UpdateTrueFalseQuestionCommandHandler : IRequestHandler<UpdateTrueFalseQuestionCommand, LatestQuizId>
 {
     private readonly IRepository _repository;
     private readonly IQuizService _quizService;
@@ -22,11 +22,11 @@ public class UpdateTrueFalseQuestionCommandHandler : IRequestHandler<UpdateTrueF
         _questionService = questionService;
     }
 
-    public async Task<NewQuizId> Handle(UpdateTrueFalseQuestionCommand request, CancellationToken cancellationToken)
+    public async Task<LatestQuizId> Handle(UpdateTrueFalseQuestionCommand request, CancellationToken cancellationToken)
     {
-        var newQuiz = await _quizService.GetNewWithCopiedQuestionsAndDeprecateOldAsync(request.GetQuizId(), request.GetQuestionId());
+        var (quiz, createdNewQuiz) = await _quizService.GetValidOrDeprecateAndCreateWithQuestionsAsync(request.GetQuizId(), request.GetQuestionId());
         
-        var questionToUpdate = newQuiz.Questions.First(qn => qn.Id == request.GetQuestionId());
+        var questionToUpdate = quiz.Questions.First(qn => qn.Id == request.GetQuestionId());
 
         if (questionToUpdate.Content != request.Content)
             questionToUpdate.Content = request.Content;
@@ -36,11 +36,14 @@ public class UpdateTrueFalseQuestionCommandHandler : IRequestHandler<UpdateTrueF
         if (answerOfQuestionToUpdate.IsCorrect != request.IsCorrect)
             answerOfQuestionToUpdate.IsCorrect = request.IsCorrect;
 
-        _questionService.ResetIds(newQuiz.Questions);
+        if (createdNewQuiz)
+        {
+            _questionService.ResetIds(quiz.Questions);
+            await _repository.AddAsync(quiz);
+        }
 
-        await _repository.AddAsync(newQuiz);
         await _repository.SaveChangesAsync();
 
-        return new NewQuizId(newQuiz.Id);
+        return new LatestQuizId(quiz.Id);
     }
 }
