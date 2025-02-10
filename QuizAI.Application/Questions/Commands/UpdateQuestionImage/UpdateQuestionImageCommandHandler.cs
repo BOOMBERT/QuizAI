@@ -25,12 +25,11 @@ public class UpdateQuestionImageCommandHandler : IRequestHandler<UpdateQuestionI
 
     public async Task<LatestQuizId> Handle(UpdateQuestionImageCommand request, CancellationToken cancellationToken)
     {
-        var (quizId, questionId) = (request.GetQuizId(), request.GetQuestionId());
-        var (quiz, createdNewQuiz) = await _quizService.GetValidOrDeprecateAndCreateWithQuestionsAsync(quizId, questionId);
+        var (quiz, createdNewQuiz) = await _quizService.GetValidOrDeprecateAndCreateWithQuestionsAsync(request.GetQuizId(), request.GetQuestionId());
 
         var newImage = await _imageService.UploadAsync(request.Image);
 
-        var question = quiz.Questions.First(qn => qn.Id == questionId);
+        var question = quiz.Questions.First(qn => qn.Id == request.GetQuestionId());
         var previousImageId = question.ImageId;
 
         question.ImageId = newImage.Id;

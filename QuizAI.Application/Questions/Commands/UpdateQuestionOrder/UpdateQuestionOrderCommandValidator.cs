@@ -7,7 +7,7 @@ public class UpdateQuestionOrderCommandValidator : AbstractValidator<UpdateQuest
     public UpdateQuestionOrderCommandValidator()
     {
         RuleFor(uqo => uqo.OrderChanges)
-            .Must(orderChanges => orderChanges.All(oc => oc.NewOrder >= 1 && oc.NewOrder <= 20)).WithMessage("Each order number must be between 1 and 20, inclusive.")
+            .Must(orderChanges => orderChanges.Min(oc => oc.NewOrder) >= 1).WithMessage("Each order number must be at least 1")
             .Must(orderChanges =>
             {
                 var newOrders = orderChanges.Select(oc => oc.NewOrder).ToList();
@@ -17,7 +17,7 @@ public class UpdateQuestionOrderCommandValidator : AbstractValidator<UpdateQuest
 
                 return minOrder == 1 && maxOrder == count && newOrders.Distinct().Count() == count;
             })
-            .WithMessage("New orders must form a continuous sequence without gaps or duplicates.")
-            .Must(orderChanges => orderChanges.Select(oc => oc.QuestionId).Distinct().Count() == orderChanges.Count).WithMessage("Question IDs must be unique.");
+            .WithMessage("New orders must form a continuous sequence without gaps or duplicates")
+            .Must(orderChanges => orderChanges.Select(oc => oc.QuestionId).Distinct().Count() == orderChanges.Count).WithMessage("Question IDs must be unique");
     }
 }

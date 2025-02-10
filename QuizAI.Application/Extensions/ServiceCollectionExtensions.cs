@@ -48,9 +48,8 @@ public static class ServiceCollectionExtensions
         {
             var mapper = provider.GetRequiredService<IMapper>();
             var repository = provider.GetRequiredService<IRepository>();
-            var questionsRepository = provider.GetRequiredService<IQuestionsRepository>();
             byte maxNumberOfQuestions = 20;
-            return new QuestionService(mapper, repository, questionsRepository, maxNumberOfQuestions);
+            return new QuestionService(mapper, repository, maxNumberOfQuestions);
         });
 
         services.AddScoped<IQuizService, QuizService>();

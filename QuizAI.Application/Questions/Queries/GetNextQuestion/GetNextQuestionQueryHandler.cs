@@ -13,16 +13,13 @@ namespace QuizAI.Application.Questions.Queries.GetNextQuestion;
 
 public class GetNextQuestionQueryHandler : IRequestHandler<GetNextQuestionQuery, QuestionDto>
 {
-    private readonly IMapper _mapper;
     private readonly IRepository _repository;
     private readonly IUserContext _userContext;
     private readonly IQuizzesRepository _quizzesRepository;
     private readonly IQuestionsRepository _questionsRepository;
 
-    public GetNextQuestionQueryHandler(
-        IMapper mapper, IRepository repository, IUserContext userContext, IQuizzesRepository quizzesRepository, IQuestionsRepository questionsRepository)
+    public GetNextQuestionQueryHandler(IRepository repository, IUserContext userContext, IQuizzesRepository quizzesRepository, IQuestionsRepository questionsRepository)
     {
-        _mapper = mapper;
         _repository = repository;
         _userContext = userContext;
         _quizzesRepository = quizzesRepository;

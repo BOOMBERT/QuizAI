@@ -54,7 +54,7 @@ public class QuestionService : IQuestionService
     {
         if (questionCount >= _maxNumberOfQuestions)
             throw new ConflictException(
-                $"Cannot add a new question as it would exceed the maximum limit of {_maxNumberOfQuestions}."
+                $"A question with order number {questionCount} cannot exist as it exceeds the maximum limit of {_maxNumberOfQuestions}"
             );
     }
 
@@ -76,7 +76,7 @@ public class QuestionService : IQuestionService
         {
             if (!questionsById.ContainsKey(orderChange.QuestionId))
             {
-                throw new NotFoundException($"Question with ID {orderChange.QuestionId} was not found in quiz with ID {quiz.Id}.");
+                throw new NotFoundException($"Question with ID {orderChange.QuestionId} was not found in quiz with ID {quiz.Id}");
             }
 
             var question = questionsById[orderChange.QuestionId];

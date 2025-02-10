@@ -26,7 +26,7 @@ public class DeleteQuizImageCommandHandler : IRequestHandler<DeleteQuizImageComm
     {
         var (quiz, createdNewQuiz) = await _quizService.GetValidOrDeprecateAndCreateAsync(request.GetId());
 
-        var imageId = quiz.ImageId ?? throw new NotFoundException($"Quiz with ID {request.GetId()} has no associated image.");
+        var imageId = quiz.ImageId ?? throw new NotFoundException($"Quiz with ID {request.GetId()} has no associated image");
         quiz.ImageId = null;
 
         if (!createdNewQuiz)

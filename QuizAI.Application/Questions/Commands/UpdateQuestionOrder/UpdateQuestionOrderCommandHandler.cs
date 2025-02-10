@@ -22,6 +22,8 @@ public class UpdateQuestionOrderCommandHandler : IRequestHandler<UpdateQuestionO
 
     public async Task Handle(UpdateQuestionOrderCommand request, CancellationToken cancellationToken)
     {
+        _questionService.ValidateQuestionLimit(request.OrderChanges.Max(oc => oc.NewOrder));
+
         var (quiz, createdNewQuiz) = await _quizService.GetValidOrDeprecateAndCreateWithQuestionsAsync(request.GetQuizId());
 
         if (quiz.QuestionCount == 0)
@@ -32,8 +34,7 @@ public class UpdateQuestionOrderCommandHandler : IRequestHandler<UpdateQuestionO
 
         _questionService.ChangeOrders(quiz, request.OrderChanges);
 
-        if (createdNewQuiz)
-            await _repository.AddAsync(quiz);
+        if (createdNewQuiz) await _repository.AddAsync(quiz);
 
         await _repository.SaveChangesAsync();
     }

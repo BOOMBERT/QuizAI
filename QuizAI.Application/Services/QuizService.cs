@@ -10,14 +10,12 @@ namespace QuizAI.Application.Services;
 public class QuizService : IQuizService
 {
     private readonly IMapper _mapper;
-    private readonly IRepository _repository;
     private readonly IQuizzesRepository _quizzesRepository;
     private readonly ICategoryService _categoryService;
 
-    public QuizService(IMapper mapper, IRepository repository, IQuizzesRepository quizzesRepository, ICategoryService categoryService)
+    public QuizService(IMapper mapper, IQuizzesRepository quizzesRepository, ICategoryService categoryService)
     {
         _mapper = mapper;
-        _repository = repository;
         _quizzesRepository = quizzesRepository;
         _categoryService = categoryService;
     }
@@ -49,7 +47,7 @@ public class QuizService : IQuizService
             throw new NotFoundException($"Quiz with ID {currentQuizId} was not found");
 
         if (questionId != null && !currentQuiz.Questions.Any(qn => qn.Id == questionId))
-            throw new NotFoundException($"Question with ID {questionId} in quiz with ID {currentQuizId} was not found.");
+            throw new NotFoundException($"Question with ID {questionId} in quiz with ID {currentQuizId} was not found");
 
         if (!await _quizzesRepository.HasAnyAttemptsAsync(currentQuiz.Id))
             return (currentQuiz, false);

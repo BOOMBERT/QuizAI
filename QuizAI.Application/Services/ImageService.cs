@@ -44,18 +44,18 @@ public class ImageService : IImageService
         if (questionId == null)
         {
             imageNameAsGuid = await _repository.GetFieldAsync<Quiz, Guid?>(quizId, "ImageId")
-                ?? throw new NotFoundException($"Quiz with ID {quizId} has no associated image.");
+                ?? throw new NotFoundException($"Quiz with ID {quizId} has no associated image");
         }
         else
         {
             imageNameAsGuid = await _questionsRepository.GetImageIdAsync(quizId, (int)questionId) 
-                ?? throw new NotFoundException($"Question with ID {questionId} in quiz with ID {quizId} has no associated image.");
+                ?? throw new NotFoundException($"Question with ID {questionId} in quiz with ID {quizId} has no associated image");
 
             questionErrorMessageContext = $"question with ID {questionId} in ";
         }
 
         var imageExtension = await _repository.GetFieldAsync<Image, string>(imageNameAsGuid, "FileExtension")
-            ?? throw new NotFoundException($"Image for {questionErrorMessageContext}quiz with ID {quizId} could not be found.");
+            ?? throw new NotFoundException($"Image for {questionErrorMessageContext}quiz with ID {quizId} could not be found");
 
         var imageData = await _fileStorageService.RetrieveAsync(imageNameAsGuid, imageExtension);
 

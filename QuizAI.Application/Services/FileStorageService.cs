@@ -48,7 +48,7 @@ public class FileStorageService : IFileStorageService
         var filePath = Path.Combine(_storagePath, fullFilename);
 
         if (!File.Exists(filePath))
-            throw new NotFoundException($"The file {fullFilename} could not be found.");
+            throw new NotFoundException($"The file {fullFilename} could not be found");
 
         return filePath;
     }

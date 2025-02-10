@@ -12,7 +12,7 @@ public class CreateOpenEndedQuestionCommandValidator : AbstractValidator<CreateO
 
         RuleFor(oeq => oeq.VerificationByAI)
             .NotEqual(false)
-            .WithMessage("Verification by AI must be enabled when answers are empty.")
+            .WithMessage("Verification by AI must be enabled when answers are empty")
             .When(oeq => oeq.Answers.Count == 0);
 
         RuleFor(oeq => oeq.Answers)
