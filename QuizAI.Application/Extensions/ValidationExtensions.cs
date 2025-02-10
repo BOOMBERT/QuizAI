@@ -43,7 +43,7 @@ internal static class ValidationExtensions
             .Must(a => a.Count >= 2).WithMessage("At least two answers are required")
             .Must(a => a.Count <= 8).WithMessage("You can specify up to 8 answers")
             .Must(a => a.Select(a => a.Content.Trim().ToLower()).ToHashSet().Count == a.Count).WithMessage("Answers must be unique")
-            .Must(a => a.All(a => !string.IsNullOrEmpty(a.Content))).WithMessage("Answer cannot be empty or whitespace")
+            .Must(a => a.All(a => !string.IsNullOrWhiteSpace(a.Content))).WithMessage("Answer cannot be empty or whitespace")
             .Must(a => a.All(a => a.Content.Length <= 255)).WithMessage("Each answer content must not exceed 255 characters");
     }
 
@@ -52,7 +52,7 @@ internal static class ValidationExtensions
         return ruleBuilder
             .Must(a => a.Count <= 5).WithMessage("You can specify up to 5 answers")
             .Must(a => a.ToHashSet().Count == a.Count).WithMessage("Answers must be unique")
-            .Must(a => a.All(a => !string.IsNullOrEmpty(a))).WithMessage("Answer cannot be empty or whitespace")
+            .Must(a => a.All(a => !string.IsNullOrWhiteSpace(a))).WithMessage("Answer cannot be empty or whitespace")
             .Must(a => a.Sum(a => a.Length) <= 1275).WithMessage("The total length of all answers must not exceed 1275 characters");
     }
 

@@ -14,40 +14,12 @@ namespace QuizAI.Application.Services;
 public class QuestionService : IQuestionService
 {
     private readonly IMapper _mapper;
-    private readonly IRepository _repository;
     private readonly byte _maxNumberOfQuestions;
 
-    public QuestionService(IMapper mapper, IRepository repository, byte maxNumberOfQuestions)
+    public QuestionService(IMapper mapper, byte maxNumberOfQuestions)
     {
         _mapper = mapper;
-        _repository = repository;
         _maxNumberOfQuestions = maxNumberOfQuestions;
-    }
-
-    public void RemoveUnusedMultipleChoiceAnswers(Question question, ICollection<CreateMultipleChoiceAnswerDto> requestedNewAnswers)
-    {
-        var answersToRemove = question.MultipleChoiceAnswers
-            .Where(mca => !requestedNewAnswers.Any(na => na.Content == mca.Content));
-
-        _repository.RemoveRange(answersToRemove);
-    }
-
-    public async Task UpdateOrAddNewAnswersAsync(Question question, ICollection<MultipleChoiceAnswer> newAnswers)
-    {
-        foreach (var newAnswer in newAnswers)
-        {
-            var existingAnswer = question.MultipleChoiceAnswers.FirstOrDefault(mca => mca.Content == newAnswer.Content);
-            if (existingAnswer != null)
-            {
-                if (existingAnswer.IsCorrect != newAnswer.IsCorrect)
-                    existingAnswer.IsCorrect = newAnswer.IsCorrect;
-            }
-            else
-            {
-                newAnswer.Question = question;
-                await _repository.AddAsync(newAnswer);
-            }
-        }
     }
 
     public void ValidateQuestionLimit(int questionCount)

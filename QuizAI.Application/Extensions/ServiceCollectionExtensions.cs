@@ -47,11 +47,11 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IQuestionService, QuestionService>(provider =>
         {
             var mapper = provider.GetRequiredService<IMapper>();
-            var repository = provider.GetRequiredService<IRepository>();
             byte maxNumberOfQuestions = 20;
-            return new QuestionService(mapper, repository, maxNumberOfQuestions);
+            return new QuestionService(mapper, maxNumberOfQuestions);
         });
 
         services.AddScoped<IQuizService, QuizService>();
+        services.AddScoped<IAnswerService, AnswerService>();
     }
 }

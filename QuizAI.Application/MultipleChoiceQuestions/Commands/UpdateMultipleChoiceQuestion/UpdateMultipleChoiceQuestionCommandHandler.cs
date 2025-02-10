@@ -16,13 +16,16 @@ public class UpdateMultipleChoiceQuestionCommandHandler : IRequestHandler<Update
     private readonly IRepository _repository;
     private readonly IQuizService _quizService;
     private readonly IQuestionService _questionService;
+    private readonly IAnswerService _answerService;
 
-    public UpdateMultipleChoiceQuestionCommandHandler(IMapper mapper, IRepository repository, IQuizService quizService, IQuestionService questionService)
+    public UpdateMultipleChoiceQuestionCommandHandler(
+        IMapper mapper, IRepository repository, IQuizService quizService, IQuestionService questionService, IAnswerService answerService)
     {
         _mapper = mapper;
         _repository = repository;
         _quizService = quizService;
         _questionService = questionService;
+        _answerService = answerService;
     }
     public async Task<LatestQuizId> Handle(UpdateMultipleChoiceQuestionCommand request, CancellationToken cancellationToken)
     {
@@ -44,8 +47,8 @@ public class UpdateMultipleChoiceQuestionCommandHandler : IRequestHandler<Update
         }
         else
         {
-            _questionService.RemoveUnusedMultipleChoiceAnswers(questionToUpdate, request.Answers);
-            await _questionService.UpdateOrAddNewAnswersAsync(questionToUpdate, newAnswers);
+            _answerService.RemoveUnusedMultipleChoiceAnswers(questionToUpdate, request.Answers);
+            await _answerService.UpdateOrAddNewAnswersAsync(questionToUpdate, newAnswers);
         }
 
         await _repository.SaveChangesAsync();

@@ -14,6 +14,7 @@ public interface IQuizzesRepository
         SortDirection? sortDirection,
         ICollection<string> FilterCategories);
     Task<QuizAttempt?> GetUnfinishedAttemptAsync(Guid quizId, string userId);
+    Task<int?> GetQuestionCountAsync(Guid quizId);
     Task<bool> HasAnyAttemptsAsync(Guid quizId);
     Task UpdateLatestVersionIdAsync(Guid oldLatestVersionId, Guid? newLatestVersionId);
 }

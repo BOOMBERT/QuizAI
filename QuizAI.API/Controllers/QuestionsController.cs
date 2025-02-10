@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using QuizAI.Application.Common;
+using QuizAI.Application.Questions.Commands.AnswerCurrentQuestion;
 using QuizAI.Application.Questions.Commands.DeleteQuestion;
 using QuizAI.Application.Questions.Commands.UpdateQuestionOrder;
 using QuizAI.Application.Questions.Dtos;
@@ -57,6 +58,20 @@ namespace QuizAI.API.Controllers
         {
             var question = await _mediator.Send(new GetQuestionByOrderQuery(QuizId, orderNumber));
             return Ok(question);
+        }
+
+        [HttpPost("answer")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesErrorResponseType(typeof(ErrorResponse))]
+        [ProducesResponseType(StatusCodes.Status409Conflict)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> AnswerCurrentQuestion(Guid QuizId, AnswerCurrentQuestionCommand command)
+        {
+            command.SetQuizId(QuizId);
+
+            await _mediator.Send(command);
+            return NoContent();
         }
 
         [HttpPatch("order")]

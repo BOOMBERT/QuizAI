@@ -6,8 +6,6 @@ namespace QuizAI.Application.Interfaces;
 
 public interface IQuestionService
 {
-    public void RemoveUnusedMultipleChoiceAnswers(Question question, ICollection<CreateMultipleChoiceAnswerDto> requestedNewAnswers);
-    Task UpdateOrAddNewAnswersAsync(Question question, ICollection<MultipleChoiceAnswer> newAnswers);
     void ValidateQuestionLimit(int questionCount);
     void RemoveAndAdjustOrder(Quiz quiz, Question questionToDelete);
     void ChangeOrders(Quiz quiz, ICollection<UpdateQuestionOrderDto> orderChanges);

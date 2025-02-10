@@ -102,6 +102,14 @@ public class QuizzesRepository : IQuizzesRepository
             .FirstOrDefaultAsync();
     }
 
+    public async Task<int?> GetQuestionCountAsync(Guid quizId)
+    {
+        return await _context.Quizzes
+            .Where(qz => qz.Id == quizId)
+            .Select(qz => (int?)qz.QuestionCount)
+            .FirstOrDefaultAsync();
+    }
+
     public async Task<bool> HasAnyAttemptsAsync(Guid quizId)
     {
         return await _context.QuizAttempts
