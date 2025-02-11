@@ -11,32 +11,38 @@ using QuizAI.Domain.Repositories;
 
 namespace QuizAI.Application.Questions.Queries.GetNextQuestion;
 
-public class GetNextQuestionQueryHandler : IRequestHandler<GetNextQuestionQuery, QuestionDto>
+public class GetNextQuestionQueryHandler : IRequestHandler<GetNextQuestionQuery, NextQuestionDto>
 {
     private readonly IRepository _repository;
     private readonly IUserContext _userContext;
     private readonly IQuizzesRepository _quizzesRepository;
     private readonly IQuestionsRepository _questionsRepository;
+    private readonly IAnswersRepository _answersRepository;
+    private readonly IQuizAttemptsRepository _quizAttemptsRepository;
 
-    public GetNextQuestionQueryHandler(IRepository repository, IUserContext userContext, IQuizzesRepository quizzesRepository, IQuestionsRepository questionsRepository)
+    public GetNextQuestionQueryHandler(
+        IRepository repository, IUserContext userContext, 
+        IQuizzesRepository quizzesRepository, IQuestionsRepository questionsRepository, IAnswersRepository answersRepository, IQuizAttemptsRepository quizAttemptsRepository)
     {
         _repository = repository;
         _userContext = userContext;
         _quizzesRepository = quizzesRepository;
         _questionsRepository = questionsRepository;
+        _answersRepository = answersRepository;
+        _quizAttemptsRepository = quizAttemptsRepository;
     }
 
-    public async Task<QuestionDto> Handle(GetNextQuestionQuery request, CancellationToken cancellationToken)
+    public async Task<NextQuestionDto> Handle(GetNextQuestionQuery request, CancellationToken cancellationToken)
     {
         var currentUser = _userContext.GetCurrentUser();
 
-        var quiz = await _quizzesRepository.GetAsync(request.QuizId) ?? 
+        var quiz = await _quizzesRepository.GetAsync(request.QuizId, false, false, false) ?? 
             throw new NotFoundException($"Quiz with ID {request.QuizId} was not found");
 
         if (quiz.QuestionCount == 0)
             throw new NotFoundException($"No questions found for quiz with ID {request.QuizId}");
         
-        var unfinishedQuizAttempt = await _quizzesRepository.GetUnfinishedAttemptAsync(request.QuizId, currentUser.Id);
+        var unfinishedQuizAttempt = await _quizAttemptsRepository.GetUnfinishedAsync(request.QuizId, currentUser.Id);
 
         int currentOrder = 1;
 
@@ -61,14 +67,16 @@ public class GetNextQuestionQueryHandler : IRequestHandler<GetNextQuestionQuery,
 
         var question = await _questionsRepository.GetByOrderAsync(request.QuizId, currentOrder);
 
-        return new QuestionDto(
+        return new NextQuestionDto(
             question!.Id,
             question.Content,
             question.Type,
+            currentOrder,
             question.ImageId != null,
             question.Type == QuestionType.MultipleChoice 
-                ? await _questionsRepository.GetMultipleChoiceAnswersContentAsync(question.Id)
-                : Enumerable.Empty<string>()
+                ? await _answersRepository.GetMultipleChoiceAnswersContentAsync(question.Id)
+                : Enumerable.Empty<string>(),
+            quiz.QuestionCount
             );
     }
 }

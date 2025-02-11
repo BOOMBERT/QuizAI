@@ -19,7 +19,7 @@ public class GetQuizByIdQueryHandler : IRequestHandler<GetQuizByIdQuery, QuizDto
 
     public async Task<QuizDto> Handle(GetQuizByIdQuery request, CancellationToken cancellationToken)
     {
-        var quiz = await _quizzesRepository.GetAsync(request.QuizId, true) 
+        var quiz = await _quizzesRepository.GetAsync(request.QuizId, true, false, false) 
             ?? throw new NotFoundException($"Quiz with ID {request.QuizId} was not found");
 
         return _mapper.Map<QuizDto>(quiz);

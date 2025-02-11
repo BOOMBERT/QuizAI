@@ -5,7 +5,7 @@ namespace QuizAI.Domain.Repositories;
 
 public interface IQuizzesRepository
 {
-    Task<Quiz?> GetAsync(Guid quizId, bool includeCategories = false, bool includeQuestionsWithAnswers = false);
+    Task<Quiz?> GetAsync(Guid quizId, bool includeCategories = false, bool includeQuestionsWithAnswers = false, bool trackChanges = true);
     Task<(IEnumerable<Quiz>, int)> GetAllMatchingAsync(
         string? searchPhrase,
         int pageSize,
@@ -13,8 +13,6 @@ public interface IQuizzesRepository
         string? sortBy,
         SortDirection? sortDirection,
         ICollection<string> FilterCategories);
-    Task<QuizAttempt?> GetUnfinishedAttemptAsync(Guid quizId, string userId);
     Task<int?> GetQuestionCountAsync(Guid quizId);
-    Task<bool> HasAnyAttemptsAsync(Guid quizId);
     Task UpdateLatestVersionIdAsync(Guid oldLatestVersionId, Guid? newLatestVersionId);
 }

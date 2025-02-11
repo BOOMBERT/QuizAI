@@ -11,13 +11,16 @@ public class DeleteQuizCommandHandler : IRequestHandler<DeleteQuizCommand>
 {
     private readonly IRepository _repository;
     private readonly IQuizzesRepository _quizzesRepository;
+    private readonly IQuizAttemptsRepository _quizAttemptsRepository;
     private readonly ICategoryService _categoryService;
     private readonly IImageService _imageService;
 
-    public DeleteQuizCommandHandler(IRepository repository, IQuizzesRepository quizzesRepository, ICategoryService categoryService, IImageService imageService)
+    public DeleteQuizCommandHandler(
+        IRepository repository, IQuizzesRepository quizzesRepository, IQuizAttemptsRepository quizAttemptsRepository, ICategoryService categoryService, IImageService imageService)
     {
         _repository = repository;
         _quizzesRepository = quizzesRepository;
+        _quizAttemptsRepository = quizAttemptsRepository;
         _categoryService = categoryService;
         _imageService = imageService;
     }
@@ -31,7 +34,7 @@ public class DeleteQuizCommandHandler : IRequestHandler<DeleteQuizCommand>
 
         await _categoryService.RemoveUnusedAsync(quiz, Enumerable.Empty<string>());
 
-        if (!await _quizzesRepository.HasAnyAttemptsAsync(quiz.Id))
+        if (!await _quizAttemptsRepository.HasAnyAsync(quiz.Id))
         {
             _repository.Remove(quiz);
             await _quizzesRepository.UpdateLatestVersionIdAsync(quiz.Id, null);

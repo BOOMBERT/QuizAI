@@ -82,9 +82,9 @@ public class QuestionService : IQuestionService
         }
     }
 
-    public QuestionWithAnswerDto MapToQuestionWithAnswerDto(Question question)
+    public QuestionWithAnswersDto MapToQuestionWithAnswersDto(Question question)
     {
-        return new QuestionWithAnswerDto(
+        return new QuestionWithAnswersDto(
                question.Id,
                question.Content,
                question.Type,

@@ -3,7 +3,7 @@ using QuizAI.Domain.Enums;
 
 namespace QuizAI.Application.Questions.Dtos;
 
-public record QuestionWithAnswerDto(
+public record QuestionWithAnswersDto(
     int Id, 
     string Content, 
     QuestionType Type, 

@@ -17,9 +17,10 @@ public class QuestionsRepository : IQuestionsRepository
         _context = context;
     }
 
-    public async Task<ICollection<Question>> GetAllAsync(Guid quizId, bool answers = false)
+    public async Task<IEnumerable<Question>> GetAllAsync(Guid quizId, bool answers = false)
     {
         var baseQuery = _context.Questions
+            .AsNoTracking()
             .Where(qn => qn.QuizId == quizId);
 
         if (answers)
@@ -48,14 +49,6 @@ public class QuestionsRepository : IQuestionsRepository
         }
 
         return await baseQuery.FirstOrDefaultAsync();
-    }
-
-    public async Task<IEnumerable<string>> GetMultipleChoiceAnswersContentAsync(int questionId)
-    {
-        return await _context.MultipleChoiceAnswers
-            .Where(mca => mca.QuestionId == questionId)
-            .Select(mca => mca.Content)
-            .ToArrayAsync();
     }
 
     public async Task<Guid?> GetImageIdAsync(Guid quizId, int questionId)

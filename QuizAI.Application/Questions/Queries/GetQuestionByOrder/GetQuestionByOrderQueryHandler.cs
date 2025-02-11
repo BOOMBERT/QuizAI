@@ -10,7 +10,7 @@ using QuizAI.Domain.Repositories;
 
 namespace QuizAI.Application.Questions.Queries.GetQuestionByOrder;
 
-public class GetQuestionByOrderQueryHandler : IRequestHandler<GetQuestionByOrderQuery, QuestionWithAnswerDto>
+public class GetQuestionByOrderQueryHandler : IRequestHandler<GetQuestionByOrderQuery, QuestionWithAnswersDto>
 {
     private readonly IRepository _repository;
     private readonly IQuestionsRepository _questionsRepository;
@@ -23,7 +23,7 @@ public class GetQuestionByOrderQueryHandler : IRequestHandler<GetQuestionByOrder
         _questionService = questionService;
     }
 
-    public async Task<QuestionWithAnswerDto> Handle(GetQuestionByOrderQuery request, CancellationToken cancellationToken)
+    public async Task<QuestionWithAnswersDto> Handle(GetQuestionByOrderQuery request, CancellationToken cancellationToken)
     {
         if (request.Order < 1)
             throw new ConflictException($"Order number {request.Order} is invalid. It must be at least 1");
@@ -36,6 +36,6 @@ public class GetQuestionByOrderQueryHandler : IRequestHandler<GetQuestionByOrder
         var question = await _questionsRepository.GetByOrderAsync(request.QuizId, request.Order, true)
             ?? throw new NotFoundException($"Question with order {request.Order} was not found in quiz with ID {request.QuizId}.");
 
-        return _questionService.MapToQuestionWithAnswerDto(question);
+        return _questionService.MapToQuestionWithAnswersDto(question);
     }
 }

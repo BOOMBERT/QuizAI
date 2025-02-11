@@ -11,12 +11,14 @@ public class QuizService : IQuizService
 {
     private readonly IMapper _mapper;
     private readonly IQuizzesRepository _quizzesRepository;
+    private readonly IQuizAttemptsRepository _quizAttemptsRepository;
     private readonly ICategoryService _categoryService;
 
-    public QuizService(IMapper mapper, IQuizzesRepository quizzesRepository, ICategoryService categoryService)
+    public QuizService(IMapper mapper, IQuizzesRepository quizzesRepository, IQuizAttemptsRepository quizAttemptsRepository, ICategoryService categoryService)
     {
         _mapper = mapper;
         _quizzesRepository = quizzesRepository;
+        _quizAttemptsRepository = quizAttemptsRepository;
         _categoryService = categoryService;
     }
 
@@ -28,7 +30,7 @@ public class QuizService : IQuizService
         if (currentQuiz.IsDeprecated)
             throw new NotFoundException($"Quiz with ID {currentQuizId} was not found");
 
-        if (!await _quizzesRepository.HasAnyAttemptsAsync(currentQuiz.Id))
+        if (!await _quizAttemptsRepository.HasAnyAsync(currentQuiz.Id))
             return (currentQuiz, false);
 
         var newQuiz = _mapper.Map<Quiz>(currentQuiz);
@@ -49,7 +51,7 @@ public class QuizService : IQuizService
         if (questionId != null && !currentQuiz.Questions.Any(qn => qn.Id == questionId))
             throw new NotFoundException($"Question with ID {questionId} in quiz with ID {currentQuizId} was not found");
 
-        if (!await _quizzesRepository.HasAnyAttemptsAsync(currentQuiz.Id))
+        if (!await _quizAttemptsRepository.HasAnyAsync(currentQuiz.Id))
             return (currentQuiz, false);
 
         var newQuiz = new Quiz

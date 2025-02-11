@@ -7,7 +7,7 @@ public class UserAnswer
     public QuizAttempt QuizAttempt { get; set; }
     public int QuestionId { get; set; }
     public Question Question { get; set; }
-    public ICollection<string> AnswerText { get; set; } = new List<string>();
+    public IList<string> AnswerText { get; set; } = new List<string>();
     public bool IsCorrect { get; set; }
     public DateTime AnsweredAt { get; set; }
 }

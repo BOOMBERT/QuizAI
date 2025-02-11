@@ -16,9 +16,11 @@ public class QuizzesRepository : IQuizzesRepository
         _context = context;
     }
 
-    public async Task<Quiz?> GetAsync(Guid quizId, bool includeCategories = false, bool includeQuestionsWithAnswers = false)
+    public async Task<Quiz?> GetAsync(Guid quizId, bool includeCategories = false, bool includeQuestionsWithAnswers = false, bool trackChanges = true)
     {
         var baseQuery = _context.Quizzes.AsQueryable();
+
+        if (!trackChanges) baseQuery = baseQuery.AsNoTracking();
 
         if (includeCategories)
             baseQuery = baseQuery.Include(qz => qz.Categories);
@@ -47,6 +49,7 @@ public class QuizzesRepository : IQuizzesRepository
         )
     {
         var baseQuery = _context.Quizzes
+            .AsNoTracking()
             .Where(qz => qz.IsDeprecated == false)
             .Include(qz => qz.Categories)
             .AsQueryable();
@@ -95,25 +98,12 @@ public class QuizzesRepository : IQuizzesRepository
         return (quizzes, totalCount);
     }
 
-    public async Task<QuizAttempt?> GetUnfinishedAttemptAsync(Guid quizId, string userId)
-    {
-        return await _context.QuizAttempts
-            .Where(qa => qa.QuizId == quizId && qa.UserId == userId && qa.FinishedAt == null)
-            .FirstOrDefaultAsync();
-    }
-
     public async Task<int?> GetQuestionCountAsync(Guid quizId)
     {
         return await _context.Quizzes
             .Where(qz => qz.Id == quizId)
             .Select(qz => (int?)qz.QuestionCount)
             .FirstOrDefaultAsync();
-    }
-
-    public async Task<bool> HasAnyAttemptsAsync(Guid quizId)
-    {
-        return await _context.QuizAttempts
-            .AnyAsync(qa => qa.QuizId == quizId);
     }
 
     public async Task UpdateLatestVersionIdAsync(Guid oldLatestVersionId, Guid? newLatestVersionId)

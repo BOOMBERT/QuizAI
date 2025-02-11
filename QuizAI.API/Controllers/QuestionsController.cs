@@ -31,7 +31,7 @@ namespace QuizAI.API.Controllers
         [ProducesErrorResponseType(typeof(ErrorResponse))]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<ActionResult<IEnumerable<QuestionWithAnswerDto>>> GetAllQuestions(Guid QuizId)
+        public async Task<ActionResult<IEnumerable<QuestionWithAnswersDto>>> GetAllQuestions(Guid QuizId)
         {
             var questions = await _mediator.Send(new GetAllQuestionsQuery(QuizId));
             return Ok(questions);
@@ -42,7 +42,7 @@ namespace QuizAI.API.Controllers
         [ProducesErrorResponseType(typeof(ErrorResponse))]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<ActionResult<QuestionDto>> GetNextQuestion(Guid QuizId)
+        public async Task<ActionResult<NextQuestionDto>> GetNextQuestion(Guid QuizId)
         {
             var question = await _mediator.Send(new GetNextQuestionQuery(QuizId));
             return Ok(question);
@@ -54,7 +54,7 @@ namespace QuizAI.API.Controllers
         [ProducesResponseType(StatusCodes.Status409Conflict)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<ActionResult<QuestionWithAnswerDto>> GetQuestionByOrder(Guid QuizId, int orderNumber)
+        public async Task<ActionResult<QuestionWithAnswersDto>> GetQuestionByOrder(Guid QuizId, int orderNumber)
         {
             var question = await _mediator.Send(new GetQuestionByOrderQuery(QuizId, orderNumber));
             return Ok(question);
