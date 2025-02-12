@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Http;
 using QuizAI.Application.Common;
 
-namespace QuizAI.Application.Quizzes.Commands.UpdateQuizImage;
+namespace QuizAI.Application.QuizImages.Commands.UpdateQuizImage;
 
 public class UpdateQuizImageCommand : IRequest<LatestQuizId>
 {

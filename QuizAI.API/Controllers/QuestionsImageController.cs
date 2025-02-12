@@ -3,10 +3,9 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using QuizAI.Application.Common;
-using QuizAI.Application.Questions.Commands.DeleteQuestionImage;
-using QuizAI.Application.Questions.Commands.UpdateQuestionImage;
-using QuizAI.Application.Questions.Queries.GetQuestionImageById;
-using QuizAI.Application.Quizzes.Commands.DeleteQuizImage;
+using QuizAI.Application.QuestionImages.Commands.DeleteQuestionImage;
+using QuizAI.Application.QuestionImages.Commands.UpdateQuestionImage;
+using QuizAI.Application.QuestionImages.Queries.GetQuestionImageById;
 
 namespace QuizAI.API.Controllers
 {

@@ -6,7 +6,7 @@ using QuizAI.Domain.Entities;
 using QuizAI.Domain.Exceptions;
 using QuizAI.Domain.Repositories;
 
-namespace QuizAI.Application.Questions.Commands.UpdateQuestionImage;
+namespace QuizAI.Application.QuestionImages.Commands.UpdateQuestionImage;
 
 public class UpdateQuestionImageCommandHandler : IRequestHandler<UpdateQuestionImageCommand, LatestQuizId>
 {

@@ -3,9 +3,9 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using QuizAI.Application.Common;
-using QuizAI.Application.Quizzes.Dtos;
-using QuizAI.Application.Quizzes.Queries.GetAttemptById;
-using QuizAI.Application.Quizzes.Queries.GetLatestAttempt;
+using QuizAI.Application.QuizAttempts.Dtos;
+using QuizAI.Application.QuizAttempts.Queries.GetAttemptById;
+using QuizAI.Application.QuizAttempts.Queries.GetLatestAttempt;
 
 namespace QuizAI.API.Controllers
 {

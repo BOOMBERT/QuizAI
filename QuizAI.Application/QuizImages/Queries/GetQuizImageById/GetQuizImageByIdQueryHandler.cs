@@ -1,7 +1,7 @@
 ﻿using MediatR;
 using QuizAI.Application.Interfaces;
 
-namespace QuizAI.Application.Quizzes.Queries.GetQuizImageById;
+namespace QuizAI.Application.QuizImages.Queries.GetQuizImageById;
 
 public class GetQuizImageByIdQueryHandler : IRequestHandler<GetQuizImageByIdQuery, (byte[], string)>
 {

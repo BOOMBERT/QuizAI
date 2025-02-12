@@ -7,7 +7,7 @@ using QuizAI.Domain.Entities;
 using QuizAI.Domain.Exceptions;
 using QuizAI.Domain.Repositories;
 
-namespace QuizAI.Application.Quizzes.Commands.DeleteQuizImage;
+namespace QuizAI.Application.QuizImages.Commands.DeleteQuizImage;
 
 public class DeleteQuizImageCommandHandler : IRequestHandler<DeleteQuizImageCommand, LatestQuizId>
 {

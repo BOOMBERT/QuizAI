@@ -1,4 +1,4 @@
-﻿using QuizAI.Application.Quizzes.Dtos;
+﻿using QuizAI.Application.QuizAttempts.Dtos;
 using QuizAI.Domain.Entities;
 
 namespace QuizAI.Application.Interfaces;

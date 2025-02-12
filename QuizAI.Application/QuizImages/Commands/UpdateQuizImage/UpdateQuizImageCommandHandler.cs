@@ -4,7 +4,7 @@ using QuizAI.Application.Interfaces;
 using QuizAI.Application.Services;
 using QuizAI.Domain.Repositories;
 
-namespace QuizAI.Application.Quizzes.Commands.UpdateQuizImage;
+namespace QuizAI.Application.QuizImages.Commands.UpdateQuizImage;
 
 public class UpdateQuizImageCommandHandler : IRequestHandler<UpdateQuizImageCommand, LatestQuizId>
 {

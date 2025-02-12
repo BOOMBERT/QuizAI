@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Http;
 using QuizAI.Application.Common;
 
-namespace QuizAI.Application.Questions.Commands.DeleteQuestionImage;
+namespace QuizAI.Application.QuestionImages.Commands.DeleteQuestionImage;
 
 public class DeleteQuestionImageCommand : IRequest<LatestQuizId>
 {

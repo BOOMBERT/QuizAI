@@ -1,7 +1,7 @@
 ﻿using FluentValidation;
 using QuizAI.Application.Extensions;
 
-namespace QuizAI.Application.Questions.Commands.UpdateQuestionImage;
+namespace QuizAI.Application.QuestionImages.Commands.UpdateQuestionImage;
 
 public class UpdateQuestionImageCommandValidator : AbstractValidator<UpdateQuestionImageCommand>
 {

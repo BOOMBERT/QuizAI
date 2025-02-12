@@ -1,22 +1,22 @@
 ﻿using MediatR;
 using QuizAI.Application.Interfaces;
 using QuizAI.Application.Questions.Dtos;
-using QuizAI.Application.Quizzes.Dtos;
+using QuizAI.Application.QuizAttempts.Dtos;
 using QuizAI.Application.Services;
 using QuizAI.Application.Users;
 using QuizAI.Domain.Exceptions;
 using QuizAI.Domain.Repositories;
 
-namespace QuizAI.Application.Quizzes.Queries.GetAttemptById;
+namespace QuizAI.Application.QuizAttempts.Queries.GetLatestAttempt;
 
-public class GetAttemptByIdQueryHandler : IRequestHandler<GetAttemptByIdQuery, QuizAttemptWithUserAnsweredQuestionsDto>
+public class GetLatestAttemptQueryHandler : IRequestHandler<GetLatestAttemptQuery, QuizAttemptWithUserAnsweredQuestionsDto>
 {
     private readonly IUserContext _userContext;
     private readonly IQuizzesRepository _quizzesRepository;
     private readonly IQuizAttemptsRepository _quizAttemptsRepository;
     private readonly IQuizAttemptService _quizAttemptService;
 
-    public GetAttemptByIdQueryHandler(
+    public GetLatestAttemptQueryHandler(
         IUserContext userContext, IQuizzesRepository quizzesRepository, IQuizAttemptsRepository quizAttemptsRepository, IQuizAttemptService quizAttemptService)
     {
         _userContext = userContext;
@@ -25,16 +25,16 @@ public class GetAttemptByIdQueryHandler : IRequestHandler<GetAttemptByIdQuery, Q
         _quizAttemptService = quizAttemptService;
     }
 
-    public async Task<QuizAttemptWithUserAnsweredQuestionsDto> Handle(GetAttemptByIdQuery request, CancellationToken cancellationToken)
+    public async Task<QuizAttemptWithUserAnsweredQuestionsDto> Handle(GetLatestAttemptQuery request, CancellationToken cancellationToken)
     {
         var currentUser = _userContext.GetCurrentUser();
 
-        var questionCount = await _quizzesRepository.GetQuestionCountAsync(request.QuizId) 
+        var questionCount = await _quizzesRepository.GetQuestionCountAsync(request.QuizId)
             ?? throw new NotFoundException($"Quiz with ID {request.QuizId} was not found");
 
-        var finishedQuizAttempt = await _quizAttemptsRepository.GetFinishedByIdAsync(request.QuizId, request.QuizAttemptId, currentUser.Id)
-            ?? throw new NotFoundException($"Quiz with ID {request.QuizId} does not have a finished attempt with ID {request.QuizAttemptId} for user with ID {currentUser.Id}");
+        var latestFinishedAttempt = await _quizAttemptsRepository.GetLatestFinishedAsync(request.QuizId, currentUser.Id)
+            ?? throw new NotFoundException($"Quiz with ID {request.QuizId} does not have any finished attempts");
 
-        return await _quizAttemptService.GetWithUserAnsweredQuestionsAsync(finishedQuizAttempt, questionCount);
+        return await _quizAttemptService.GetWithUserAnsweredQuestionsAsync(latestFinishedAttempt, questionCount);
     }
 }

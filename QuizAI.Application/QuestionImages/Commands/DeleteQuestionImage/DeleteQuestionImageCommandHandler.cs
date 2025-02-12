@@ -8,7 +8,7 @@ using QuizAI.Domain.Enums;
 using QuizAI.Domain.Exceptions;
 using QuizAI.Domain.Repositories;
 
-namespace QuizAI.Application.Questions.Commands.DeleteQuestionImage;
+namespace QuizAI.Application.QuestionImages.Commands.DeleteQuestionImage;
 
 public class DeleteQuestionImageCommandHandler : IRequestHandler<DeleteQuestionImageCommand, LatestQuizId>
 {
@@ -30,9 +30,9 @@ public class DeleteQuestionImageCommandHandler : IRequestHandler<DeleteQuestionI
         var (quiz, createdNewQuiz) = await _quizService.GetValidOrDeprecateAndCreateWithQuestionsAsync(request.QuizId, request.QuestionId);
 
         var question = quiz.Questions.First(qn => qn.Id == request.QuestionId);
-        var previousImageId = question.ImageId 
+        var previousImageId = question.ImageId
             ?? throw new NotFoundException($"Question with ID {request.QuestionId} in quiz with ID {request.QuizId} has no associated image.");
-        
+
         question.ImageId = null;
 
         if (createdNewQuiz)

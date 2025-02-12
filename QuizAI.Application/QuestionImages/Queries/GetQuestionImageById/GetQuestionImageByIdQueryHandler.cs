@@ -2,7 +2,7 @@
 using QuizAI.Application.Interfaces;
 using QuizAI.Application.Services;
 
-namespace QuizAI.Application.Questions.Queries.GetQuestionImageById;
+namespace QuizAI.Application.QuestionImages.Queries.GetQuestionImageById;
 
 public class GetQuestionImageByIdQueryHandler : IRequestHandler<GetQuestionImageByIdQuery, (byte[], string)>
 {

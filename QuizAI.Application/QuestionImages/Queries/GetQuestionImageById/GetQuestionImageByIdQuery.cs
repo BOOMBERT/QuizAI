@@ -1,6 +1,6 @@
 ﻿using MediatR;
 
-namespace QuizAI.Application.Questions.Queries.GetQuestionImageById;
+namespace QuizAI.Application.QuestionImages.Queries.GetQuestionImageById;
 
 public class GetQuestionImageByIdQuery(Guid quizId, int questionId) : IRequest<(byte[], string)>
 {

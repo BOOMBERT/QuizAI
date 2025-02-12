@@ -1,6 +1,6 @@
 ﻿using QuizAI.Application.Interfaces;
 using QuizAI.Application.Questions.Dtos;
-using QuizAI.Application.Quizzes.Dtos;
+using QuizAI.Application.QuizAttempts.Dtos;
 using QuizAI.Domain.Entities;
 using QuizAI.Domain.Repositories;
 

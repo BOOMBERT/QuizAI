@@ -1,7 +1,7 @@
 ﻿using MediatR;
-using QuizAI.Application.Quizzes.Dtos;
+using QuizAI.Application.QuizAttempts.Dtos;
 
-namespace QuizAI.Application.Quizzes.Queries.GetAttemptById;
+namespace QuizAI.Application.QuizAttempts.Queries.GetAttemptById;
 
 public class GetAttemptByIdQuery(Guid quizId, Guid quizAttemptId) : IRequest<QuizAttemptWithUserAnsweredQuestionsDto>
 {
