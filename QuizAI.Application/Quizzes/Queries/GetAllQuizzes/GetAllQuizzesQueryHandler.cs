@@ -1,7 +1,9 @@
 ﻿using AutoMapper;
 using MediatR;
 using QuizAI.Application.Common;
+using QuizAI.Application.Interfaces;
 using QuizAI.Application.Quizzes.Dtos;
+using QuizAI.Application.Users;
 using QuizAI.Domain.Repositories;
 
 namespace QuizAI.Application.Quizzes.Queries.GetAllQuizzes;
@@ -9,11 +11,13 @@ namespace QuizAI.Application.Quizzes.Queries.GetAllQuizzes;
 public class GetAllQuizzesQueryHandler : IRequestHandler<GetAllQuizzesQuery, PagedResponse<QuizDto>>
 {
     private readonly IMapper _mapper;
+    private readonly IUserContext _userContext;
     private readonly IQuizzesRepository _quizzesRepository;
 
-    public GetAllQuizzesQueryHandler(IMapper mapper, IQuizzesRepository quizzesRepository)
+    public GetAllQuizzesQueryHandler(IMapper mapper, IUserContext userContext, IQuizzesRepository quizzesRepository)
     {
         _mapper = mapper;
+        _userContext = userContext;
         _quizzesRepository = quizzesRepository;
     }
 
@@ -25,6 +29,7 @@ public class GetAllQuizzesQueryHandler : IRequestHandler<GetAllQuizzesQuery, Pag
             request.PageNumber,
             request.SortBy,
             request.SortDirection,
+            request.FilterByUser ? _userContext.GetCurrentUser().Id : null,
             request.FilterCategories
         );
 

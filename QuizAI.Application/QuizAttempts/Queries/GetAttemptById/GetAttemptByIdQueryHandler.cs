@@ -9,7 +9,7 @@ using QuizAI.Domain.Repositories;
 
 namespace QuizAI.Application.QuizAttempts.Queries.GetAttemptById;
 
-public class GetAttemptByIdQueryHandler : IRequestHandler<GetAttemptByIdQuery, QuizAttemptWithUserAnsweredQuestionsDto>
+public class GetAttemptByIdQueryHandler : IRequestHandler<GetAttemptByIdQuery, QuizAttemptViewWithUserAnsweredQuestionsDto>
 {
     private readonly IUserContext _userContext;
     private readonly IQuizzesRepository _quizzesRepository;
@@ -25,16 +25,16 @@ public class GetAttemptByIdQueryHandler : IRequestHandler<GetAttemptByIdQuery, Q
         _quizAttemptService = quizAttemptService;
     }
 
-    public async Task<QuizAttemptWithUserAnsweredQuestionsDto> Handle(GetAttemptByIdQuery request, CancellationToken cancellationToken)
+    public async Task<QuizAttemptViewWithUserAnsweredQuestionsDto> Handle(GetAttemptByIdQuery request, CancellationToken cancellationToken)
     {
         var currentUser = _userContext.GetCurrentUser();
 
-        var questionCount = await _quizzesRepository.GetQuestionCountAsync(request.QuizId)
-            ?? throw new NotFoundException($"Quiz with ID {request.QuizId} was not found");
+        var finishedQuizAttempt = await _quizAttemptsRepository.GetFinishedByIdAsync(request.QuizAttemptId, currentUser.Id)
+            ?? throw new NotFoundException($"No finished quiz attempt found with ID {request.QuizAttemptId} for user with ID {currentUser.Id}");
 
-        var finishedQuizAttempt = await _quizAttemptsRepository.GetFinishedByIdAsync(request.QuizId, request.QuizAttemptId, currentUser.Id)
-            ?? throw new NotFoundException($"Quiz with ID {request.QuizId} does not have a finished attempt with ID {request.QuizAttemptId} for user with ID {currentUser.Id}");
+        var quizNameAndQuestionCount = await _quizzesRepository.GetNameAndQuestionCountAsync(finishedQuizAttempt.QuizId);
+        var (quizName, questionCount) = quizNameAndQuestionCount.Value;
 
-        return await _quizAttemptService.GetWithUserAnsweredQuestionsAsync(finishedQuizAttempt, questionCount);
+        return await _quizAttemptService.GetWithUserAnsweredQuestionsAsync(finishedQuizAttempt, questionCount, quizName);
     }
 }

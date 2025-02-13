@@ -45,19 +45,24 @@ public class QuizzesRepository : IQuizzesRepository
         int pageNumber,
         string? sortBy,
         SortDirection? sortDirection,
-        ICollection<string> FilterCategories
+        string? filterUserId,
+        ICollection<string> filterCategories
         )
     {
         var baseQuery = _context.Quizzes
             .AsNoTracking()
-            .Where(qz => qz.IsDeprecated == false)
             .Include(qz => qz.Categories)
-            .AsQueryable();
+            .Where(qz => qz.IsDeprecated == false);
 
-        if (FilterCategories.Count > 0)
+        if (filterUserId != null)
+            baseQuery = baseQuery
+                .Where(qz => qz.CreatorId == filterUserId);
+
+        if (filterCategories.Count > 0)
             baseQuery = baseQuery
                 .Where(qz => qz.Categories
-                .Any(c => FilterCategories.Select(c => c.ToLower()).Contains(c.Name)));
+                .Any(c => filterCategories.Select(c => c.ToLower()).Contains(c.Name)));
+
 
         if (!string.IsNullOrEmpty(searchPhrase))
         {
@@ -104,6 +109,18 @@ public class QuizzesRepository : IQuizzesRepository
             .Where(qz => qz.Id == quizId)
             .Select(qz => (int?)qz.QuestionCount)
             .FirstOrDefaultAsync();
+    }
+
+    public async Task<(string, int)?> GetNameAndQuestionCountAsync(Guid quizId)
+    {
+        var result = await _context.Quizzes
+            .Where(qz => qz.Id == quizId)
+            .Select(qz => new { qz.Name, qz.QuestionCount })
+            .FirstOrDefaultAsync();
+
+        if (result == null) return null;
+
+        return (result.Name, result.QuestionCount);
     }
 
     public async Task UpdateLatestVersionIdAsync(Guid oldLatestVersionId, Guid? newLatestVersionId)

@@ -2,6 +2,8 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using QuizAI.Application.Common;
+using QuizAI.Application.QuizAttempts.Dtos;
+using QuizAI.Application.QuizAttempts.Queries.GetLatestAttempt;
 using QuizAI.Application.Quizzes.Commands.CreateQuiz;
 using QuizAI.Application.Quizzes.Commands.DeleteQuiz;
 using QuizAI.Application.Quizzes.Commands.UpdateQuiz;
@@ -83,5 +85,16 @@ public class QuizzesController : ControllerBase
         
         await _mediator.Send(command);
         return NoContent();
+    }
+
+    [HttpGet("{quizId}/attempts/latest")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesErrorResponseType(typeof(ErrorResponse))]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<ActionResult<QuizAttemptViewWithUserAnsweredQuestionsDto>> GetLatestAttempt(Guid quizId)
+    {
+        var latestAttempt = await _mediator.Send(new GetLatestAttemptQuery(quizId));
+        return Ok(latestAttempt);
     }
 }

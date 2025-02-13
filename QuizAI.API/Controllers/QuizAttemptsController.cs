@@ -4,12 +4,12 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using QuizAI.Application.Common;
 using QuizAI.Application.QuizAttempts.Dtos;
+using QuizAI.Application.QuizAttempts.Queries.GetAllAttempts;
 using QuizAI.Application.QuizAttempts.Queries.GetAttemptById;
-using QuizAI.Application.QuizAttempts.Queries.GetLatestAttempt;
 
 namespace QuizAI.API.Controllers
 {
-    [Route("api/quizzes")]
+    [Route("api/quiz-attempts")]
     [ApiController]
     [Authorize]
     public class QuizAttemptsController : ControllerBase
@@ -21,26 +21,25 @@ namespace QuizAI.API.Controllers
             _mediator = mediator;
         }
 
-        [HttpGet("{quizId}/attempts/latest")]
+        [HttpGet("{quizAttemptId}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesErrorResponseType(typeof(ErrorResponse))]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<ActionResult<QuizAttemptWithUserAnsweredQuestionsDto>> GetLatestAttempt(Guid quizId)
+        public async Task<ActionResult<QuizAttemptViewWithUserAnsweredQuestionsDto>> GetAttemptById(Guid quizAttemptId)
         {
-            var latestAttempt = await _mediator.Send(new GetLatestAttemptQuery(quizId));
-            return Ok(latestAttempt);
+            var attempt = await _mediator.Send(new GetAttemptByIdQuery(quizAttemptId));
+            return Ok(attempt);
         }
 
-        [HttpGet("{quizId}/attempts/{quizAttemptId}")]
+        [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesErrorResponseType(typeof(ErrorResponse))]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<ActionResult<QuizAttemptWithUserAnsweredQuestionsDto>> GetAttemptById(Guid quizId, Guid quizAttemptId)
+        public async Task<ActionResult<PagedResponse<QuizAttemptViewDto>>> GetAllAttempts([FromQuery] GetAllAttemptsQuery query)
         {
-            var attempt = await _mediator.Send(new GetAttemptByIdQuery(quizId, quizAttemptId));
-            return Ok(attempt);
+            var attempts = await _mediator.Send(query);
+            return Ok(attempts);
         }
     }
 }

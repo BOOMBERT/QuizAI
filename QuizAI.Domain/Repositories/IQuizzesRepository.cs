@@ -12,7 +12,9 @@ public interface IQuizzesRepository
         int pageNumber,
         string? sortBy,
         SortDirection? sortDirection,
+        string? filterUserId,
         ICollection<string> FilterCategories);
     Task<int?> GetQuestionCountAsync(Guid quizId);
+    Task<(string, int)?> GetNameAndQuestionCountAsync(Guid quizId);
     Task UpdateLatestVersionIdAsync(Guid oldLatestVersionId, Guid? newLatestVersionId);
 }

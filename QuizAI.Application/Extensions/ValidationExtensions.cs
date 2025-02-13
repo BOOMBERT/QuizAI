@@ -1,7 +1,9 @@
 ﻿using FluentValidation;
 using Microsoft.AspNetCore.Http;
+using QuizAI.Application.Interfaces;
 using QuizAI.Application.MultipleChoiceQuestions.Dtos;
 using QuizAI.Application.Utils;
+using QuizAI.Domain.Constants;
 
 namespace QuizAI.Application.Extensions;
 
@@ -63,5 +65,46 @@ internal static class ValidationExtensions
             if (image != null)
                 FileValidationUtil.Validate(image, MaxImageSizeInBytes);
         });
+    }
+
+    internal static IRuleBuilder<T, DateTime?> IsValidUtcDateTime<T>(this IRuleBuilder<T, DateTime?> ruleBuilder)
+    {
+        return ruleBuilder
+            .Must(d => !d.HasValue || d.Value <= DateTime.UtcNow)
+            .WithMessage("The date cannot exceed the current date");
+    }
+
+    internal static IRuleBuilderOptions<T, int> IsValidPageNumber<T>(this IRuleBuilder<T, int> ruleBuilder) 
+        where T : IPaginationQuery
+    {
+        return ruleBuilder
+            .GreaterThanOrEqualTo(1).WithMessage("Page number must be greater than or equal to 1");
+    }
+
+    internal static IRuleBuilderOptions<T, int> IsValidPageSize<T>(this IRuleBuilder<T, int> ruleBuilder, int[] allowPageSizes) 
+        where T : IPaginationQuery
+    {
+        return ruleBuilder
+            .Must(ps => allowPageSizes.Contains(ps)).WithMessage($"Page size must be in [{string.Join(",", allowPageSizes)}]");
+    }
+
+    internal static IRuleBuilderOptions<T, SortDirection?> IsValidSortDirection<T>(this IRuleBuilder<T, SortDirection?> ruleBuilder) 
+        where T : IPaginationQuery
+    {
+        return ruleBuilder
+               .Must((instance, sortDirection) =>
+                   (!string.IsNullOrEmpty(instance.SortBy) && sortDirection != null) ||
+                   (string.IsNullOrEmpty(instance.SortBy) && sortDirection == null)
+               )
+               .WithMessage("Sort direction is required when Sort by is provided and must be empty when Sort by is empty");
+    }
+
+    internal static IRuleBuilderOptions<T, string?> IsValidSortBy<T>(this IRuleBuilder<T, string?> ruleBuilder, string[] allowedSortByColumnNames) 
+        where T : IPaginationQuery
+    {
+        return ruleBuilder
+            .Must(sb => allowedSortByColumnNames.Any(asbcn => string.Equals(asbcn, sb, StringComparison.OrdinalIgnoreCase)))
+            .WithMessage($"Sort by is optional, or must be in [{string.Join(",", allowedSortByColumnNames)}]")
+            .When(f => !string.IsNullOrEmpty(f.SortBy));
     }
 }

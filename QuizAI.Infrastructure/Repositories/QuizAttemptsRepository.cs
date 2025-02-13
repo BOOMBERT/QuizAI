@@ -1,7 +1,9 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using QuizAI.Domain.Constants;
 using QuizAI.Domain.Entities;
 using QuizAI.Domain.Repositories;
 using QuizAI.Infrastructure.Persistence;
+using System.Linq.Expressions;
 
 namespace QuizAI.Infrastructure.Repositories;
 
@@ -21,11 +23,11 @@ public class QuizAttemptsRepository : IQuizAttemptsRepository
             .FirstOrDefaultAsync();
     }
 
-    public async Task<QuizAttempt?> GetFinishedByIdAsync(Guid quizId, Guid quizAttemptId, string userId)
+    public async Task<QuizAttempt?> GetFinishedByIdAsync(Guid quizAttemptId, string userId)
     {
         return await _context.QuizAttempts
             .AsNoTracking()
-            .Where(qa => qa.Id == quizAttemptId && qa.QuizId == quizId && qa.UserId == userId && qa.FinishedAt != null)
+            .Where(qa => qa.Id == quizAttemptId && qa.UserId == userId && qa.FinishedAt != null)
             .FirstOrDefaultAsync();
     }
 
@@ -36,6 +38,75 @@ public class QuizAttemptsRepository : IQuizAttemptsRepository
             .Where(qa => qa.QuizId == quizId && qa.UserId == userId && qa.FinishedAt != null)
             .OrderByDescending(qa => qa.FinishedAt)
             .FirstOrDefaultAsync();
+    }
+
+    public async Task<(IEnumerable<QuizAttempt>, int)> GetAllMatchingFinishedAsync(
+        string userId,
+        string? searchPhrase,
+        int pageSize,
+        int pageNumber,
+        string? sortBy,
+        SortDirection? sortDirection,
+        Guid? filterQuizId,
+        DateTime? filterStartedAtYearAndMonth,
+        DateTime? filterFinishedAtYearAndMonth)
+    {
+        var baseQuery = _context.QuizAttempts
+            .AsNoTracking()
+            .Include(qa => qa.Quiz)
+            .Where(qa => qa.UserId == userId && qa.FinishedAt != null);
+
+        if (filterQuizId != null)
+            baseQuery = baseQuery
+                .Where(qa => qa.QuizId == filterQuizId);
+
+        if (filterStartedAtYearAndMonth != null)
+        {
+            baseQuery = baseQuery
+                .Where(qa => qa.StartedAt.Year == filterStartedAtYearAndMonth.Value.Year && 
+                qa.StartedAt.Month == filterStartedAtYearAndMonth.Value.Month);
+        }
+
+        if (filterFinishedAtYearAndMonth != null)
+        {
+            baseQuery = baseQuery
+                .Where(qa => qa.FinishedAt!.Value.Year == filterFinishedAtYearAndMonth.Value.Year && 
+                qa.FinishedAt!.Value.Month == filterFinishedAtYearAndMonth.Value.Month);
+        }
+
+        if (!string.IsNullOrEmpty(searchPhrase))
+        {
+            var searchPhraseLower = searchPhrase.ToLower();
+
+            baseQuery = baseQuery.Where(qa => qa.Quiz.Name.ToLower().Contains(searchPhraseLower));
+        }
+
+        var totalCount = await baseQuery.CountAsync();
+
+        if (!string.IsNullOrEmpty(sortBy) && sortDirection != null)
+        {
+            var columnsSelector = new Dictionary<string, Expression<Func<QuizAttempt, object>>>(StringComparer.OrdinalIgnoreCase)
+            {
+                { nameof(QuizAttempt.StartedAt), qa => qa.StartedAt },
+                { nameof(QuizAttempt.FinishedAt), qa => qa.FinishedAt! },
+            };
+
+            if (columnsSelector.ContainsKey(sortBy))
+            {
+                var selectedColumn = columnsSelector[sortBy];
+
+                baseQuery = sortDirection == SortDirection.Ascending
+                    ? baseQuery.OrderBy(selectedColumn)
+                    : baseQuery.OrderByDescending(selectedColumn);
+            }
+        }
+
+        var quizAttempts = await baseQuery
+            .Skip(pageSize * (pageNumber - 1))
+            .Take(pageSize)
+            .ToListAsync();
+
+        return (quizAttempts, totalCount);
     }
 
     public async Task<bool> HasAnyAsync(Guid quizId)

@@ -17,7 +17,7 @@ public class QuizAttemptService : IQuizAttemptService
         _questionService = questionService;
     }
 
-    public async Task<QuizAttemptWithUserAnsweredQuestionsDto> GetWithUserAnsweredQuestionsAsync(QuizAttempt finishedQuizAttempt, int questionCount)
+    public async Task<QuizAttemptViewWithUserAnsweredQuestionsDto> GetWithUserAnsweredQuestionsAsync(QuizAttempt finishedQuizAttempt, int questionCount, string quizName)
     {
         var userAnswersWithQuestions = await _answersRepository.GetUserAnswersByAttemptIdAsync(finishedQuizAttempt.Id, true);
 
@@ -33,7 +33,16 @@ public class QuizAttemptService : IQuizAttemptService
             );
         }
 
-        return new QuizAttemptWithUserAnsweredQuestionsDto(
-            quizAttemptWithUserAnswers, finishedQuizAttempt.CorrectAnswers, questionCount, finishedQuizAttempt.StartedAt, (DateTime)finishedQuizAttempt.FinishedAt!);
+        return new QuizAttemptViewWithUserAnsweredQuestionsDto(
+            quizAttemptWithUserAnswers,
+            new QuizAttemptViewDto(
+                finishedQuizAttempt.Id,
+                finishedQuizAttempt.QuizId,
+                finishedQuizAttempt.StartedAt,
+                (DateTime)finishedQuizAttempt.FinishedAt!,
+                finishedQuizAttempt.CorrectAnswers, 
+                questionCount,
+                quizName
+                ));
     }
 }
