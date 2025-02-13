@@ -45,8 +45,9 @@ public class QuizzesRepository : IQuizzesRepository
         int pageNumber,
         string? sortBy,
         SortDirection? sortDirection,
-        string? filterUserId,
-        ICollection<string> filterCategories
+        string? filterByCreatorId,
+        ICollection<string> filterCategories,
+        string? UserIdToFilterBySharedQuizzes
         )
     {
         var baseQuery = _context.Quizzes
@@ -54,9 +55,9 @@ public class QuizzesRepository : IQuizzesRepository
             .Include(qz => qz.Categories)
             .Where(qz => qz.IsDeprecated == false);
 
-        if (filterUserId != null)
+        if (filterByCreatorId != null)
             baseQuery = baseQuery
-                .Where(qz => qz.CreatorId == filterUserId);
+                .Where(qz => qz.CreatorId == filterByCreatorId);
 
         if (filterCategories.Count > 0)
             baseQuery = baseQuery
@@ -73,6 +74,16 @@ public class QuizzesRepository : IQuizzesRepository
                 (qz.Description != null && qz.Description.ToLower().Contains(searchPhraseLower))
             );
         }
+
+        if (filterByCreatorId == null && UserIdToFilterBySharedQuizzes == null)
+        {
+            baseQuery = baseQuery
+                .Where(qz => qz.IsPrivate == false);
+        }
+
+        if (UserIdToFilterBySharedQuizzes != null)
+            baseQuery = baseQuery
+                .Where(qz => _context.QuizPermissions.Any(qp => qp.QuizId == qz.Id && qp.UserId == UserIdToFilterBySharedQuizzes));
 
         var totalCount = await baseQuery.CountAsync();
 
@@ -121,6 +132,30 @@ public class QuizzesRepository : IQuizzesRepository
         if (result == null) return null;
 
         return (result.Name, result.QuestionCount);
+    }
+
+    public async Task<(string, bool, bool)?> GetCreatorIdAndIsPrivateAndIsDeprecatedAsync(Guid quizId)
+    {
+        var result = await _context.Quizzes
+            .Where(qz => qz.Id == quizId)
+            .Select(qz => new { qz.CreatorId, qz.IsPrivate, qz.IsDeprecated })
+            .FirstOrDefaultAsync();
+
+        if (result == null) return null;
+
+        return (result.CreatorId, result.IsPrivate, result.IsDeprecated);
+    }
+
+    public async Task<(string, bool)?> GetCreatorIdAndIsDeprecatedAsync(Guid quizId)
+    {
+        var result = await _context.Quizzes
+            .Where(qz => qz.Id == quizId)
+            .Select(qz => new { qz.CreatorId, qz.IsDeprecated })
+            .FirstOrDefaultAsync();
+
+        if (result == null) return null;
+
+        return (result.CreatorId, result.IsDeprecated);
     }
 
     public async Task UpdateLatestVersionIdAsync(Guid oldLatestVersionId, Guid? newLatestVersionId)

@@ -13,7 +13,7 @@ public class GetAllAttemptsQuery : IRequest<PagedResponse<QuizAttemptViewDto>>, 
     public int PageSize { get; set; }
     public string? SortBy { get; set; }
     public SortDirection? SortDirection { get; set; }
-    public Guid? FilterQuizId { get; set; }
-    public DateTime? FilterStartedAtYearAndMonth { get; set; }
-    public DateTime? FilterFinishedAtYearAndMonth { get; set; }
+    public Guid? FilterByQuizId { get; set; }
+    public DateTime? FilterByStartedAtYearAndMonth { get; set; }
+    public DateTime? FilterByFinishedAtYearAndMonth { get; set; }
 }

@@ -47,31 +47,31 @@ public class QuizAttemptsRepository : IQuizAttemptsRepository
         int pageNumber,
         string? sortBy,
         SortDirection? sortDirection,
-        Guid? filterQuizId,
-        DateTime? filterStartedAtYearAndMonth,
-        DateTime? filterFinishedAtYearAndMonth)
+        Guid? filterByQuizId,
+        DateTime? filterByStartedAtYearAndMonth,
+        DateTime? filterByFinishedAtYearAndMonth)
     {
         var baseQuery = _context.QuizAttempts
             .AsNoTracking()
             .Include(qa => qa.Quiz)
             .Where(qa => qa.UserId == userId && qa.FinishedAt != null);
 
-        if (filterQuizId != null)
+        if (filterByQuizId != null)
             baseQuery = baseQuery
-                .Where(qa => qa.QuizId == filterQuizId);
+                .Where(qa => qa.QuizId == filterByQuizId);
 
-        if (filterStartedAtYearAndMonth != null)
+        if (filterByStartedAtYearAndMonth != null)
         {
             baseQuery = baseQuery
-                .Where(qa => qa.StartedAt.Year == filterStartedAtYearAndMonth.Value.Year && 
-                qa.StartedAt.Month == filterStartedAtYearAndMonth.Value.Month);
+                .Where(qa => qa.StartedAt.Year == filterByStartedAtYearAndMonth.Value.Year && 
+                qa.StartedAt.Month == filterByStartedAtYearAndMonth.Value.Month);
         }
 
-        if (filterFinishedAtYearAndMonth != null)
+        if (filterByFinishedAtYearAndMonth != null)
         {
             baseQuery = baseQuery
-                .Where(qa => qa.FinishedAt!.Value.Year == filterFinishedAtYearAndMonth.Value.Year && 
-                qa.FinishedAt!.Value.Month == filterFinishedAtYearAndMonth.Value.Month);
+                .Where(qa => qa.FinishedAt!.Value.Year == filterByFinishedAtYearAndMonth.Value.Year && 
+                qa.FinishedAt!.Value.Month == filterByFinishedAtYearAndMonth.Value.Month);
         }
 
         if (!string.IsNullOrEmpty(searchPhrase))

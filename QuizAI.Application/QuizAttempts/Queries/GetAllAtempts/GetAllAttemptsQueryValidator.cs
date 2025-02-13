@@ -31,10 +31,10 @@ public class GetAllAttemptsQueryValidator : AbstractValidator<GetAllAttemptsQuer
         RuleFor(qa => qa.SearchPhrase)
             .MaximumLength(128).WithMessage("Search phrase must be at most 128 characters long");
 
-        RuleFor(qa => qa.FilterStartedAtYearAndMonth)
+        RuleFor(qa => qa.FilterByStartedAtYearAndMonth)
             .IsValidUtcDateTime();
 
-        RuleFor(qa => qa.FilterStartedAtYearAndMonth)
+        RuleFor(qa => qa.FilterByStartedAtYearAndMonth)
             .IsValidUtcDateTime();
     }
 }

@@ -6,8 +6,9 @@ public record QuizDto(
     string? Description, 
     DateTime CreationDate, 
     bool HasImage, 
-    IEnumerable<string> Categories, 
-    bool IsDeprecated, 
+    IEnumerable<string> Categories,
+    bool IsPrivate,
+    bool IsDeprecated,
     Guid? LatestVersionId,
     int QuestionCount,
     string CreatorId

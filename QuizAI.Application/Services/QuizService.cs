@@ -12,13 +12,17 @@ public class QuizService : IQuizService
     private readonly IMapper _mapper;
     private readonly IQuizzesRepository _quizzesRepository;
     private readonly IQuizAttemptsRepository _quizAttemptsRepository;
+    private readonly IQuizPermissionsRepository _quizPermissionsRepository;
     private readonly ICategoryService _categoryService;
 
-    public QuizService(IMapper mapper, IQuizzesRepository quizzesRepository, IQuizAttemptsRepository quizAttemptsRepository, ICategoryService categoryService)
+    public QuizService(
+        IMapper mapper, IQuizzesRepository quizzesRepository, 
+        IQuizAttemptsRepository quizAttemptsRepository, IQuizPermissionsRepository quizPermissionsRepository, ICategoryService categoryService)
     {
         _mapper = mapper;
         _quizzesRepository = quizzesRepository;
         _quizAttemptsRepository = quizAttemptsRepository;
+        _quizPermissionsRepository = quizPermissionsRepository;
         _categoryService = categoryService;
     }
 
@@ -62,6 +66,7 @@ public class QuizService : IQuizService
             QuestionCount = currentQuiz.QuestionCount,
             CreatorId = currentQuiz.CreatorId,
             ImageId = currentQuiz.ImageId,
+            IsPrivate = currentQuiz.IsPrivate,
             Categories = await _categoryService.GetOrCreateEntitiesAsync(currentQuiz.Categories.Select(c => c.Name)),
             Questions = _mapper.Map<ICollection<Question>>(currentQuiz.Questions)
         };
@@ -74,6 +79,7 @@ public class QuizService : IQuizService
     private async Task DeprecateAsync(Quiz oldQuiz, Guid newQuizId)
     {
         await _quizzesRepository.UpdateLatestVersionIdAsync(oldQuiz.Id, newQuizId);
+        await _quizPermissionsRepository.UpdateQuizIdAsync(oldQuiz.Id, newQuizId);
 
         oldQuiz.LatestVersionId = newQuizId;
         oldQuiz.Categories.Clear();

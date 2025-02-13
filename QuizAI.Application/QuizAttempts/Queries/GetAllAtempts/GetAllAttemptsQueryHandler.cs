@@ -29,9 +29,9 @@ public class GetAllAttemptsQueryHandler : IRequestHandler<GetAllAttemptsQuery, P
             request.PageNumber,
             request.SortBy,
             request.SortDirection,
-            request.FilterQuizId,
-            request.FilterStartedAtYearAndMonth,
-            request.FilterFinishedAtYearAndMonth
+            request.FilterByQuizId,
+            request.FilterByStartedAtYearAndMonth,
+            request.FilterByFinishedAtYearAndMonth
             );
 
         var attemptsDtos = new List<QuizAttemptViewDto>();

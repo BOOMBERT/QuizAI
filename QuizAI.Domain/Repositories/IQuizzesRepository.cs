@@ -13,8 +13,12 @@ public interface IQuizzesRepository
         string? sortBy,
         SortDirection? sortDirection,
         string? filterUserId,
-        ICollection<string> FilterCategories);
+        ICollection<string> FilterCategories,
+        string? UserIdToFilterBySharedQuizzes
+        );
     Task<int?> GetQuestionCountAsync(Guid quizId);
     Task<(string, int)?> GetNameAndQuestionCountAsync(Guid quizId);
+    Task<(string, bool, bool)?> GetCreatorIdAndIsPrivateAndIsDeprecatedAsync(Guid quizId);
+    Task<(string, bool)?> GetCreatorIdAndIsDeprecatedAsync(Guid quizId);
     Task UpdateLatestVersionIdAsync(Guid oldLatestVersionId, Guid? newLatestVersionId);
 }

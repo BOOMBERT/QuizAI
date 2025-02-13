@@ -13,6 +13,7 @@ public class GetAllQuizzesQuery : IRequest<PagedResponse<QuizDto>>, IPaginationQ
     public int PageSize { get; set; }
     public string? SortBy { get; set; }
     public SortDirection? SortDirection { get; set; }
-    public ICollection<string> FilterCategories { get; set; } = new List<string>();
-    public bool FilterByUser { get; set; }
+    public ICollection<string> FilterByCategories { get; set; } = new List<string>();
+    public bool FilterByCreator { get; set; }
+    public bool FilterBySharedQuizzes { get; set; }
 }

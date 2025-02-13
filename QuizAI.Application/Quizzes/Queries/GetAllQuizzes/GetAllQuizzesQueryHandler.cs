@@ -23,14 +23,17 @@ public class GetAllQuizzesQueryHandler : IRequestHandler<GetAllQuizzesQuery, Pag
 
     public async Task<PagedResponse<QuizDto>> Handle(GetAllQuizzesQuery request, CancellationToken cancellationToken)
     {
+        var currentUser = _userContext.GetCurrentUser();
+
         var (quizzes, totalCount) = await _quizzesRepository.GetAllMatchingAsync(
             request.SearchPhrase,
             request.PageSize,
             request.PageNumber,
             request.SortBy,
             request.SortDirection,
-            request.FilterByUser ? _userContext.GetCurrentUser().Id : null,
-            request.FilterCategories
+            request.FilterByCreator ? currentUser.Id : null,
+            request.FilterByCategories,
+            request.FilterBySharedQuizzes ? currentUser.Id : null
         );
 
         var quizzesDtos = _mapper.Map<IEnumerable<QuizDto>>(quizzes);
