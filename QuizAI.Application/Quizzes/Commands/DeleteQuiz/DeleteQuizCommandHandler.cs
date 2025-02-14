@@ -14,15 +14,18 @@ public class DeleteQuizCommandHandler : IRequestHandler<DeleteQuizCommand>
     private readonly IQuizAttemptsRepository _quizAttemptsRepository;
     private readonly ICategoryService _categoryService;
     private readonly IImageService _imageService;
+    private readonly IQuizPermissionsRepository _quizPermissionsRepository;
 
     public DeleteQuizCommandHandler(
-        IRepository repository, IQuizzesRepository quizzesRepository, IQuizAttemptsRepository quizAttemptsRepository, ICategoryService categoryService, IImageService imageService)
+        IRepository repository, IQuizzesRepository quizzesRepository, IQuizAttemptsRepository quizAttemptsRepository, 
+        ICategoryService categoryService, IImageService imageService, IQuizPermissionsRepository quizPermissionsRepository)
     {
         _repository = repository;
         _quizzesRepository = quizzesRepository;
         _quizAttemptsRepository = quizAttemptsRepository;
         _categoryService = categoryService;
         _imageService = imageService;
+        _quizPermissionsRepository = quizPermissionsRepository;
     }
 
     public async Task Handle(DeleteQuizCommand request, CancellationToken cancellationToken)
@@ -45,6 +48,7 @@ public class DeleteQuizCommandHandler : IRequestHandler<DeleteQuizCommand>
         else
         {
             quiz.IsDeprecated = true;
+            await _quizPermissionsRepository.DeletePermissionsAsync(quiz.Id);
         }
 
         await _repository.SaveChangesAsync();

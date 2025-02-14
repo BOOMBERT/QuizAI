@@ -39,4 +39,23 @@ public class QuizPermissionsRepository : IQuizPermissionsRepository
             quizPermission.QuizId = newQuizId;
         }
     }
+
+    public async Task DeletePermissionsAsync(Guid quizId)
+    {
+        await _context.QuizPermissions
+            .Where(qp => qp.QuizId == quizId)
+            .ExecuteDeleteAsync();
+    }
+
+    public async Task<bool> HasAnyAsync(Guid quizId, string userId)
+    {
+        return await _context.QuizPermissions
+            .AnyAsync(qp => qp.QuizId == quizId && qp.UserId == userId);
+    }
+
+    public async Task<bool> CanEditAsync(Guid quizId, string userId)
+    {
+        return await _context.QuizPermissions
+            .AnyAsync(qp => qp.QuizId == quizId && qp.UserId == userId && qp.CanEdit == true);
+    }
 }

@@ -3,6 +3,7 @@ using MediatR;
 using QuizAI.Application.Interfaces;
 using QuizAI.Application.Questions.Dtos;
 using QuizAI.Application.Services;
+using QuizAI.Domain.Constants;
 using QuizAI.Domain.Entities;
 using QuizAI.Domain.Enums;
 using QuizAI.Domain.Exceptions;
@@ -13,12 +14,15 @@ namespace QuizAI.Application.Questions.Queries.GetQuestionByOrder;
 public class GetQuestionByOrderQueryHandler : IRequestHandler<GetQuestionByOrderQuery, QuestionWithAnswersDto>
 {
     private readonly IRepository _repository;
+    private readonly IQuizAuthorizationService _quizAuthorizationService;
     private readonly IQuestionsRepository _questionsRepository;
     private readonly IQuestionService _questionService;
 
-    public GetQuestionByOrderQueryHandler(IRepository repository, IQuestionsRepository questionsRepository, IQuestionService questionService)
+    public GetQuestionByOrderQueryHandler(
+        IRepository repository, IQuizAuthorizationService quizAuthorizationService, IQuestionsRepository questionsRepository, IQuestionService questionService)
     {
         _repository = repository;
+        _quizAuthorizationService = quizAuthorizationService;
         _questionsRepository = questionsRepository;
         _questionService = questionService;
     }
@@ -30,8 +34,10 @@ public class GetQuestionByOrderQueryHandler : IRequestHandler<GetQuestionByOrder
 
         _questionService.ValidateQuestionLimit(request.Order);
 
-        if (!await _repository.EntityExistsAsync<Quiz>(request.QuizId))
-            throw new NotFoundException($"Quiz with ID {request.QuizId} was not found");
+        var quiz = await _repository.GetEntityAsync<Quiz>(request.QuizId, false)
+            ?? throw new NotFoundException($"Quiz with ID {request.QuizId} was not found");
+
+        await _quizAuthorizationService.AuthorizeAsync(quiz, null, ResourceOperation.RestrictedRead);
 
         var question = await _questionsRepository.GetByOrderAsync(request.QuizId, request.Order, true)
             ?? throw new NotFoundException($"Question with order {request.Order} was not found in quiz with ID {request.QuizId}.");

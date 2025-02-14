@@ -54,5 +54,6 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IQuizService, QuizService>();
         services.AddScoped<IAnswerService, AnswerService>();
         services.AddScoped<IQuizAttemptService, QuizAttemptService>();
+        services.AddScoped<IQuizAuthorizationService, QuizAuthorizationService>();
     }
 }

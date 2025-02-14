@@ -3,7 +3,9 @@ using MediatR;
 using QuizAI.Application.Interfaces;
 using QuizAI.Application.Questions.Dtos;
 using QuizAI.Application.Questions.Queries.GetQuestion;
+using QuizAI.Application.Services;
 using QuizAI.Application.Users;
+using QuizAI.Domain.Constants;
 using QuizAI.Domain.Entities;
 using QuizAI.Domain.Enums;
 using QuizAI.Domain.Exceptions;
@@ -15,18 +17,18 @@ public class GetNextQuestionQueryHandler : IRequestHandler<GetNextQuestionQuery,
 {
     private readonly IRepository _repository;
     private readonly IUserContext _userContext;
-    private readonly IQuizzesRepository _quizzesRepository;
+    private readonly IQuizAuthorizationService _quizAuthorizationService;
     private readonly IQuestionsRepository _questionsRepository;
     private readonly IAnswersRepository _answersRepository;
     private readonly IQuizAttemptsRepository _quizAttemptsRepository;
 
     public GetNextQuestionQueryHandler(
-        IRepository repository, IUserContext userContext, 
-        IQuizzesRepository quizzesRepository, IQuestionsRepository questionsRepository, IAnswersRepository answersRepository, IQuizAttemptsRepository quizAttemptsRepository)
+        IRepository repository, IUserContext userContext, IQuizAuthorizationService quizAuthorizationService, 
+        IQuestionsRepository questionsRepository, IAnswersRepository answersRepository, IQuizAttemptsRepository quizAttemptsRepository)
     {
         _repository = repository;
         _userContext = userContext;
-        _quizzesRepository = quizzesRepository;
+        _quizAuthorizationService = quizAuthorizationService;
         _questionsRepository = questionsRepository;
         _answersRepository = answersRepository;
         _quizAttemptsRepository = quizAttemptsRepository;
@@ -36,8 +38,10 @@ public class GetNextQuestionQueryHandler : IRequestHandler<GetNextQuestionQuery,
     {
         var currentUser = _userContext.GetCurrentUser();
 
-        var quiz = await _quizzesRepository.GetAsync(request.QuizId, false, false, false) ?? 
+        var quiz = await _repository.GetEntityAsync<Quiz>(request.QuizId, false) ?? 
             throw new NotFoundException($"Quiz with ID {request.QuizId} was not found");
+
+        await _quizAuthorizationService.AuthorizeAsync(quiz, currentUser.Id, ResourceOperation.Read);
 
         if (quiz.QuestionCount == 0)
             throw new NotFoundException($"No questions found for quiz with ID {request.QuizId}");

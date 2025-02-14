@@ -31,12 +31,14 @@ public class Repository : IRepository
             .FirstOrDefaultAsync();
     }
 
-    public async Task<TField?> GetFieldAsync<TEntity, TField>(int id, string fieldName) where TEntity : class
+    public async Task<TEntity?> GetEntityAsync<TEntity>(Guid id, bool trackChanges = true) where TEntity : class
     {
-        return await _context.Set<TEntity>()
-            .Where(e => EF.Property<int>(e, "Id") == id)
-            .Select(e => EF.Property<TField>(e, fieldName))
-            .FirstOrDefaultAsync();
+        var baseQuery = _context.Set<TEntity>().Where(e => EF.Property<Guid>(e, "Id") == id);
+
+        if (!trackChanges)
+            baseQuery = baseQuery.AsNoTracking();
+
+        return await baseQuery.FirstOrDefaultAsync();
     }
 
     public async Task<bool> EntityExistsAsync<T>(Guid id) where T : class

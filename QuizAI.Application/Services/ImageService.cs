@@ -35,9 +35,6 @@ public class ImageService : IImageService
 
     public async Task<(byte[], string)> GetDataToReturnAsync(Guid quizId, int? questionId = null)
     {
-        if (!await _repository.EntityExistsAsync<Quiz>(quizId))
-            throw new NotFoundException($"Quiz with ID {quizId} was not found");
-
         Guid imageNameAsGuid;
         string questionErrorMessageContext = string.Empty;
 
