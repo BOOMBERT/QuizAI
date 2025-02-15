@@ -37,7 +37,7 @@ public class GetAllQuizzesQueryValidator : AbstractValidator<GetAllQuizzesQuery>
             .Must(fc => fc.All(fc => fc.Length <= 64)).WithMessage("Each category must not exceed 64 characters");
 
         RuleFor(qz => qz.FilterBySharedQuizzes)
-            .Null().WithMessage("You cannot filter by shared quizzes if you are filtering by creator")
+            .Must(fs => fs == false).WithMessage("You cannot filter by shared quizzes if you are filtering by creator")
             .When(qz => qz.FilterByCreator);
     }
 }

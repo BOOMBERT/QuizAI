@@ -1,9 +1,6 @@
 ﻿using MediatR;
 using QuizAI.Application.Interfaces;
-using QuizAI.Application.Questions.Dtos;
 using QuizAI.Application.QuizAttempts.Dtos;
-using QuizAI.Application.Services;
-using QuizAI.Application.Users;
 using QuizAI.Domain.Exceptions;
 using QuizAI.Domain.Repositories;
 
@@ -33,7 +30,7 @@ public class GetLatestAttemptQueryHandler : IRequestHandler<GetLatestAttemptQuer
             ?? throw new NotFoundException($"Quiz with ID {request.QuizId} was not found");
 
         var latestFinishedAttempt = await _quizAttemptsRepository.GetLatestFinishedAsync(request.QuizId, currentUser.Id)
-            ?? throw new NotFoundException($"Quiz with ID {request.QuizId} does not have any finished attempts");
+            ?? throw new NotFoundException($"No finished quiz attempt found for quiz with ID {request.QuizId} and user with ID {currentUser.Id}");
 
         return await _quizAttemptService.GetWithUserAnsweredQuestionsAsync(latestFinishedAttempt, questionCount, quizName);
     }

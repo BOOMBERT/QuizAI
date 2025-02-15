@@ -1,10 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using QuizAI.Domain.Entities;
-using QuizAI.Domain.Enums;
-using QuizAI.Domain.Exceptions;
 using QuizAI.Domain.Repositories;
 using QuizAI.Infrastructure.Persistence;
-using System.Linq.Expressions;
 
 namespace QuizAI.Infrastructure.Repositories;
 
@@ -32,15 +29,5 @@ public class QuestionsRepository : IQuestionsRepository
         }
 
         return await baseQuery.FirstOrDefaultAsync();
-    }
-
-    public async Task<Guid?> GetImageIdAsync(Guid quizId, int questionId)
-    {
-        var question = await _context.Questions
-            .Where(qn => qn.QuizId == quizId && qn.Id == questionId)
-            .FirstOrDefaultAsync() 
-            ?? throw new NotFoundException($"Question with ID {questionId} in quiz with ID {quizId} was not found");
-
-        return question.ImageId;
     }
 }

@@ -5,7 +5,7 @@ namespace QuizAI.Application.Interfaces;
 
 public interface IImageService
 {
-    Task<(byte[], string)> GetDataToReturnAsync(Guid quizId, int? questionId = null);
+    Task<(byte[], string)> GetDataToReturnAsync(Quiz quiz, int? questionId = null);
     Task<Image> UploadAsync(IFormFile image);
     Task DeleteIfNotAssignedAsync(Guid imageId, Guid? quizIdToSkip = null, int? questionIdToSkip = null);
 }

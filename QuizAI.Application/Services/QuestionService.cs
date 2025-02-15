@@ -1,13 +1,9 @@
 ﻿using AutoMapper;
-using MediatR;
-using QuizAI.Application.Common;
 using QuizAI.Application.Interfaces;
-using QuizAI.Application.MultipleChoiceQuestions.Dtos;
 using QuizAI.Application.Questions.Dtos;
 using QuizAI.Domain.Entities;
 using QuizAI.Domain.Enums;
 using QuizAI.Domain.Exceptions;
-using QuizAI.Domain.Repositories;
 
 namespace QuizAI.Application.Services;
 

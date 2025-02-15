@@ -2,7 +2,6 @@
 using QuizAI.Application.Common;
 using QuizAI.Application.Interfaces;
 using QuizAI.Application.QuizAttempts.Dtos;
-using QuizAI.Application.Quizzes.Dtos;
 using QuizAI.Domain.Repositories;
 
 namespace QuizAI.Application.QuizAttempts.Queries.GetAllAttempts;

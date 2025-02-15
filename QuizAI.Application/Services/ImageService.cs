@@ -1,5 +1,4 @@
-﻿using MediatR;
-using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Http;
 using QuizAI.Application.Interfaces;
 using QuizAI.Application.Utils;
 using QuizAI.Domain.Entities;
@@ -33,28 +32,28 @@ public class ImageService : IImageService
         _imagesDefaultSize = imagesDefaultSize;
     }
 
-    public async Task<(byte[], string)> GetDataToReturnAsync(Guid quizId, int? questionId = null)
+    public async Task<(byte[], string)> GetDataToReturnAsync(Quiz quiz, int? questionId = null)
     {
-        Guid imageNameAsGuid;
+        Guid imageName;
         string questionErrorMessageContext = string.Empty;
 
         if (questionId == null)
         {
-            imageNameAsGuid = await _repository.GetFieldAsync<Quiz, Guid?>(quizId, "ImageId")
-                ?? throw new NotFoundException($"Quiz with ID {quizId} has no associated image");
+            imageName = quiz.ImageId ?? throw new NotFoundException($"Quiz with ID {quiz.Id} has no associated image");
         }
         else
         {
-            imageNameAsGuid = await _questionsRepository.GetImageIdAsync(quizId, (int)questionId) 
-                ?? throw new NotFoundException($"Question with ID {questionId} in quiz with ID {quizId} has no associated image");
+            var question = await _repository.GetEntityAsync<Question>((int)questionId)
+                ?? throw new NotFoundException($"Question with ID {questionId} has no associated image");
 
+            imageName = question.ImageId ?? throw new NotFoundException($"Question with ID {questionId} in quiz with ID {quiz.Id} has no associated image");
             questionErrorMessageContext = $"question with ID {questionId} in ";
         }
 
-        var imageExtension = await _repository.GetFieldAsync<Image, string>(imageNameAsGuid, "FileExtension")
-            ?? throw new NotFoundException($"Image for {questionErrorMessageContext}quiz with ID {quizId} could not be found");
+        var imageExtension = await _repository.GetFieldAsync<Image, string>(imageName, "FileExtension")
+            ?? throw new NotFoundException($"Image for {questionErrorMessageContext}quiz with ID {quiz.Id} could not be found");
 
-        var imageData = await _fileStorageService.RetrieveAsync(imageNameAsGuid, imageExtension);
+        var imageData = await _fileStorageService.RetrieveAsync(imageName, imageExtension);
 
         if (imageExtension == FileExtension.Jpg) imageExtension = FileExtension.Jpeg;
         var contentType = "image/" + imageExtension.TrimStart('.');

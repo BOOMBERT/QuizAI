@@ -15,7 +15,7 @@ public class Quiz
     public User Creator { get; set; }
     public Guid? ImageId { get; set; }    
     public Image? Image { get; set; }
-    public QuizPermission QuizPermission { get; set; }
+    public ICollection<QuizPermission> QuizPermissions { get; set; } = new List<QuizPermission>();
     public ICollection<Category> Categories { get; set; } = new List<Category>();
     public ICollection<Question> Questions { get; set; } = new List<Question>();
     public ICollection<QuizAttempt> QuizAttempts { get; set; } = new List<QuizAttempt>();

@@ -2,10 +2,7 @@
 using MediatR;
 using QuizAI.Application.Common;
 using QuizAI.Application.Interfaces;
-using QuizAI.Application.Services;
 using QuizAI.Domain.Entities;
-using QuizAI.Domain.Enums;
-using QuizAI.Domain.Exceptions;
 using QuizAI.Domain.Repositories;
 
 namespace QuizAI.Application.MultipleChoiceQuestions.Commands.UpdateMultipleChoiceQuestion;

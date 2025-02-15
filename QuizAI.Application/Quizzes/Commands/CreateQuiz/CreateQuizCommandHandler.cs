@@ -1,7 +1,6 @@
 ﻿using AutoMapper;
 using MediatR;
 using QuizAI.Application.Interfaces;
-using QuizAI.Application.Users;
 using QuizAI.Domain.Entities;
 using QuizAI.Domain.Repositories;
 

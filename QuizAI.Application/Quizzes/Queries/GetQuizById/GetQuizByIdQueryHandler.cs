@@ -2,8 +2,6 @@
 using MediatR;
 using QuizAI.Application.Interfaces;
 using QuizAI.Application.Quizzes.Dtos;
-using QuizAI.Application.Services;
-using QuizAI.Domain.Constants;
 using QuizAI.Domain.Exceptions;
 using QuizAI.Domain.Repositories;
 
@@ -27,8 +25,9 @@ public class GetQuizByIdQueryHandler : IRequestHandler<GetQuizByIdQuery, QuizDto
         var quiz = await _quizzesRepository.GetAsync(request.QuizId, true, false, false) 
             ?? throw new NotFoundException($"Quiz with ID {request.QuizId} was not found");
 
-        await _quizAuthorizationService.AuthorizeAsync(quiz, null, ResourceOperation.Read);
+        var canUserEditQuiz = await _quizAuthorizationService.AuthorizeReadOperationAndGetCanEditAsync(quiz, null);
 
-        return _mapper.Map<QuizDto>(quiz);
+        var quizDto = _mapper.Map<QuizDto>(quiz);
+        return quizDto with { CanEdit = canUserEditQuiz };
     }
 }

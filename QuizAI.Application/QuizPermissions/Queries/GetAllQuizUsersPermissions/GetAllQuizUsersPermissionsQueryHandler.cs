@@ -1,8 +1,6 @@
 ﻿using MediatR;
 using QuizAI.Application.Interfaces;
 using QuizAI.Application.QuizPermissions.Dtos;
-using QuizAI.Application.Users;
-using QuizAI.Domain.Entities;
 using QuizAI.Domain.Exceptions;
 using QuizAI.Domain.Repositories;
 
@@ -35,7 +33,7 @@ public class GetAllQuizUsersPermissionsQueryHandler : IRequestHandler<GetAllQuiz
             throw new NotFoundException($"Quiz with ID {request.QuizId} was not found");
 
         if (creatorId != currentUser.Id)
-            throw new ConflictException($"You cannot view the permissions for quiz with ID {request.QuizId} because you are not its creator");
+            throw new ForbiddenException($"You cannot view the permissions for quiz with ID {request.QuizId} because you are not its creator");
 
         var quizPermissions = await _quizPermissionsRepository.GetAllAsync(request.QuizId);
         var quizUsersPermissionsDtos = await Task.WhenAll(

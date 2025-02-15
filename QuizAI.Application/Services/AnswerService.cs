@@ -1,5 +1,4 @@
-﻿using MediatR;
-using QuizAI.Application.Interfaces;
+﻿using QuizAI.Application.Interfaces;
 using QuizAI.Application.MultipleChoiceQuestions.Dtos;
 using QuizAI.Domain.Entities;
 using QuizAI.Domain.Enums;

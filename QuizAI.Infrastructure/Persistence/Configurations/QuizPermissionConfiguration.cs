@@ -9,11 +9,11 @@ public class QuizPermissionConfiguration : IEntityTypeConfiguration<QuizPermissi
     public void Configure(EntityTypeBuilder<QuizPermission> builder)
     {
         builder.HasOne(qp => qp.Quiz)
-            .WithOne(qz => qz.QuizPermission)
-            .HasForeignKey<QuizPermission>(qp => qp.QuizId);
+            .WithMany(qz => qz.QuizPermissions)
+            .HasForeignKey(qp => qp.QuizId);
 
         builder.HasOne(qp => qp.User)
-            .WithOne(qz => qz.QuizPermission)
-            .HasForeignKey<QuizPermission>(qp => qp.UserId);
+            .WithMany(u => u.QuizPermissions)
+            .HasForeignKey(qp => qp.UserId);
     }
 }

@@ -41,9 +41,14 @@ public class Repository : IRepository
         return await baseQuery.FirstOrDefaultAsync();
     }
 
-    public async Task<bool> EntityExistsAsync<T>(Guid id) where T : class
+    public async Task<TEntity?> GetEntityAsync<TEntity>(int id, bool trackChanges = true) where TEntity : class
     {
-        return await _context.Set<T>().AnyAsync(e => EF.Property<Guid>(e, "Id") == id);
+        var baseQuery = _context.Set<TEntity>().Where(e => EF.Property<int>(e, "Id") == id);
+
+        if (!trackChanges)
+            baseQuery = baseQuery.AsNoTracking();
+
+        return await baseQuery.FirstOrDefaultAsync();
     }
 
     public async Task DeleteAsync<T>(Guid id) where T : class

@@ -1,6 +1,5 @@
 ﻿using MediatR;
 using QuizAI.Application.Interfaces;
-using QuizAI.Application.Users;
 using QuizAI.Domain.Entities;
 using QuizAI.Domain.Exceptions;
 using QuizAI.Domain.Repositories;
@@ -33,9 +32,6 @@ public class ManageUsersQuizPermissionsCommandHandler : IRequestHandler<ManageUs
         if (string.Equals(userEmail, currentUser.Email, StringComparison.OrdinalIgnoreCase)) 
             throw new ConflictException("You cannot assign permissions to yourself");
 
-        var userId = await _userRepository.GetIdAsync(userEmail)
-            ?? throw new NotFoundException($"User with email {userEmail} was not found");
-
         var (creatorId, isPrivate, isDeprecated) = await _quizzesRepository.GetCreatorIdAndIsPrivateAndIsDeprecatedAsync(quizId)
             ?? throw new NotFoundException($"Quiz with ID {quizId} was not found");
 
@@ -43,7 +39,10 @@ public class ManageUsersQuizPermissionsCommandHandler : IRequestHandler<ManageUs
             throw new NotFoundException($"Quiz with ID {quizId} was not found");
 
         if (creatorId != currentUser.Id) 
-            throw new ConflictException($"You cannot manage permissions for quiz with ID {quizId} because you are not its creator");
+            throw new ForbiddenException($"You cannot manage permissions for quiz with ID {quizId} because you are not its creator");
+
+        var userId = await _userRepository.GetIdAsync(userEmail) 
+            ?? throw new NotFoundException($"User with email {userEmail} was not found");
 
         var userQuizPermissions = await _quizPermissionsRepository.GetAsync(quizId, userId);
         var userQuizPermissionsExist = userQuizPermissions != null;

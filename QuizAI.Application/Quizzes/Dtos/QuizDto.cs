@@ -11,5 +11,6 @@ public record QuizDto(
     bool IsDeprecated,
     Guid? LatestVersionId,
     int QuestionCount,
-    string CreatorId
+    string CreatorId,
+    bool CanEdit
     );

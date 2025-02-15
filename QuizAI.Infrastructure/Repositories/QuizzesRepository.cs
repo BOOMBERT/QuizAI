@@ -40,24 +40,45 @@ public class QuizzesRepository : IQuizzesRepository
     }
 
     public async Task<(IEnumerable<Quiz>, int)> GetAllMatchingAsync(
+        string userId,
         string? searchPhrase,
         int pageSize,
         int pageNumber,
         string? sortBy,
         SortDirection? sortDirection,
-        string? filterByCreatorId,
+        bool filterByCreatorId,
         ICollection<string> filterCategories,
-        string? UserIdToFilterBySharedQuizzes
+        bool filterBySharedQuizzes
         )
     {
         var baseQuery = _context.Quizzes
             .AsNoTracking()
             .Include(qz => qz.Categories)
+            .Include(qz => qz.QuizPermissions)
             .Where(qz => qz.IsDeprecated == false);
 
-        if (filterByCreatorId != null)
+        if (filterBySharedQuizzes || filterByCreatorId)
+        {
+            if (filterBySharedQuizzes)
+            {
+                baseQuery = baseQuery
+                    .Where(qz => _context.QuizPermissions.Any(qp => qp.QuizId == qz.Id && qp.UserId == userId));
+            }
+            else if (filterByCreatorId)
+            {
+                baseQuery = baseQuery
+                    .Where(qz => qz.CreatorId == userId);
+            }
+        }
+        else
+        {
             baseQuery = baseQuery
-                .Where(qz => qz.CreatorId == filterByCreatorId);
+                .Where(qz => 
+                qz.IsPrivate == false || 
+                (qz.IsPrivate == true && qz.CreatorId == userId) || 
+                _context.QuizPermissions.Any(qp => qp.QuizId == qz.Id && qp.UserId == userId)
+                );
+        }
 
         if (filterCategories.Count > 0)
             baseQuery = baseQuery
@@ -74,16 +95,6 @@ public class QuizzesRepository : IQuizzesRepository
                 (qz.Description != null && qz.Description.ToLower().Contains(searchPhraseLower))
             );
         }
-
-        if (filterByCreatorId == null && UserIdToFilterBySharedQuizzes == null)
-        {
-            baseQuery = baseQuery
-                .Where(qz => qz.IsPrivate == false);
-        }
-
-        if (UserIdToFilterBySharedQuizzes != null)
-            baseQuery = baseQuery
-                .Where(qz => _context.QuizPermissions.Any(qp => qp.QuizId == qz.Id && qp.UserId == UserIdToFilterBySharedQuizzes));
 
         var totalCount = await baseQuery.CountAsync();
 
@@ -112,14 +123,6 @@ public class QuizzesRepository : IQuizzesRepository
             .ToListAsync();
 
         return (quizzes, totalCount);
-    }
-
-    public async Task<int?> GetQuestionCountAsync(Guid quizId)
-    {
-        return await _context.Quizzes
-            .Where(qz => qz.Id == quizId)
-            .Select(qz => (int?)qz.QuestionCount)
-            .FirstOrDefaultAsync();
     }
 
     public async Task<(string, int)?> GetNameAndQuestionCountAsync(Guid quizId)

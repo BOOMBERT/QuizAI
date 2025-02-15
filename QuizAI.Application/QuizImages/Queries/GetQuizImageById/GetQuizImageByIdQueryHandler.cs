@@ -1,6 +1,5 @@
 ﻿using MediatR;
 using QuizAI.Application.Interfaces;
-using QuizAI.Application.Services;
 using QuizAI.Domain.Constants;
 using QuizAI.Domain.Entities;
 using QuizAI.Domain.Exceptions;
@@ -28,6 +27,6 @@ public class GetQuizImageByIdQueryHandler : IRequestHandler<GetQuizImageByIdQuer
         
         await _quizAuthorizationService.AuthorizeAsync(quiz, null, ResourceOperation.Read);
 
-        return await _imageService.GetDataToReturnAsync(request.QuizId);
+        return await _imageService.GetDataToReturnAsync(quiz);
     }
 }

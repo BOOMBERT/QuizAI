@@ -1,6 +1,6 @@
 ﻿using AutoMapper;
-using MediatR;
 using QuizAI.Application.Interfaces;
+using QuizAI.Domain.Constants;
 using QuizAI.Domain.Entities;
 using QuizAI.Domain.Exceptions;
 using QuizAI.Domain.Repositories;
@@ -10,17 +10,21 @@ namespace QuizAI.Application.Services;
 public class QuizService : IQuizService
 {
     private readonly IMapper _mapper;
+    private readonly IRepository _repository;
     private readonly IQuizzesRepository _quizzesRepository;
+    private readonly IQuizAuthorizationService _quizAuthorizationService;
     private readonly IQuizAttemptsRepository _quizAttemptsRepository;
     private readonly IQuizPermissionsRepository _quizPermissionsRepository;
     private readonly ICategoryService _categoryService;
 
     public QuizService(
-        IMapper mapper, IQuizzesRepository quizzesRepository, 
+        IMapper mapper, IRepository repository, IQuizzesRepository quizzesRepository, IQuizAuthorizationService quizAuthorizationService, 
         IQuizAttemptsRepository quizAttemptsRepository, IQuizPermissionsRepository quizPermissionsRepository, ICategoryService categoryService)
     {
         _mapper = mapper;
+        _repository = repository;
         _quizzesRepository = quizzesRepository;
+        _quizAuthorizationService = quizAuthorizationService;
         _quizAttemptsRepository = quizAttemptsRepository;
         _quizPermissionsRepository = quizPermissionsRepository;
         _categoryService = categoryService;
@@ -30,6 +34,8 @@ public class QuizService : IQuizService
     {
         var currentQuiz = await _quizzesRepository.GetAsync(currentQuizId, true, true)
             ?? throw new NotFoundException($"Quiz with ID {currentQuizId} was not found");
+
+        await _quizAuthorizationService.AuthorizeAsync(currentQuiz, null, ResourceOperation.Update);
 
         if (currentQuiz.IsDeprecated)
             throw new NotFoundException($"Quiz with ID {currentQuizId} was not found");
@@ -48,6 +54,8 @@ public class QuizService : IQuizService
     {
         var currentQuiz = await _quizzesRepository.GetAsync(currentQuizId, true, true)
             ?? throw new NotFoundException($"Quiz with ID {currentQuizId} was not found");
+
+        await _quizAuthorizationService.AuthorizeAsync(currentQuiz, null, ResourceOperation.Update);
 
         if (currentQuiz.IsDeprecated)
             throw new NotFoundException($"Quiz with ID {currentQuizId} was not found");
@@ -79,7 +87,31 @@ public class QuizService : IQuizService
     private async Task DeprecateAsync(Quiz oldQuiz, Guid newQuizId)
     {
         await _quizzesRepository.UpdateLatestVersionIdAsync(oldQuiz.Id, newQuizId);
-        await _quizPermissionsRepository.UpdateQuizIdAsync(oldQuiz.Id, newQuizId);
+
+        var quizPermissions = await _quizPermissionsRepository.GetAllAsync(oldQuiz.Id);
+
+        if (quizPermissions != null && quizPermissions.Any())
+        {
+            foreach (var quizPermission in quizPermissions)
+            {
+                if (await _quizAttemptsRepository.GetUnfinishedAsync(quizPermission.QuizId, quizPermission.UserId) == null)
+                {
+                    quizPermission.QuizId = newQuizId;
+                }
+                else
+                {
+                    var newQuizPermission = new QuizPermission
+                    {
+                        QuizId = newQuizId,
+                        UserId = quizPermission.UserId,
+                        CanEdit = quizPermission.CanEdit,
+                        CanPlay = quizPermission.CanPlay
+                    };
+
+                    await _repository.AddAsync(newQuizPermission);
+                }
+            }
+        }
 
         oldQuiz.LatestVersionId = newQuizId;
         oldQuiz.Categories.Clear();

@@ -20,7 +20,8 @@ public class QuizzesProfile : Profile
 
         CreateMap<Quiz, QuizDto>()
             .ForCtorParam(nameof(QuizDto.HasImage), opt => opt.MapFrom(src => src.ImageId != null))
-            .ForCtorParam(nameof(QuizDto.Categories), opt => opt.MapFrom(src => src.Categories.Select(c => c.Name)));
+            .ForCtorParam(nameof(QuizDto.Categories), opt => opt.MapFrom(src => src.Categories.Select(c => c.Name)))
+            .ForCtorParam(nameof(QuizDto.CanEdit), opt => opt.MapFrom(src => false));
 
         CreateMap<Quiz, Quiz>()
             .ForMember(dest => dest.Id, opt => opt.MapFrom(src => Guid.NewGuid()))

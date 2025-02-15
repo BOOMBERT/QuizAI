@@ -1,9 +1,6 @@
 ﻿using MediatR;
 using QuizAI.Application.Interfaces;
-using QuizAI.Application.Questions.Dtos;
 using QuizAI.Application.QuizAttempts.Dtos;
-using QuizAI.Application.Services;
-using QuizAI.Application.Users;
 using QuizAI.Domain.Exceptions;
 using QuizAI.Domain.Repositories;
 

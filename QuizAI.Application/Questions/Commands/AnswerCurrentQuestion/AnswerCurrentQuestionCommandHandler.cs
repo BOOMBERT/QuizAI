@@ -1,9 +1,7 @@
 ﻿using MediatR;
 using QuizAI.Application.Interfaces;
-using QuizAI.Application.Services;
-using QuizAI.Application.Users;
+using QuizAI.Domain.Constants;
 using QuizAI.Domain.Entities;
-using QuizAI.Domain.Enums;
 using QuizAI.Domain.Exceptions;
 using QuizAI.Domain.Repositories;
 
@@ -13,18 +11,18 @@ public class AnswerCurrentQuestionCommandHandler : IRequestHandler<AnswerCurrent
 {
     private readonly IRepository _repository;
     private readonly IUserContext _userContext;
-    private readonly IQuizzesRepository _quizzesRepository;
+    private readonly IQuizAuthorizationService _quizAuthorizationService;
     private readonly IQuestionsRepository _questionsRepository;
     private readonly IQuizAttemptsRepository _quizAttemptsRepository;
     private readonly IAnswerService _answerService;
 
     public AnswerCurrentQuestionCommandHandler(
-        IRepository repository, IUserContext userContext, 
-        IQuizzesRepository quizzesRepository, IQuestionsRepository questionsRepository, IQuizAttemptsRepository quizAttemptsRepository, IAnswerService answerService)
+        IRepository repository, IUserContext userContext, IQuizAuthorizationService quizAuthorizationService, 
+        IQuestionsRepository questionsRepository, IQuizAttemptsRepository quizAttemptsRepository, IAnswerService answerService)
     {
         _repository = repository;
         _userContext = userContext;
-        _quizzesRepository = quizzesRepository;
+        _quizAuthorizationService = quizAuthorizationService;
         _questionsRepository = questionsRepository;
         _quizAttemptsRepository = quizAttemptsRepository;
         _answerService = answerService;
@@ -34,8 +32,10 @@ public class AnswerCurrentQuestionCommandHandler : IRequestHandler<AnswerCurrent
     {
         var currentUser = _userContext.GetCurrentUser();
 
-        var questionCount = await _quizzesRepository.GetQuestionCountAsync(request.GetQuizId()) 
+        var quiz = await _repository.GetEntityAsync<Quiz>(request.GetQuizId()) 
             ?? throw new NotFoundException($"Quiz with ID {request.GetQuizId()} was not found");
+
+        await _quizAuthorizationService.AuthorizeAsync(quiz, currentUser.Id, ResourceOperation.Create);
 
         var unfinishedAttempt = await _quizAttemptsRepository.GetUnfinishedAsync(request.GetQuizId(), currentUser.Id)
             ?? throw new ConflictException(
@@ -57,7 +57,7 @@ public class AnswerCurrentQuestionCommandHandler : IRequestHandler<AnswerCurrent
 
         if (isUserAnswerCorrect) unfinishedAttempt.CorrectAnswers++;
 
-        if (questionCount == unfinishedAttempt.CurrentOrder)
+        if (quiz.QuestionCount == unfinishedAttempt.CurrentOrder)
         {
             unfinishedAttempt.CurrentOrder = 0;
             unfinishedAttempt.FinishedAt = DateTime.UtcNow;

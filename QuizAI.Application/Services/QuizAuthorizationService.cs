@@ -1,5 +1,4 @@
 ﻿using QuizAI.Application.Interfaces;
-using QuizAI.Application.Users;
 using QuizAI.Domain.Constants;
 using QuizAI.Domain.Entities;
 using QuizAI.Domain.Exceptions;
@@ -18,46 +17,79 @@ public class QuizAuthorizationService : IQuizAuthorizationService
         _quizPermissionsRepository = quizPermissionsRepository;
     }
 
-    public async Task<bool> AuthorizeAsync(Quiz quiz, string? userId, ResourceOperation resourceOperation)
+    public async Task AuthorizeAsync(Quiz quiz, string? userId, ResourceOperation resourceOperation)
     {
         if (userId == null)
             userId = _userContext.GetCurrentUser().Id;
 
-        return resourceOperation switch
+        switch (resourceOperation)
         {
-            ResourceOperation.Read => await AuthorizeReadOperationAsync(quiz, userId),
-            ResourceOperation.RestrictedRead => await AuthorizeRestrictedReadOperationAsync(quiz, userId),
-            _ => false
-        };
+            case ResourceOperation.Create:
+                await AuthorizeBasicAccessAsync(quiz, userId);
+                break;
+            case ResourceOperation.Read:
+                await AuthorizeBasicAccessAsync(quiz, userId);
+                break;
+            case ResourceOperation.RestrictedRead:
+                await AuthorizeRestrictedAccessAsync(quiz, userId);
+                break;
+            case ResourceOperation.Update:
+                await AuthorizeRestrictedAccessAsync(quiz, userId);
+                break;
+            case ResourceOperation.Delete:
+                AuthorizeDeleteOperation(quiz, userId);
+                break;
+            default:
+                throw new ForbiddenException($"Authorization for {resourceOperation} is not implemented");
+        }
     }
 
-    private async Task<bool> AuthorizeReadOperationAsync(Quiz quiz, string userId)
+    public async Task<bool> AuthorizeReadOperationAndGetCanEditAsync(Quiz quiz, string? userId = null)
     {
-        if (!quiz.IsPrivate) 
+        if (userId == null)
+            userId = _userContext.GetCurrentUser().Id;
+
+        if (quiz.CreatorId == userId)
             return true;
 
-        var isAuthorized = (
-            quiz.CreatorId == userId || 
-            await _quizPermissionsRepository.HasAnyAsync(quiz.Id, userId)
-            );
+        var userQuizPermissions = await _quizPermissionsRepository.GetAsync(quiz.Id, userId, false);
 
-        if (!isAuthorized) 
+        if (!quiz.IsPrivate)
+            return userQuizPermissions?.CanEdit ?? false;
+
+        if (userQuizPermissions == null || (!userQuizPermissions?.CanPlay ?? false))
             throw new ForbiddenException("You do not have permission to access this resource");
 
-        return true;
+        return userQuizPermissions?.CanEdit ?? false;
     }
 
-    private async Task<bool> AuthorizeRestrictedReadOperationAsync(Quiz quiz, string userId)
+    private async Task AuthorizeBasicAccessAsync(Quiz quiz, string userId)
     {
         var isAuthorized = (
+            !quiz.IsPrivate ||
             quiz.CreatorId == userId ||
-            await _quizPermissionsRepository.CanEditAsync(quiz.Id, userId)
+            await _quizPermissionsRepository.CheckAsync(quiz.Id, userId, null, true)
             );
 
         if (!isAuthorized)
             throw new ForbiddenException("You do not have permission to access this resource");
+    }
 
-        return true;
+    private async Task AuthorizeRestrictedAccessAsync(Quiz quiz, string userId)
+    {
+        var isAuthorized = (
+            quiz.CreatorId == userId ||
+            await _quizPermissionsRepository.CheckAsync(quiz.Id, userId, true, null)
+            );
+
+        if (!isAuthorized)
+            throw new ForbiddenException("You do not have permission to access this resource");
+    }
+
+    private static void AuthorizeDeleteOperation(Quiz quiz, string userId)
+    {
+        if (quiz.CreatorId != userId)
+            throw new ForbiddenException("You do not have permission to access this resource");
     }
 
 }

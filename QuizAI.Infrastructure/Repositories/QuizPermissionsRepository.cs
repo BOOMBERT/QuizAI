@@ -14,11 +14,15 @@ public class QuizPermissionsRepository : IQuizPermissionsRepository
         _context = context;
     }
 
-    public async Task<QuizPermission?> GetAsync(Guid quizId, string userId)
+    public async Task<QuizPermission?> GetAsync(Guid quizId, string userId, bool trackChanges = true)
     {
-        return await _context.QuizPermissions
-            .Where(qp => qp.QuizId == quizId && qp.UserId == userId)
-            .FirstOrDefaultAsync();
+        var baseQuery = _context.QuizPermissions
+            .Where(qp => qp.QuizId == quizId && qp.UserId == userId);
+
+        if (!trackChanges)
+            baseQuery = baseQuery.AsNoTracking();
+
+        return await baseQuery.FirstOrDefaultAsync();
     }
 
     public async Task<IEnumerable<QuizPermission>> GetAllAsync(Guid quizId)
@@ -28,18 +32,6 @@ public class QuizPermissionsRepository : IQuizPermissionsRepository
             .ToArrayAsync();
     }
 
-    public async Task UpdateQuizIdAsync(Guid previousQuizId, Guid newQuizId)
-    {
-        var quizPermissions = await _context.QuizPermissions
-            .Where(qp => qp.QuizId == previousQuizId)
-            .ToListAsync();
-
-        foreach (var quizPermission in quizPermissions)
-        {
-            quizPermission.QuizId = newQuizId;
-        }
-    }
-
     public async Task DeletePermissionsAsync(Guid quizId)
     {
         await _context.QuizPermissions
@@ -47,15 +39,12 @@ public class QuizPermissionsRepository : IQuizPermissionsRepository
             .ExecuteDeleteAsync();
     }
 
-    public async Task<bool> HasAnyAsync(Guid quizId, string userId)
+    public async Task<bool> CheckAsync(Guid quizId, string userId, bool? canEdit, bool? canPlay)
     {
         return await _context.QuizPermissions
-            .AnyAsync(qp => qp.QuizId == quizId && qp.UserId == userId);
-    }
-
-    public async Task<bool> CanEditAsync(Guid quizId, string userId)
-    {
-        return await _context.QuizPermissions
-            .AnyAsync(qp => qp.QuizId == quizId && qp.UserId == userId && qp.CanEdit == true);
+            .AnyAsync(
+                qp => qp.QuizId == quizId && qp.UserId == userId && 
+                (canEdit == null || qp.CanEdit == canEdit) && 
+                (canPlay == null || qp.CanPlay == canPlay));
     }
 }

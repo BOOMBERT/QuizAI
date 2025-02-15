@@ -7,16 +7,16 @@ public interface IQuizzesRepository
 {
     Task<Quiz?> GetAsync(Guid quizId, bool includeCategories = false, bool includeQuestionsWithAnswers = false, bool trackChanges = true);
     Task<(IEnumerable<Quiz>, int)> GetAllMatchingAsync(
+        string userId,
         string? searchPhrase,
         int pageSize,
         int pageNumber,
         string? sortBy,
         SortDirection? sortDirection,
-        string? filterUserId,
-        ICollection<string> FilterCategories,
-        string? UserIdToFilterBySharedQuizzes
+        bool filterByCreatorId,
+        ICollection<string> filterCategories,
+        bool filterBySharedQuizzes
         );
-    Task<int?> GetQuestionCountAsync(Guid quizId);
     Task<(string, int)?> GetNameAndQuestionCountAsync(Guid quizId);
     Task<(string, bool, bool)?> GetCreatorIdAndIsPrivateAndIsDeprecatedAsync(Guid quizId);
     Task<(string, bool)?> GetCreatorIdAndIsDeprecatedAsync(Guid quizId);
