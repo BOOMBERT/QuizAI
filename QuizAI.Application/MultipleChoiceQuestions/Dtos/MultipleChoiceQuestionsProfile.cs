@@ -1,6 +1,4 @@
 ﻿using AutoMapper;
-using QuizAI.Application.MultipleChoiceQuestions.Commands.CreateMultipleChoiceQuestion;
-using QuizAI.Application.OpenEndedQuestions.Commands.CreateOpenEndedQuestion;
 using QuizAI.Domain.Entities;
 
 namespace QuizAI.Application.MultipleChoiceQuestions.Dtos;

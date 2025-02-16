@@ -1,6 +1,5 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using QuizAI.Application.Common;
 using QuizAI.Application.Questions.Commands.AnswerCurrentQuestion;
@@ -10,7 +9,6 @@ using QuizAI.Application.Questions.Dtos;
 using QuizAI.Application.Questions.Queries.GetAllQuestions;
 using QuizAI.Application.Questions.Queries.GetQuestion;
 using QuizAI.Application.Questions.Queries.GetQuestionByOrder;
-using QuizAI.Domain.Entities;
 
 namespace QuizAI.API.Controllers
 {

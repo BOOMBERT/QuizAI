@@ -1,6 +1,5 @@
 ﻿using AutoMapper;
 using QuizAI.Domain.Entities;
-using QuizAI.Domain.Enums;
 
 namespace QuizAI.Application.Questions.Dtos;
 

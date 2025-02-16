@@ -109,6 +109,37 @@ public class QuizAttemptsRepository : IQuizAttemptsRepository
         return (quizAttempts, totalCount);
     }
 
+    public async Task<(int, double, TimeSpan)> GetDetailedStatsAsync(Guid quizId, bool includeDeprecated)
+    {
+        var baseQuery = _context.QuizAttempts
+            .Include(qa => qa.Quiz)
+            .Where(qa => qa.FinishedAt != null && (qa.QuizId == quizId || (includeDeprecated && qa.Quiz.LatestVersionId == quizId)));
+
+        var stats = await baseQuery
+            .Select(qa => new
+            {
+                qa.CorrectAnswers,
+                qa.Quiz.QuestionCount,
+                TimeSpent = EF.Functions.DateDiffSecond(qa.StartedAt, qa.FinishedAt!.Value)
+            })
+            .ToListAsync();
+
+        if (stats.Count == 0)
+        {
+            return (0, 0.0, TimeSpan.Zero);
+        }
+
+        var quizAttemptsCount = stats.Count;
+        var averageCorrectAnswers = stats.Average(s => (double)s.CorrectAnswers / s.QuestionCount);
+        var totalTimeSpent = stats.Sum(s => s.TimeSpent);
+
+        return (
+            quizAttemptsCount,
+            averageCorrectAnswers,
+            TimeSpan.FromSeconds(totalTimeSpent / quizAttemptsCount)
+            );
+    }
+
     public async Task<bool> HasAnyAsync(Guid quizId)
     {
         return await _context.QuizAttempts

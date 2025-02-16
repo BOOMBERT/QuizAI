@@ -1,5 +1,4 @@
-﻿using QuizAI.Domain.Entities;
-using QuizAI.Domain.Enums;
+﻿using QuizAI.Domain.Enums;
 
 namespace QuizAI.Application.Questions.Dtos;
 

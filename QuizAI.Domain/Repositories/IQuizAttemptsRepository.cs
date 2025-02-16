@@ -8,7 +8,6 @@ public interface IQuizAttemptsRepository
     Task<QuizAttempt?> GetUnfinishedAsync(Guid quizId, string userId);
     Task<QuizAttempt?> GetFinishedByIdAsync(Guid quizAttemptId, string userId);
     Task<QuizAttempt?> GetLatestFinishedAsync(Guid quizId, string userId);
-    Task<bool> HasAnyAsync(Guid quizId);
     Task<(IEnumerable<QuizAttempt>, int)> GetAllMatchingFinishedAsync(
         string userId,
         string? searchPhrase,
@@ -19,4 +18,6 @@ public interface IQuizAttemptsRepository
         Guid? filterQuizId,
         DateTime? filterStartedAt,
         DateTime? filterFinishedAt);
+    Task<(int, double, TimeSpan)> GetDetailedStatsAsync(Guid quizId, bool includeDeprecated);
+    Task<bool> HasAnyAsync(Guid quizId);
 }

@@ -2,7 +2,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using QuizAI.Application.Common;
-using QuizAI.Application.MultipleChoiceQuestions.Commands.UpdateMultipleChoiceQuestion;
 using QuizAI.Application.TrueFalseQuestions.Commands.CreateTrueFalseQuestion;
 using QuizAI.Application.TrueFalseQuestions.Commands.UpdateTrueFalseQuestion;
 

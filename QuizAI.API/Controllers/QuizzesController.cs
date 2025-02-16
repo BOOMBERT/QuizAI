@@ -10,6 +10,7 @@ using QuizAI.Application.Quizzes.Commands.UpdateQuiz;
 using QuizAI.Application.Quizzes.Dtos;
 using QuizAI.Application.Quizzes.Queries.GetAllQuizzes;
 using QuizAI.Application.Quizzes.Queries.GetQuizById;
+using QuizAI.Application.Quizzes.Queries.GetQuizStats;
 
 namespace QuizAI.API.Controllers;
 
@@ -96,5 +97,16 @@ public class QuizzesController : ControllerBase
     {
         var latestAttempt = await _mediator.Send(new GetLatestAttemptQuery(quizId));
         return Ok(latestAttempt);
+    }
+
+    [HttpGet("{quizId}/stats")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesErrorResponseType(typeof(ErrorResponse))]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<ActionResult<QuizStatsDto>> GetQuizStats(Guid quizId, bool includeDeprecatedVersions)
+    {
+        var quizStats = await _mediator.Send(new GetQuizStatsQuery(quizId, includeDeprecatedVersions));
+        return Ok(quizStats);
     }
 }
