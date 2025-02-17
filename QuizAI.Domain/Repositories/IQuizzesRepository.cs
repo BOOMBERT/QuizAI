@@ -6,6 +6,7 @@ namespace QuizAI.Domain.Repositories;
 public interface IQuizzesRepository
 {
     Task<Quiz?> GetAsync(Guid quizId, bool includeCategories = false, bool includeQuestionsWithAnswers = false, bool trackChanges = true);
+    Task<Quiz?> GetWithQuestionsAndCategoriesAsync(Guid quizId);
     Task<(IEnumerable<Quiz>, int)> GetAllMatchingAsync(
         string userId,
         string? searchPhrase,
@@ -18,7 +19,7 @@ public interface IQuizzesRepository
         bool filterBySharedQuizzes
         );
     Task<(string, int)?> GetNameAndQuestionCountAsync(Guid quizId);
-    Task<(string, bool, bool)?> GetCreatorIdAndIsPrivateAndIsDeprecatedAsync(Guid quizId);
-    Task<(string, bool)?> GetCreatorIdAndIsDeprecatedAsync(Guid quizId);
+    Task<(string, bool, bool, Guid?)?> GetCreatorIdAndIsPrivateAndIsDeprecatedAndLatestVersionIdAsync(Guid quizId);
+    Task<(string, bool, Guid?)?> GetCreatorIdAndIsDeprecatedAndLatestVersionIdAsync(Guid quizId);
     Task UpdateLatestVersionIdAsync(Guid oldLatestVersionId, Guid? newLatestVersionId);
 }

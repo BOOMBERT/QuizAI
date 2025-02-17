@@ -1,6 +1,7 @@
 ﻿using MediatR;
 using QuizAI.Application.Common;
 using QuizAI.Application.Interfaces;
+using QuizAI.Domain.Exceptions;
 using QuizAI.Domain.Repositories;
 
 namespace QuizAI.Application.QuestionImages.Commands.UpdateQuestionImage;
@@ -27,9 +28,9 @@ public class UpdateQuestionImageCommandHandler : IRequestHandler<UpdateQuestionI
         var newImage = await _imageService.UploadAsync(request.Image);
 
         var question = quiz.Questions.First(qn => qn.Id == request.GetQuestionId());
-        var previousImageId = question.ImageId;
 
-        question.ImageId = newImage.Id;
+        if (question.ImageId == newImage.Id)
+            throw new ConflictException($"The image is already assigned to the question with ID {question.Id} in quiz with ID {quiz.Id}");
 
         if (createdNewQuiz)
         {
@@ -38,9 +39,11 @@ public class UpdateQuestionImageCommandHandler : IRequestHandler<UpdateQuestionI
         }
         else
         {
-            if (previousImageId != null)
-                await _imageService.DeleteIfNotAssignedAsync((Guid)previousImageId, null, question.Id);
+            if (question.ImageId != null)
+                await _imageService.DeleteIfNotAssignedAsync((Guid)question.ImageId, null, question.Id);
         }
+
+        question.ImageId = newImage.Id;
 
         await _repository.SaveChangesAsync();
 

@@ -1,11 +1,12 @@
 ﻿using MediatR;
+using QuizAI.Application.Common;
 using QuizAI.Application.Interfaces;
 using QuizAI.Domain.Exceptions;
 using QuizAI.Domain.Repositories;
 
 namespace QuizAI.Application.Questions.Commands.UpdateQuestionOrder;
 
-public class UpdateQuestionOrderCommandHandler : IRequestHandler<UpdateQuestionOrderCommand>
+public class UpdateQuestionOrderCommandHandler : IRequestHandler<UpdateQuestionOrderCommand, LatestQuizId>
 {
     private readonly IRepository _repository;
     private readonly IQuizService _quizService;
@@ -18,7 +19,7 @@ public class UpdateQuestionOrderCommandHandler : IRequestHandler<UpdateQuestionO
         _questionService = questionService;
     }
 
-    public async Task Handle(UpdateQuestionOrderCommand request, CancellationToken cancellationToken)
+    public async Task<LatestQuizId> Handle(UpdateQuestionOrderCommand request, CancellationToken cancellationToken)
     {
         _questionService.ValidateQuestionLimit(request.OrderChanges.Max(oc => oc.NewOrder));
 
@@ -32,8 +33,14 @@ public class UpdateQuestionOrderCommandHandler : IRequestHandler<UpdateQuestionO
 
         _questionService.ChangeOrders(quiz, request.OrderChanges);
 
-        if (createdNewQuiz) await _repository.AddAsync(quiz);
+        if (createdNewQuiz)
+        {
+            _questionService.ResetIds(quiz.Questions);
+            await _repository.AddAsync(quiz);
+        }
 
         await _repository.SaveChangesAsync();
+
+        return new LatestQuizId(quiz.Id);
     }
 }

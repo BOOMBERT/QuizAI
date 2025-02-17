@@ -39,6 +39,14 @@ public class QuizzesRepository : IQuizzesRepository
         return await baseQuery.FirstOrDefaultAsync(qz => qz.Id == quizId);
     }
 
+    public async Task<Quiz?> GetWithQuestionsAndCategoriesAsync(Guid quizId)
+    {
+        return await _context.Quizzes
+            .Include(qz => qz.Questions)
+            .Include(qz => qz.Categories)
+            .FirstOrDefaultAsync(qz => qz.Id == quizId);
+    }
+
     public async Task<(IEnumerable<Quiz>, int)> GetAllMatchingAsync(
         string userId,
         string? searchPhrase,
@@ -137,28 +145,28 @@ public class QuizzesRepository : IQuizzesRepository
         return (result.Name, result.QuestionCount);
     }
 
-    public async Task<(string, bool, bool)?> GetCreatorIdAndIsPrivateAndIsDeprecatedAsync(Guid quizId)
+    public async Task<(string, bool, bool, Guid?)?> GetCreatorIdAndIsPrivateAndIsDeprecatedAndLatestVersionIdAsync(Guid quizId)
     {
         var result = await _context.Quizzes
             .Where(qz => qz.Id == quizId)
-            .Select(qz => new { qz.CreatorId, qz.IsPrivate, qz.IsDeprecated })
+            .Select(qz => new { qz.CreatorId, qz.IsPrivate, qz.IsDeprecated, qz.LatestVersionId })
             .FirstOrDefaultAsync();
 
         if (result == null) return null;
 
-        return (result.CreatorId, result.IsPrivate, result.IsDeprecated);
+        return (result.CreatorId, result.IsPrivate, result.IsDeprecated, result.LatestVersionId);
     }
 
-    public async Task<(string, bool)?> GetCreatorIdAndIsDeprecatedAsync(Guid quizId)
+    public async Task<(string, bool, Guid?)?> GetCreatorIdAndIsDeprecatedAndLatestVersionIdAsync(Guid quizId)
     {
         var result = await _context.Quizzes
             .Where(qz => qz.Id == quizId)
-            .Select(qz => new { qz.CreatorId, qz.IsDeprecated })
+            .Select(qz => new { qz.CreatorId, qz.IsDeprecated, qz.LatestVersionId })
             .FirstOrDefaultAsync();
 
         if (result == null) return null;
 
-        return (result.CreatorId, result.IsDeprecated);
+        return (result.CreatorId, result.IsDeprecated, result.LatestVersionId);
     }
 
     public async Task UpdateLatestVersionIdAsync(Guid oldLatestVersionId, Guid? newLatestVersionId)

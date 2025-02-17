@@ -37,12 +37,9 @@ public static class ServiceCollectionExtensions
             var repository = provider.GetRequiredService<IRepository>();
             var fileStorageService = provider.GetRequiredService<IFileStorageService>();
             var imagesRepository = provider.GetRequiredService<IImagesRepository>();
-            var questionsRepository = provider.GetRequiredService<IQuestionsRepository>();
             (ushort, ushort) imagesDefaultSize = (800, 800);
-            return new ImageService(repository, fileStorageService, imagesRepository, questionsRepository, imagesDefaultSize);
+            return new ImageService(repository, fileStorageService, imagesRepository, imagesDefaultSize);
         });
-
-        services.AddScoped<ICategoryService, CategoryService>();
 
         services.AddScoped<IQuestionService, QuestionService>(provider =>
         {
@@ -51,6 +48,7 @@ public static class ServiceCollectionExtensions
             return new QuestionService(mapper, maxNumberOfQuestions);
         });
 
+        services.AddScoped<ICategoryService, CategoryService>();
         services.AddScoped<IQuizService, QuizService>();
         services.AddScoped<IAnswerService, AnswerService>();
         services.AddScoped<IQuizAttemptService, QuizAttemptService>();

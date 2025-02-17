@@ -1,6 +1,7 @@
 ﻿using MediatR;
 using QuizAI.Application.Common;
 using QuizAI.Application.Interfaces;
+using QuizAI.Domain.Exceptions;
 using QuizAI.Domain.Repositories;
 
 namespace QuizAI.Application.QuizImages.Commands.UpdateQuizImage;
@@ -10,30 +11,36 @@ public class UpdateQuizImageCommandHandler : IRequestHandler<UpdateQuizImageComm
     private readonly IRepository _repository;
     private readonly IQuizService _quizService;
     private readonly IImageService _imageService;
+    private readonly IQuizzesRepository _quizzesRepository;
 
-    public UpdateQuizImageCommandHandler(IRepository repository, IQuizService quizService, IImageService imageService)
+    public UpdateQuizImageCommandHandler(IRepository repository, IQuizService quizService, IImageService imageService, IQuizzesRepository quizzesRepository)
     {
         _repository = repository;
         _quizService = quizService;
         _imageService = imageService;
+        _quizzesRepository = quizzesRepository;
     }
 
     public async Task<LatestQuizId> Handle(UpdateQuizImageCommand request, CancellationToken cancellationToken)
     {
         var (quiz, createdNewQuiz) = await _quizService.GetValidOrDeprecateAndCreateAsync(request.GetId());
+        
+        var newImage = await _imageService.UploadAsync(request.Image);
+
+        if (quiz.ImageId == newImage.Id)
+            throw new ConflictException($"The image is already assigned to the quiz with ID {quiz.Id}");
 
         if (createdNewQuiz)
         {
             await _repository.AddAsync(quiz);
         }
-        else
+
+        if (quiz.ImageId != null)
         {
-            if (quiz.ImageId != null)
-                await _imageService.DeleteIfNotAssignedAsync((Guid)quiz.ImageId, request.GetId());
+            await _imageService.DeleteIfNotAssignedAsync((Guid)quiz.ImageId, request.GetId());
         }
 
-        var newImage = await _imageService.UploadAsync(request.Image);
-        quiz.ImageId = newImage.Id;
+        quiz.ImageId = newImage.Id;        
 
         await _repository.SaveChangesAsync();
 

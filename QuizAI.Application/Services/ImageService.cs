@@ -15,20 +15,13 @@ public class ImageService : IImageService
     private readonly IRepository _repository;
     private readonly IFileStorageService _fileStorageService;
     private readonly IImagesRepository _imagesRepository;
-    private readonly IQuestionsRepository _questionsRepository;
     private readonly (ushort width, ushort height)? _imagesDefaultSize;
 
-    public ImageService(
-        IRepository repository,
-        IFileStorageService fileStorageService,
-        IImagesRepository imagesRepository, 
-        IQuestionsRepository questionsRepository,
-        (ushort width, ushort height)? imagesDefaultSize)
+    public ImageService(IRepository repository, IFileStorageService fileStorageService, IImagesRepository imagesRepository, (ushort width, ushort height)? imagesDefaultSize)
     {
         _repository = repository;
         _fileStorageService = fileStorageService;
         _imagesRepository = imagesRepository;
-        _questionsRepository = questionsRepository;
         _imagesDefaultSize = imagesDefaultSize;
     }
 
@@ -44,7 +37,7 @@ public class ImageService : IImageService
         else
         {
             var question = await _repository.GetEntityAsync<Question>((int)questionId)
-                ?? throw new NotFoundException($"Question with ID {questionId} has no associated image");
+                ?? throw new NotFoundException($"Question with ID {questionId} in quiz with ID {quiz.Id} was not found");
 
             imageName = question.ImageId ?? throw new NotFoundException($"Question with ID {questionId} in quiz with ID {quiz.Id} has no associated image");
             questionErrorMessageContext = $"question with ID {questionId} in ";

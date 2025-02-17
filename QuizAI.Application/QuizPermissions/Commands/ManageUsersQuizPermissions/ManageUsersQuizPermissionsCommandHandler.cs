@@ -32,14 +32,14 @@ public class ManageUsersQuizPermissionsCommandHandler : IRequestHandler<ManageUs
         if (string.Equals(userEmail, currentUser.Email, StringComparison.OrdinalIgnoreCase)) 
             throw new ConflictException("You cannot assign permissions to yourself");
 
-        var (creatorId, isPrivate, isDeprecated) = await _quizzesRepository.GetCreatorIdAndIsPrivateAndIsDeprecatedAsync(quizId)
+        var (creatorId, isPrivate, isDeprecated, latestVersionId) = await _quizzesRepository.GetCreatorIdAndIsPrivateAndIsDeprecatedAndLatestVersionIdAsync(quizId)
             ?? throw new NotFoundException($"Quiz with ID {quizId} was not found");
 
-        if (isDeprecated) 
-            throw new NotFoundException($"Quiz with ID {quizId} was not found");
-
-        if (creatorId != currentUser.Id) 
+        if (creatorId != currentUser.Id)
             throw new ForbiddenException($"You cannot manage permissions for quiz with ID {quizId} because you are not its creator");
+
+        if (isDeprecated) 
+            throw new NotFoundQuizWithVersioningException(quizId, latestVersionId);
 
         var userId = await _userRepository.GetIdAsync(userEmail) 
             ?? throw new NotFoundException($"User with email {userEmail} was not found");

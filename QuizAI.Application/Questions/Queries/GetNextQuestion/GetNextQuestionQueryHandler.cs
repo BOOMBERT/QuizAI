@@ -53,7 +53,7 @@ public class GetNextQuestionQueryHandler : IRequestHandler<GetNextQuestionQuery,
         if (unfinishedQuizAttempt == null)
         {
             if (quiz.IsDeprecated)
-                throw new NotFoundException($"Quiz with ID {request.QuizId} was not found");
+                throw new NotFoundQuizWithVersioningException(quiz.Id, quiz.LatestVersionId);
 
             var quizAttempt = new QuizAttempt
             { 

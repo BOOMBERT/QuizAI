@@ -38,7 +38,7 @@ public class QuizService : IQuizService
         await _quizAuthorizationService.AuthorizeAsync(currentQuiz, null, ResourceOperation.Update);
 
         if (currentQuiz.IsDeprecated)
-            throw new NotFoundException($"Quiz with ID {currentQuizId} was not found");
+            throw new NotFoundQuizWithVersioningException(currentQuizId, currentQuiz.LatestVersionId);
 
         if (!await _quizAttemptsRepository.HasAnyAsync(currentQuiz.Id))
             return (currentQuiz, false);
@@ -58,7 +58,7 @@ public class QuizService : IQuizService
         await _quizAuthorizationService.AuthorizeAsync(currentQuiz, null, ResourceOperation.Update);
 
         if (currentQuiz.IsDeprecated)
-            throw new NotFoundException($"Quiz with ID {currentQuizId} was not found");
+            throw new NotFoundQuizWithVersioningException(currentQuizId, currentQuiz.LatestVersionId);
 
         if (questionId != null && !currentQuiz.Questions.Any(qn => qn.Id == questionId))
             throw new NotFoundException($"Question with ID {questionId} in quiz with ID {currentQuizId} was not found");
@@ -113,6 +113,7 @@ public class QuizService : IQuizService
             }
         }
 
+        oldQuiz.ImageId = null;
         oldQuiz.LatestVersionId = newQuizId;
         oldQuiz.Categories.Clear();
         oldQuiz.IsDeprecated = true;

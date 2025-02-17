@@ -31,27 +31,46 @@ public class DeleteQuizCommandHandler : IRequestHandler<DeleteQuizCommand>
 
     public async Task Handle(DeleteQuizCommand request, CancellationToken cancellationToken)
     {
-        var quiz = await _quizzesRepository.GetAsync(request.GetId(), true);
-        
-        if (quiz == null || quiz.IsDeprecated)
-            throw new NotFoundException($"Quiz with ID {request.GetId()} was not found");
+        var quiz = await _quizzesRepository.GetWithQuestionsAndCategoriesAsync(request.GetId())
+            ?? throw new NotFoundException($"Quiz with ID {request.GetId()} was not found");
 
         await _quizAuthorizationService.AuthorizeAsync(quiz, null, ResourceOperation.Delete);
 
+        if (quiz.IsDeprecated)
+            throw new NotFoundQuizWithVersioningException(quiz.Id, quiz.LatestVersionId);
+
         await _categoryService.RemoveUnusedAsync(quiz, Enumerable.Empty<string>());
+
+        var imagesIdsToDelete = new HashSet<Guid>();
+
+        if (quiz.ImageId != null)
+        {
+            imagesIdsToDelete.Add((Guid)quiz.ImageId);
+            quiz.ImageId = null;
+        }
 
         if (!await _quizAttemptsRepository.HasAnyAsync(quiz.Id))
         {
             _repository.Remove(quiz);
             await _quizzesRepository.UpdateLatestVersionIdAsync(quiz.Id, null);
 
-            if (quiz.ImageId != null)
-                await _imageService.DeleteIfNotAssignedAsync((Guid)quiz.ImageId, quiz.Id);
+            foreach (var question in quiz.Questions.Where(qn => qn.ImageId != null))
+            {
+                imagesIdsToDelete.Add((Guid)question.ImageId!);
+                question.ImageId = null;
+            }
         }
         else
         {
             quiz.IsDeprecated = true;
             await _quizPermissionsRepository.DeletePermissionsAsync(quiz.Id);
+        }
+
+        await _repository.SaveChangesAsync();
+
+        foreach (var imageIdToDelete in imagesIdsToDelete)
+        {
+            await _imageService.DeleteIfNotAssignedAsync(imageIdToDelete, null, null);
         }
 
         await _repository.SaveChangesAsync();

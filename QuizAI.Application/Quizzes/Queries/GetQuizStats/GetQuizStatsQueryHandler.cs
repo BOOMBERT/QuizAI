@@ -23,14 +23,14 @@ public class GetQuizStatsQueryHandler : IRequestHandler<GetQuizStatsQuery, QuizS
     {
         var currentUser = _userContext.GetCurrentUser();
 
-        var (creatorId, isDeprecated) = await _quizzesRepository.GetCreatorIdAndIsDeprecatedAsync(request.QuizId)
+        var (creatorId, isDeprecated, latestVersionId) = await _quizzesRepository.GetCreatorIdAndIsDeprecatedAndLatestVersionIdAsync(request.QuizId)
             ?? throw new NotFoundException($"Quiz with ID {request.QuizId} was not found");
-
-        if (isDeprecated) 
-            throw new NotFoundException($"Quiz with ID {request.QuizId} was not found");
 
         if (creatorId != currentUser.Id) 
             throw new ForbiddenException($"You do not have permission to view the stats of the quiz with ID {request.QuizId} because you are not its creator");
+
+        if (isDeprecated)
+            throw new NotFoundQuizWithVersioningException(request.QuizId, latestVersionId);
 
         var (quizAttemptsCount, averageCorrectAnswers, averageTimeSpent) = 
             await _quizAttemptsRepository.GetDetailedStatsAsync(request.QuizId, request.IncludeDeprecatedVersions);

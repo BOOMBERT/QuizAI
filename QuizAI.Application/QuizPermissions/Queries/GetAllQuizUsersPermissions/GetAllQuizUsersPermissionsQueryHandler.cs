@@ -26,14 +26,14 @@ public class GetAllQuizUsersPermissionsQueryHandler : IRequestHandler<GetAllQuiz
     {
         var currentUser = _userContext.GetCurrentUser();
 
-        var (creatorId, isDeprecated) = await _quizzesRepository.GetCreatorIdAndIsDeprecatedAsync(request.QuizId)
+        var (creatorId, isDeprecated, latestVersionId) = await _quizzesRepository.GetCreatorIdAndIsDeprecatedAndLatestVersionIdAsync(request.QuizId)
             ?? throw new NotFoundException($"Quiz with ID {request.QuizId} was not found");
-
-        if (isDeprecated)
-            throw new NotFoundException($"Quiz with ID {request.QuizId} was not found");
 
         if (creatorId != currentUser.Id)
             throw new ForbiddenException($"You cannot view the permissions for quiz with ID {request.QuizId} because you are not its creator");
+
+        if (isDeprecated)
+            throw new NotFoundQuizWithVersioningException(request.QuizId, latestVersionId);
 
         var quizPermissions = await _quizPermissionsRepository.GetAllAsync(request.QuizId);
         var quizUsersPermissionsDtos = await Task.WhenAll(

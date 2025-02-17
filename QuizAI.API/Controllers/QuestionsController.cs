@@ -58,6 +58,20 @@ namespace QuizAI.API.Controllers
             return Ok(question);
         }
 
+        [HttpPatch("order")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesErrorResponseType(typeof(ErrorResponse))]
+        [ProducesResponseType(StatusCodes.Status409Conflict)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<ActionResult<LatestQuizId>> UpdateQuestionOrder(Guid QuizId, UpdateQuestionOrderCommand command)
+        {
+            command.SetQuizId(QuizId);
+
+            var newQuizId = await _mediator.Send(command);
+            return Ok(newQuizId);
+        }
+
         [HttpPost("answer")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesErrorResponseType(typeof(ErrorResponse))]
@@ -65,20 +79,6 @@ namespace QuizAI.API.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> AnswerCurrentQuestion(Guid QuizId, AnswerCurrentQuestionCommand command)
-        {
-            command.SetQuizId(QuizId);
-
-            await _mediator.Send(command);
-            return NoContent();
-        }
-
-        [HttpPatch("order")]
-        [ProducesResponseType(StatusCodes.Status204NoContent)]
-        [ProducesErrorResponseType(typeof(ErrorResponse))]
-        [ProducesResponseType(StatusCodes.Status409Conflict)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> UpdateQuestionOrder(Guid QuizId, UpdateQuestionOrderCommand command)
         {
             command.SetQuizId(QuizId);
 

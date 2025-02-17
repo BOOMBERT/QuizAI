@@ -22,7 +22,7 @@ public class QuestionService : IQuestionService
     {
         if (questionCount >= _maxNumberOfQuestions)
             throw new ConflictException(
-                $"A question with order number {questionCount} cannot exist as it exceeds the maximum limit of {_maxNumberOfQuestions}"
+                $"The question with order number {questionCount} cannot exist as it exceeds the maximum limit of {_maxNumberOfQuestions}"
             );
     }
 
@@ -48,7 +48,11 @@ public class QuestionService : IQuestionService
             }
 
             var question = questionsById[orderChange.QuestionId];
-            question.Order = (byte)orderChange.NewOrder;
+
+            if (question.Order != (byte)orderChange.NewOrder)
+            {
+                question.Order = (byte)orderChange.NewOrder;
+            }
         }
     }
 

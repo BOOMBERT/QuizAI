@@ -27,7 +27,7 @@ public class DeleteQuestionImageCommandHandler : IRequestHandler<DeleteQuestionI
 
         var question = quiz.Questions.First(qn => qn.Id == request.QuestionId);
         var previousImageId = question.ImageId
-            ?? throw new NotFoundException($"Question with ID {request.QuestionId} in quiz with ID {request.QuizId} has no associated image.");
+            ?? throw new NotFoundException($"Question with ID {request.QuestionId} in quiz with ID {request.QuizId} has no associated image");
 
         question.ImageId = null;
 
