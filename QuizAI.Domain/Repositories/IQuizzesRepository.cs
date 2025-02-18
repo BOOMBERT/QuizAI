@@ -16,7 +16,8 @@ public interface IQuizzesRepository
         SortDirection? sortDirection,
         bool filterByCreatorId,
         ICollection<string> filterCategories,
-        bool filterBySharedQuizzes
+        bool filterBySharedQuizzes,
+        bool filterByUnfinishedAttempts
         );
     Task<(string, int)?> GetNameAndQuestionCountAsync(Guid quizId);
     Task<(string, bool, bool, Guid?)?> GetCreatorIdAndIsPrivateAndIsDeprecatedAndLatestVersionIdAsync(Guid quizId);

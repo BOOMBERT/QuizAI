@@ -21,7 +21,9 @@ public class QuizzesProfile : Profile
         CreateMap<Quiz, QuizDto>()
             .ForCtorParam(nameof(QuizDto.HasImage), opt => opt.MapFrom(src => src.ImageId != null))
             .ForCtorParam(nameof(QuizDto.Categories), opt => opt.MapFrom(src => src.Categories.Select(c => c.Name)))
-            .ForCtorParam(nameof(QuizDto.CanEdit), opt => opt.MapFrom(src => false));
+            .ForCtorParam(nameof(QuizDto.CanEdit), opt => opt.MapFrom(src => false))
+            .ForCtorParam(nameof(QuizDto.HasUnfinishedAttempt), opt => opt.MapFrom(src => false))
+            .ForCtorParam(nameof(QuizDto.PublicImageUrl), opt => opt.MapFrom(src => (string?)null));
 
         CreateMap<Quiz, Quiz>()
             .ForMember(dest => dest.Id, opt => opt.MapFrom(src => Guid.NewGuid()))

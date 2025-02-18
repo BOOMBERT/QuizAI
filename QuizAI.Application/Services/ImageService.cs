@@ -46,25 +46,32 @@ public class ImageService : IImageService
         var imageExtension = await _repository.GetFieldAsync<Image, string>(imageName, "FileExtension")
             ?? throw new NotFoundException($"Image for {questionErrorMessageContext}quiz with ID {quiz.Id} could not be found");
 
-        var imageData = await _fileStorageService.RetrieveAsync(imageName, imageExtension);
+        var imageData = await _fileStorageService.RetrieveAsync(imageName, imageExtension, quiz.IsPrivate);
 
         if (imageExtension == FileExtension.Jpg) imageExtension = FileExtension.Jpeg;
         var contentType = "image/" + imageExtension.TrimStart('.');
         return (imageData, contentType);
     }
 
-    public async Task<Image> UploadAsync(IFormFile image)
+    public async Task<Image> UploadAsync(IFormFile image, bool isPrivate)
     {
         byte[] optimizedImage = await ImageOptimizationUtil.Optimize(image, _imagesDefaultSize);
 
         var imageHash = HashByPhash(optimizedImage);
         var imageInDb = await _imagesRepository.GetAsync(imageHash);
 
-        if (imageInDb != null)
-            return imageInDb;
+        string imageExtension;
+        imageExtension = Path.GetExtension(image.FileName);
 
-        var imageExtension = Path.GetExtension(image.FileName);
-        var imageName = await _fileStorageService.UploadAsync(optimizedImage, imageExtension);
+        if (imageInDb != null)
+        {
+            if(!await _imagesRepository.IsInStorageAsync(imageHash, isPrivate))
+                await _fileStorageService.UploadAsync(optimizedImage, imageExtension, isPrivate, imageInDb.Id);
+
+            return imageInDb;
+        }
+
+        var imageName = await _fileStorageService.UploadAsync(optimizedImage, imageExtension, isPrivate);
 
         var newUploadedImage = new Image
         {
@@ -78,7 +85,7 @@ public class ImageService : IImageService
         return newUploadedImage;
     }
 
-    public async Task DeleteIfNotAssignedAsync(Guid imageId, Guid? quizIdToSkip = null, int? questionIdToSkip = null)
+    public async Task DeleteIfNotAssignedAsync(Guid imageId, bool isPrivate, Guid? quizIdToSkip = null, int? questionIdToSkip = null)
     {
         var imageExtension = await _repository.GetFieldAsync<Image, string>(imageId, "FileExtension") ?? 
             throw new NotFoundException($"Image with ID {imageId} was not found");
@@ -87,7 +94,27 @@ public class ImageService : IImageService
             !await _imagesRepository.IsAssignedToAnyQuestionAsync(imageId, questionIdToSkip))
         {
             await _repository.DeleteAsync<Image>(imageId);
-            _fileStorageService.Delete(imageId, imageExtension);
+            _fileStorageService.Delete(imageId, imageExtension, isPrivate);
+        }
+        else if (!await _imagesRepository.IsAssignedToAnyQuizAsync(imageId, quizIdToSkip, isPrivate) && 
+             !await _imagesRepository.IsAssignedToAnyQuestionAsync(imageId, questionIdToSkip, isPrivate))
+        {
+            _fileStorageService.Delete(imageId, imageExtension, isPrivate);
+        }
+    }
+
+    public async Task MoveImagesAsync(HashSet<(Guid imageId, string imageExtension)> images, bool isPrivate, bool doNotDelete = false)
+    {
+        foreach (var (imageId, imageExtension) in images)
+        {
+            _fileStorageService.CopyImage(imageId, imageExtension, isPrivate);
+
+            if (!doNotDelete &&
+                !await _imagesRepository.IsAssignedToAnyQuizAsync(imageId, null, isPrivate) && 
+                !await _imagesRepository.IsAssignedToAnyQuestionAsync(imageId, null, isPrivate))
+            {
+                _fileStorageService.Delete(imageId, imageExtension, isPrivate);
+            }
         }
     }
 

@@ -19,7 +19,8 @@ TestResults
 *.suo
 *.user
 *.sln.docstates
-Uploads/
+PublicUploads/
+PrivateUploads/
 
 # Build results
 [Dd]ebug/

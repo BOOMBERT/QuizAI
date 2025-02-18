@@ -2,7 +2,6 @@
 using FluentValidation;
 using FluentValidation.AspNetCore;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 using QuizAI.Application.Interfaces;
 using QuizAI.Application.Services;
 using QuizAI.Application.Users;
@@ -12,7 +11,7 @@ namespace QuizAI.Application.Extensions;
 
 public static class ServiceCollectionExtensions
 {
-    public static void AddApplication(this IServiceCollection services)
+    public static void AddApplication(this IServiceCollection services, string publicStoragePath, string privateStoragePath)
     {
         var applicationAssembly = typeof(ServiceCollectionExtensions).Assembly;
         
@@ -24,12 +23,9 @@ public static class ServiceCollectionExtensions
         services.AddHttpContextAccessor();
         services.AddScoped<IUserContext, UserContext>();
 
-        var storageFolderName = "Uploads";
-
-        services.AddScoped<IFileStorageService, FileStorageService>(provider =>
+        services.AddScoped<IFileStorageService>(provider =>
         {
-            var environment = provider.GetRequiredService<IHostEnvironment>();
-            return new FileStorageService(environment, storageFolderName);
+            return new FileStorageService(publicStoragePath, privateStoragePath);
         });
 
         services.AddScoped<IImageService, ImageService>(provider =>

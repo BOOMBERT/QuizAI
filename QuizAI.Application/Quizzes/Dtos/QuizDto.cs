@@ -12,5 +12,7 @@ public record QuizDto(
     Guid? LatestVersionId,
     int QuestionCount,
     string CreatorId,
-    bool CanEdit
+    bool CanEdit,
+    bool HasUnfinishedAttempt,
+    string? PublicImageUrl
     );

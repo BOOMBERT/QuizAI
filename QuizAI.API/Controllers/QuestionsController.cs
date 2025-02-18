@@ -49,7 +49,6 @@ namespace QuizAI.API.Controllers
         [HttpGet("order/{orderNumber}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesErrorResponseType(typeof(ErrorResponse))]
-        [ProducesResponseType(StatusCodes.Status409Conflict)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<ActionResult<QuestionWithAnswersDto>> GetQuestionByOrder(Guid QuizId, int orderNumber)

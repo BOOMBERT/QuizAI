@@ -16,4 +16,5 @@ public class GetAllQuizzesQuery : IRequest<PagedResponse<QuizDto>>, IPaginationQ
     public ICollection<string> FilterByCategories { get; set; } = new List<string>();
     public bool FilterByCreator { get; set; }
     public bool FilterBySharedQuizzes { get; set; }
+    public bool FilterByUnfinishedAttempts { get; set; }
 }

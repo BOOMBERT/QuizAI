@@ -30,7 +30,7 @@ public class QuizService : IQuizService
         _categoryService = categoryService;
     }
 
-    public async Task<(Quiz, bool)> GetValidOrDeprecateAndCreateAsync(Guid currentQuizId)
+    public async Task<(Quiz, bool)> GetValidOrDeprecateAndCreateWithNewQuestionsAsync(Guid currentQuizId)
     {
         var currentQuiz = await _quizzesRepository.GetAsync(currentQuizId, true, true)
             ?? throw new NotFoundException($"Quiz with ID {currentQuizId} was not found");

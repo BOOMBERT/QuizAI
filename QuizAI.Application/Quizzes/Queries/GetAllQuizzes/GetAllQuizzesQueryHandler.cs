@@ -3,6 +3,7 @@ using MediatR;
 using QuizAI.Application.Common;
 using QuizAI.Application.Interfaces;
 using QuizAI.Application.Quizzes.Dtos;
+using QuizAI.Domain.Entities;
 using QuizAI.Domain.Repositories;
 
 namespace QuizAI.Application.Quizzes.Queries.GetAllQuizzes;
@@ -12,14 +13,12 @@ public class GetAllQuizzesQueryHandler : IRequestHandler<GetAllQuizzesQuery, Pag
     private readonly IMapper _mapper;
     private readonly IUserContext _userContext;
     private readonly IQuizzesRepository _quizzesRepository;
-    private readonly IQuizAuthorizationService _quizAuthorizationService;
 
-    public GetAllQuizzesQueryHandler(IMapper mapper, IUserContext userContext, IQuizzesRepository quizzesRepository, IQuizAuthorizationService quizAuthorizationService)
+    public GetAllQuizzesQueryHandler(IMapper mapper, IUserContext userContext, IQuizzesRepository quizzesRepository)
     {
         _mapper = mapper;
         _userContext = userContext;
         _quizzesRepository = quizzesRepository;
-        _quizAuthorizationService = quizAuthorizationService;
     }
 
     public async Task<PagedResponse<QuizDto>> Handle(GetAllQuizzesQuery request, CancellationToken cancellationToken)
@@ -35,7 +34,8 @@ public class GetAllQuizzesQueryHandler : IRequestHandler<GetAllQuizzesQuery, Pag
             request.SortDirection,
             request.FilterByCreator,
             request.FilterByCategories,
-            request.FilterBySharedQuizzes
+            request.FilterBySharedQuizzes,
+            request.FilterByUnfinishedAttempts
         );
 
         var quizzesDtos = _mapper.Map<IEnumerable<QuizDto>>(quizzes);
@@ -46,16 +46,35 @@ public class GetAllQuizzesQueryHandler : IRequestHandler<GetAllQuizzesQuery, Pag
         }
         else
         {
-            var dtosWithUpdatedCanEdit = quizzes.Zip(quizzesDtos, (quiz, dto) =>
+            quizzesDtos = quizzesDtos.Zip(quizzes, (dto, quiz) => dto with
             {
-                var canEdit = dto.CreatorId == currentUser.Id ||
-                              quiz.QuizPermissions.FirstOrDefault(qp => qp.QuizId == dto.Id && qp.UserId == currentUser.Id)?.CanEdit == true;
-
-                return dto with { CanEdit = canEdit };
+                CanEdit = dto.CreatorId == currentUser.Id || quiz.QuizPermissions.Any(qp => qp.UserId == currentUser.Id && qp.CanEdit)
             });
-
-            quizzesDtos = dtosWithUpdatedCanEdit;
         }
+
+        if (request.FilterByUnfinishedAttempts)
+        {
+            quizzesDtos = quizzesDtos.Select(dto => dto with { HasUnfinishedAttempt = true });
+        }
+        else
+        {
+            quizzesDtos = quizzesDtos.Zip(quizzes, (dto, quiz) => dto with
+            {
+                HasUnfinishedAttempt = quiz.QuizAttempts.Any(qa => qa.UserId == currentUser.Id && qa.FinishedAt == null)
+            });
+        }
+
+        quizzesDtos = quizzesDtos.Zip(quizzes, (dto, quiz) =>
+        {
+            string? publicImageUrl = null;
+            if (!dto.IsPrivate && dto.HasImage)
+            {
+                publicImageUrl = $"/api/uploads/{quiz.ImageId}{quiz.Image!.FileExtension}";
+            }
+
+            return dto with { PublicImageUrl = publicImageUrl };
+        });
+
 
         var paginationInfo = new PaginationInfo(totalCount, request.PageSize, request.PageNumber);
 

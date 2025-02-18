@@ -56,21 +56,35 @@ public class QuizzesRepository : IQuizzesRepository
         SortDirection? sortDirection,
         bool filterByCreatorId,
         ICollection<string> filterCategories,
-        bool filterBySharedQuizzes
+        bool filterBySharedQuizzes,
+        bool filterByUnfinishedAttempts
         )
     {
         var baseQuery = _context.Quizzes
             .AsNoTracking()
             .Include(qz => qz.Categories)
-            .Include(qz => qz.QuizPermissions)
-            .Where(qz => qz.IsDeprecated == false);
+            .Include(qz => qz.Image)
+            .AsQueryable();
+
+        if (filterByUnfinishedAttempts)
+        {
+            baseQuery = baseQuery
+                .Include(qz => qz.QuizAttempts)
+                .Where(qz => qz.QuizAttempts.Any(qa => qa.UserId == userId && qa.FinishedAt == null));
+        }
+        else
+        {
+            baseQuery = baseQuery
+                .Where(qz => qz.IsDeprecated == false);
+        }
 
         if (filterBySharedQuizzes || filterByCreatorId)
         {
             if (filterBySharedQuizzes)
             {
                 baseQuery = baseQuery
-                    .Where(qz => _context.QuizPermissions.Any(qp => qp.QuizId == qz.Id && qp.UserId == userId));
+                    .Include(qz => qz.QuizPermissions)
+                    .Where(qz => qz.QuizPermissions.Any(qp => qp.UserId == userId));
             }
             else if (filterByCreatorId)
             {
@@ -81,10 +95,11 @@ public class QuizzesRepository : IQuizzesRepository
         else
         {
             baseQuery = baseQuery
+                .Include(qz => qz.QuizPermissions)
                 .Where(qz => 
                 qz.IsPrivate == false || 
                 (qz.IsPrivate == true && qz.CreatorId == userId) || 
-                _context.QuizPermissions.Any(qp => qp.QuizId == qz.Id && qp.UserId == userId)
+                qz.QuizPermissions.Any(qp => qp.UserId == userId)
                 );
         }
 

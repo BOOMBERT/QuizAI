@@ -63,14 +63,14 @@ public class QuizAttemptsRepository : IQuizAttemptsRepository
         if (filterByStartedAtYearAndMonth != null)
         {
             baseQuery = baseQuery
-                .Where(qa => qa.StartedAt.Year == filterByStartedAtYearAndMonth.Value.Year && 
+                .Where(qa => qa.StartedAt.Year == filterByStartedAtYearAndMonth.Value.Year &&
                 qa.StartedAt.Month == filterByStartedAtYearAndMonth.Value.Month);
         }
 
         if (filterByFinishedAtYearAndMonth != null)
         {
             baseQuery = baseQuery
-                .Where(qa => qa.FinishedAt!.Value.Year == filterByFinishedAtYearAndMonth.Value.Year && 
+                .Where(qa => qa.FinishedAt!.Value.Year == filterByFinishedAtYearAndMonth.Value.Year &&
                 qa.FinishedAt!.Value.Month == filterByFinishedAtYearAndMonth.Value.Month);
         }
 
@@ -140,9 +140,12 @@ public class QuizAttemptsRepository : IQuizAttemptsRepository
             );
     }
 
-    public async Task<bool> HasAnyAsync(Guid quizId)
+    public async Task<bool> HasAnyAsync(Guid quizId, string? userId = null, bool ? finished = null)
     {
         return await _context.QuizAttempts
-            .AnyAsync(qa => qa.QuizId == quizId);
+            .AnyAsync(qa => 
+            qa.QuizId == quizId && 
+            (userId == null || qa.UserId == userId) &&
+            (finished == null || (finished.Value ? qa.FinishedAt != null : qa.FinishedAt == null)));
     }
 }

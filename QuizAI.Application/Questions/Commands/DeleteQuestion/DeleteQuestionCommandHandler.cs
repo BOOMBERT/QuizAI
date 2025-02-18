@@ -37,7 +37,7 @@ public class DeleteQuestionCommandHandler : IRequestHandler<DeleteQuestionComman
         else
         {
             if (questionToDelete.ImageId != null)
-                await _imageService.DeleteIfNotAssignedAsync((Guid)questionToDelete.ImageId, null, request.QuestionId);
+                await _imageService.DeleteIfNotAssignedAsync((Guid)questionToDelete.ImageId, quiz.IsPrivate, null, request.QuestionId);
         }
 
         await _repository.SaveChangesAsync();

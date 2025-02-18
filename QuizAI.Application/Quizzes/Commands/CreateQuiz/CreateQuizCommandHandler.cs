@@ -35,7 +35,7 @@ public class CreateQuizCommandHandler : IRequestHandler<CreateQuizCommand, Guid>
 
         if (request.Image != null)
         {
-            var uploadedImage = await _imageService.UploadAsync(request.Image);
+            var uploadedImage = await _imageService.UploadAsync(request.Image, quiz.IsPrivate);
             quiz.Image = uploadedImage;
         }
 

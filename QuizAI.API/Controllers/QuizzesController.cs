@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using QuizAI.Application.Common;
 using QuizAI.Application.QuizAttempts.Dtos;
 using QuizAI.Application.QuizAttempts.Queries.GetLatestAttempt;
+using QuizAI.Application.Quizzes.Commands.ChangeQuizPrivacy;
 using QuizAI.Application.Quizzes.Commands.CreateQuiz;
 using QuizAI.Application.Quizzes.Commands.DeleteQuiz;
 using QuizAI.Application.Quizzes.Commands.UpdateQuiz;
@@ -67,6 +68,20 @@ public class QuizzesController : ControllerBase
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<ActionResult<LatestQuizId>> UpdateQuiz(Guid quizId, UpdateQuizCommand command)
+    {
+        command.SetId(quizId);
+
+        var newQuizId = await _mediator.Send(command);
+        return Ok(newQuizId);
+    }
+
+    [HttpPatch("{quizId}/privacy")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesErrorResponseType(typeof(ErrorResponse))]
+    [ProducesResponseType(StatusCodes.Status409Conflict)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<ActionResult<LatestQuizId>> ChangeQuizPrivacy(Guid quizId, ChangeQuizPrivacyCommand command)
     {
         command.SetId(quizId);
 

@@ -70,7 +70,7 @@ public class DeleteQuizCommandHandler : IRequestHandler<DeleteQuizCommand>
 
         foreach (var imageIdToDelete in imagesIdsToDelete)
         {
-            await _imageService.DeleteIfNotAssignedAsync(imageIdToDelete, null, null);
+            await _imageService.DeleteIfNotAssignedAsync(imageIdToDelete, quiz.IsPrivate, null, null);
         }
 
         await _repository.SaveChangesAsync();

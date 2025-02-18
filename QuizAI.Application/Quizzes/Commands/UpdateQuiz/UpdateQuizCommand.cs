@@ -9,7 +9,6 @@ public class UpdateQuizCommand : IRequest<LatestQuizId>
     public required string Name { get; set; }
     public string? Description { get; set; }
     public ICollection<string> Categories { get; set; } = new List<string>();
-    public bool IsPrivate { get; set; }
 
     public void SetId(Guid id)
     {

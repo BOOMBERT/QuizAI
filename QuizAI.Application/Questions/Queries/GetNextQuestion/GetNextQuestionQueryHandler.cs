@@ -1,10 +1,7 @@
-﻿using AutoMapper;
-using MediatR;
+﻿using MediatR;
 using QuizAI.Application.Interfaces;
 using QuizAI.Application.Questions.Dtos;
 using QuizAI.Application.Questions.Queries.GetQuestion;
-using QuizAI.Application.Services;
-using QuizAI.Application.Users;
 using QuizAI.Domain.Constants;
 using QuizAI.Domain.Entities;
 using QuizAI.Domain.Enums;

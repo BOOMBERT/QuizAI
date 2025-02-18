@@ -1,20 +1,35 @@
-using Microsoft.OpenApi.Models;
+using Microsoft.Extensions.FileProviders;
 using QuizAI.API.Extensions;
 using QuizAI.API.Middlewares;
 using QuizAI.Application.Extensions;
 using QuizAI.Domain.Entities;
 using QuizAI.Infrastructure.Extensions;
-using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
 
+var publicStorageFolderName = "PublicUploads";
+var privateStorageFolderName = "PrivateUploads";
+
+var publicStoragePath = Path.Combine(builder.Environment.ContentRootPath, publicStorageFolderName);
+var privateStoragePath = Path.Combine(builder.Environment.ContentRootPath, privateStorageFolderName);
+
+Directory.CreateDirectory(publicStoragePath);
+Directory.CreateDirectory(privateStoragePath);
+
 builder.AddPresentation();
-builder.Services.AddApplication();
+builder.Services.AddApplication(publicStoragePath, privateStoragePath);
 builder.Services.AddInfrastructure(builder.Configuration);
 
 var app = builder.Build();
 
 app.UseMiddleware<ErrorHandlingMiddleware>();
+
+app.UseStaticFiles(new StaticFileOptions
+{
+    FileProvider = new PhysicalFileProvider(
+        Path.Combine(builder.Environment.ContentRootPath, "PublicUploads")),
+    RequestPath = "/api/uploads"
+});
 
 if (app.Environment.IsDevelopment())
 {

@@ -25,7 +25,7 @@ public class UpdateQuestionImageCommandHandler : IRequestHandler<UpdateQuestionI
     {
         var (quiz, createdNewQuiz) = await _quizService.GetValidOrDeprecateAndCreateWithQuestionsAsync(request.GetQuizId(), request.GetQuestionId());
 
-        var newImage = await _imageService.UploadAsync(request.Image);
+        var newImage = await _imageService.UploadAsync(request.Image, quiz.IsPrivate);
 
         var question = quiz.Questions.First(qn => qn.Id == request.GetQuestionId());
 
@@ -40,7 +40,7 @@ public class UpdateQuestionImageCommandHandler : IRequestHandler<UpdateQuestionI
         else
         {
             if (question.ImageId != null)
-                await _imageService.DeleteIfNotAssignedAsync((Guid)question.ImageId, null, question.Id);
+                await _imageService.DeleteIfNotAssignedAsync((Guid)question.ImageId, quiz.IsPrivate, null, question.Id);
         }
 
         question.ImageId = newImage.Id;

@@ -27,7 +27,7 @@ public class GetQuestionByOrderQueryHandler : IRequestHandler<GetQuestionByOrder
     public async Task<QuestionWithAnswersDto> Handle(GetQuestionByOrderQuery request, CancellationToken cancellationToken)
     {
         if (request.Order < 1)
-            throw new ConflictException($"Order number {request.Order} is invalid. It must be at least 1");
+            throw new BadRequestException($"Order number {request.Order} is invalid. It must be at least 1");
 
         _questionService.ValidateQuestionLimit(request.Order);
 

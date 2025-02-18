@@ -21,17 +21,15 @@ public class DeleteQuizImageCommandHandler : IRequestHandler<DeleteQuizImageComm
 
     public async Task<LatestQuizId> Handle(DeleteQuizImageCommand request, CancellationToken cancellationToken)
     {
-        var (quiz, createdNewQuiz) = await _quizService.GetValidOrDeprecateAndCreateAsync(request.GetId());
+        var (quiz, createdNewQuiz) = await _quizService.GetValidOrDeprecateAndCreateWithNewQuestionsAsync(request.GetId());
 
         var imageId = quiz.ImageId ?? throw new NotFoundException($"Quiz with ID {request.GetId()} has no associated image");
 
-        await _imageService.DeleteIfNotAssignedAsync(imageId, request.GetId());
+        await _imageService.DeleteIfNotAssignedAsync(imageId, quiz.IsPrivate, request.GetId());
         quiz.ImageId = null;
 
         if (createdNewQuiz)
-        {
             await _repository.AddAsync(quiz);
-        }        
 
         await _repository.SaveChangesAsync();
 

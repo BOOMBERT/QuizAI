@@ -23,7 +23,7 @@ public class UpdateQuizCommandHandler : IRequestHandler<UpdateQuizCommand, Lates
 
     public async Task<LatestQuizId> Handle(UpdateQuizCommand request, CancellationToken cancellationToken)
     {
-        var (quizToUpdate, createdNewQuiz) = await _quizService.GetValidOrDeprecateAndCreateAsync(request.GetId());
+        var (quizToUpdate, createdNewQuiz) = await _quizService.GetValidOrDeprecateAndCreateWithNewQuestionsAsync(request.GetId());
 
         await _categoryService.RemoveUnusedAsync(quizToUpdate, request.Categories);
 

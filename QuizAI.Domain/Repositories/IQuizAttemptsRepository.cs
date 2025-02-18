@@ -19,5 +19,5 @@ public interface IQuizAttemptsRepository
         DateTime? filterStartedAt,
         DateTime? filterFinishedAt);
     Task<(int, double, TimeSpan)> GetDetailedStatsAsync(Guid quizId, bool includeDeprecated);
-    Task<bool> HasAnyAsync(Guid quizId);
+    Task<bool> HasAnyAsync(Guid quizId, string? userId = null, bool? finished = null);
 }

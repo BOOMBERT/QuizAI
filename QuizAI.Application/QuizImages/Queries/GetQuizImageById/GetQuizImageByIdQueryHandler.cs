@@ -27,6 +27,9 @@ public class GetQuizImageByIdQueryHandler : IRequestHandler<GetQuizImageByIdQuer
         
         await _quizAuthorizationService.AuthorizeAsync(quiz, null, ResourceOperation.Read);
 
+        if (!quiz.IsPrivate)
+            throw new ForbiddenException($"The quiz with ID {quiz.Id} is not private, so you can view the image directly on the website");
+
         return await _imageService.GetDataToReturnAsync(quiz);
     }
 }
