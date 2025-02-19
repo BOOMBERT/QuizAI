@@ -65,8 +65,11 @@ public class ImageService : IImageService
 
         if (imageInDb != null)
         {
-            if(!await _imagesRepository.IsInStorageAsync(imageHash, isPrivate))
+            if (!await _imagesRepository.IsAssignedToAnyQuizAsync(imageInDb.Id, null, isPrivate) && 
+                !await _imagesRepository.IsAssignedToAnyQuestionAsync(imageInDb.Id, null, isPrivate))
+            {
                 await _fileStorageService.UploadAsync(optimizedImage, imageExtension, isPrivate, imageInDb.Id);
+            }
 
             return imageInDb;
         }

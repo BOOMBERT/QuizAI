@@ -15,17 +15,19 @@ public class GetNextQuestionQueryHandler : IRequestHandler<GetNextQuestionQuery,
     private readonly IRepository _repository;
     private readonly IUserContext _userContext;
     private readonly IQuizAuthorizationService _quizAuthorizationService;
+    private readonly IImagesRepository _imagesRepository;
     private readonly IQuestionsRepository _questionsRepository;
     private readonly IAnswersRepository _answersRepository;
     private readonly IQuizAttemptsRepository _quizAttemptsRepository;
 
     public GetNextQuestionQueryHandler(
-        IRepository repository, IUserContext userContext, IQuizAuthorizationService quizAuthorizationService, 
+        IRepository repository, IUserContext userContext, IQuizAuthorizationService quizAuthorizationService, IImagesRepository imagesRepository, 
         IQuestionsRepository questionsRepository, IAnswersRepository answersRepository, IQuizAttemptsRepository quizAttemptsRepository)
     {
         _repository = repository;
         _userContext = userContext;
         _quizAuthorizationService = quizAuthorizationService;
+        _imagesRepository = imagesRepository;
         _questionsRepository = questionsRepository;
         _answersRepository = answersRepository;
         _quizAttemptsRepository = quizAttemptsRepository;
@@ -77,7 +79,10 @@ public class GetNextQuestionQueryHandler : IRequestHandler<GetNextQuestionQuery,
             question.Type == QuestionType.MultipleChoice 
                 ? await _answersRepository.GetMultipleChoiceAnswersContentAsync(question.Id)
                 : Enumerable.Empty<string>(),
-            quiz.QuestionCount
+            quiz.QuestionCount,
+            (!quiz.IsPrivate && question!.ImageId != null) 
+                ? $"/api/uploads/{question.ImageId}{await _imagesRepository.GetFileExtensionAsync((Guid)question.ImageId)}"
+                : null
             );
     }
 }

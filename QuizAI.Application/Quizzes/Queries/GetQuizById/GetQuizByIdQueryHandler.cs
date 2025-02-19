@@ -36,13 +36,13 @@ public class GetQuizByIdQueryHandler : IRequestHandler<GetQuizByIdQuery, QuizDto
             ?? throw new NotFoundException($"Quiz with ID {request.QuizId} was not found");
 
         var canUserEditQuiz = await _quizAuthorizationService.AuthorizeReadOperationAndGetCanEditAsync(quiz, currentUser.Id);
+        if (quiz.IsDeprecated) canUserEditQuiz = false;
 
         var hasUnfinishedAttempt = await _quizAttemptsRepository.HasAnyAsync(quiz.Id, currentUser.Id, false);
 
-        string? publicImageUrl = null;
-
-        if (!quiz.IsPrivate && quiz.ImageId != null)
-            publicImageUrl = $"/api/uploads/{quiz.ImageId}{await _imagesRepository.GetFileExtensionAsync((Guid)quiz.ImageId)}";
+        var publicImageUrl = (!quiz.IsPrivate && quiz.ImageId != null) 
+            ? $"/api/uploads/{quiz.ImageId}{await _imagesRepository.GetFileExtensionAsync((Guid)quiz.ImageId)}" 
+            : null;
 
         var quizDto = _mapper.Map<QuizDto>(quiz);
 

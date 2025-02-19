@@ -39,6 +39,6 @@ public class GetQuestionByOrderQueryHandler : IRequestHandler<GetQuestionByOrder
         var question = await _questionsRepository.GetByOrderAsync(request.QuizId, request.Order, true)
             ?? throw new NotFoundException($"Question with order {request.Order} was not found in quiz with ID {request.QuizId}.");
 
-        return _questionService.MapToQuestionWithAnswersDto(question);
+        return await _questionService.MapToQuestionWithAnswersDtoAsync(question, quiz.IsPrivate);
     }
 }

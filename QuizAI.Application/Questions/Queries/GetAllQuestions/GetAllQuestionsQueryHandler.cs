@@ -27,6 +27,13 @@ public class GetAllQuestionsQueryHandler : IRequestHandler<GetAllQuestionsQuery,
 
         await _quizAuthorizationService.AuthorizeAsync(quizWithQuestionsAndAnswers, null, ResourceOperation.RestrictedRead);
 
-        return quizWithQuestionsAndAnswers.Questions.Select(_questionService.MapToQuestionWithAnswersDto);
+        var questionWithAnswersDtos = new List<QuestionWithAnswersDto>();
+
+        foreach (var question in quizWithQuestionsAndAnswers.Questions)
+        {
+            questionWithAnswersDtos.Add(await _questionService.MapToQuestionWithAnswersDtoAsync(question, quizWithQuestionsAndAnswers.IsPrivate));
+        }
+
+        return questionWithAnswersDtos;
     }
 }

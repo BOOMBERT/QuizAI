@@ -19,7 +19,7 @@ public interface IQuizzesRepository
         bool filterBySharedQuizzes,
         bool filterByUnfinishedAttempts
         );
-    Task<(string, int)?> GetNameAndQuestionCountAsync(Guid quizId);
+    Task<(string, int, bool)?> GetNameAndQuestionCountAndIsPrivateAsync(Guid quizId);
     Task<(string, bool, bool, Guid?)?> GetCreatorIdAndIsPrivateAndIsDeprecatedAndLatestVersionIdAsync(Guid quizId);
     Task<(string, bool, Guid?)?> GetCreatorIdAndIsDeprecatedAndLatestVersionIdAsync(Guid quizId);
     Task UpdateLatestVersionIdAsync(Guid oldLatestVersionId, Guid? newLatestVersionId);

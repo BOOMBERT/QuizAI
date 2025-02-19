@@ -1,5 +1,4 @@
 ﻿using QuizAI.Application.Interfaces;
-using QuizAI.Domain.Enums;
 using QuizAI.Domain.Exceptions;
 
 namespace QuizAI.Application.Services;

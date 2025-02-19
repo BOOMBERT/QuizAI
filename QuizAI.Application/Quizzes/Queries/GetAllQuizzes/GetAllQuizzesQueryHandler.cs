@@ -3,7 +3,6 @@ using MediatR;
 using QuizAI.Application.Common;
 using QuizAI.Application.Interfaces;
 using QuizAI.Application.Quizzes.Dtos;
-using QuizAI.Domain.Entities;
 using QuizAI.Domain.Repositories;
 
 namespace QuizAI.Application.Quizzes.Queries.GetAllQuizzes;
@@ -40,41 +39,29 @@ public class GetAllQuizzesQueryHandler : IRequestHandler<GetAllQuizzesQuery, Pag
 
         var quizzesDtos = _mapper.Map<IEnumerable<QuizDto>>(quizzes);
 
-        if (request.FilterByCreator)
-        {
-            quizzesDtos = quizzesDtos.Select(dto => dto with { CanEdit = true });
-        }
-        else
-        {
-            quizzesDtos = quizzesDtos.Zip(quizzes, (dto, quiz) => dto with
-            {
-                CanEdit = dto.CreatorId == currentUser.Id || quiz.QuizPermissions.Any(qp => qp.UserId == currentUser.Id && qp.CanEdit)
-            });
-        }
-
-        if (request.FilterByUnfinishedAttempts)
-        {
-            quizzesDtos = quizzesDtos.Select(dto => dto with { HasUnfinishedAttempt = true });
-        }
-        else
-        {
-            quizzesDtos = quizzesDtos.Zip(quizzes, (dto, quiz) => dto with
-            {
-                HasUnfinishedAttempt = quiz.QuizAttempts.Any(qa => qa.UserId == currentUser.Id && qa.FinishedAt == null)
-            });
-        }
-
         quizzesDtos = quizzesDtos.Zip(quizzes, (dto, quiz) =>
         {
-            string? publicImageUrl = null;
-            if (!dto.IsPrivate && dto.HasImage)
+            bool canEdit = dto.IsDeprecated 
+                ? false
+                : (request.FilterByCreator
+                    ? true
+                    : dto.CreatorId == currentUser.Id || quiz.QuizPermissions.Any(qp => qp.UserId == currentUser.Id && qp.CanEdit));
+
+            bool hasUnfinishedAttempt = request.FilterByUnfinishedAttempts
+                ? true
+                : quiz.QuizAttempts.Any(qa => qa.UserId == currentUser.Id && qa.FinishedAt == null);
+
+            string? publicImageUrl = (!dto.IsPrivate && dto.HasImage)
+                ? $"/api/uploads/{quiz.ImageId}{quiz.Image!.FileExtension}"
+                : null;
+
+            return dto with
             {
-                publicImageUrl = $"/api/uploads/{quiz.ImageId}{quiz.Image!.FileExtension}";
-            }
-
-            return dto with { PublicImageUrl = publicImageUrl };
+                CanEdit = canEdit,
+                HasUnfinishedAttempt = hasUnfinishedAttempt,
+                PublicImageUrl = publicImageUrl
+            };
         });
-
 
         var paginationInfo = new PaginationInfo(totalCount, request.PageSize, request.PageNumber);
 

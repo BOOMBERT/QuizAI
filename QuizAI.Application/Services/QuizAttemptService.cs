@@ -17,7 +17,8 @@ public class QuizAttemptService : IQuizAttemptService
         _questionService = questionService;
     }
 
-    public async Task<QuizAttemptViewWithUserAnsweredQuestionsDto> GetWithUserAnsweredQuestionsAsync(QuizAttempt finishedQuizAttempt, int questionCount, string quizName)
+    public async Task<QuizAttemptViewWithUserAnsweredQuestionsDto> GetWithUserAnsweredQuestionsAsync(
+        QuizAttempt finishedQuizAttempt, int questionCount, string quizName, bool isPrivate)
     {
         var userAnswersWithQuestions = await _answersRepository.GetUserAnswersByAttemptIdAsync(finishedQuizAttempt.Id, true);
 
@@ -27,7 +28,7 @@ public class QuizAttemptService : IQuizAttemptService
         {
             quizAttemptWithUserAnswers.Add(
                 new UserAnsweredQuestionDto(
-                    _questionService.MapToQuestionWithAnswersDto(userAnswersWithQuestion.Question),
+                    await _questionService.MapToQuestionWithAnswersDtoAsync(userAnswersWithQuestion.Question, isPrivate),
                     new UserAnswerDto(userAnswersWithQuestion.Id, userAnswersWithQuestion.AnswerText, userAnswersWithQuestion.IsCorrect, userAnswersWithQuestion.AnsweredAt)
                 )
             );

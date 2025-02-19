@@ -5,7 +5,6 @@ namespace QuizAI.Domain.Repositories;
 public interface IImagesRepository
 {
     Task<Image?> GetAsync(byte[] hash);
-    Task<bool> IsInStorageAsync(byte[] hash, bool privateStorage);
     Task<bool> IsAssignedToAnyQuizAsync(Guid imageId, Guid? quizIdToSkip, bool? onlyPrivate = null);
     Task<bool> IsAssignedToAnyQuestionAsync(Guid imageId, int? questionIdToSkip, bool? onlyPrivate = null);
     Task<IEnumerable<Image>> GetQuizAndItsQuestionImagesAsync(Guid quizId, Guid? quizImageId);

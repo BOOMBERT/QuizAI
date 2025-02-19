@@ -64,12 +64,12 @@ public class QuizzesRepository : IQuizzesRepository
             .AsNoTracking()
             .Include(qz => qz.Categories)
             .Include(qz => qz.Image)
+            .Include(qz => qz.QuizAttempts)
             .AsQueryable();
 
         if (filterByUnfinishedAttempts)
         {
             baseQuery = baseQuery
-                .Include(qz => qz.QuizAttempts)
                 .Where(qz => qz.QuizAttempts.Any(qa => qa.UserId == userId && qa.FinishedAt == null));
         }
         else
@@ -148,16 +148,16 @@ public class QuizzesRepository : IQuizzesRepository
         return (quizzes, totalCount);
     }
 
-    public async Task<(string, int)?> GetNameAndQuestionCountAsync(Guid quizId)
+    public async Task<(string, int, bool)?> GetNameAndQuestionCountAndIsPrivateAsync(Guid quizId)
     {
         var result = await _context.Quizzes
             .Where(qz => qz.Id == quizId)
-            .Select(qz => new { qz.Name, qz.QuestionCount })
+            .Select(qz => new { qz.Name, qz.QuestionCount, qz.IsPrivate })
             .FirstOrDefaultAsync();
 
         if (result == null) return null;
 
-        return (result.Name, result.QuestionCount);
+        return (result.Name, result.QuestionCount, result.IsPrivate);
     }
 
     public async Task<(string, bool, bool, Guid?)?> GetCreatorIdAndIsPrivateAndIsDeprecatedAndLatestVersionIdAsync(Guid quizId)

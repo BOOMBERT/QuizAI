@@ -10,5 +10,6 @@ public record QuestionWithAnswersDto(
     bool HasImage,
     IEnumerable<MultipleChoiceAnswerDto> MultipleChoiceAnswers, 
     OpenEndedAnswerDto? OpenEndedAnswer, 
-    TrueFalseAnswerDto? TrueFalseAnswer
+    TrueFalseAnswerDto? TrueFalseAnswer,
+    string? PublicImageUrl
     );

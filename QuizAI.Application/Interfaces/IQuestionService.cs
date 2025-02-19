@@ -9,5 +9,5 @@ public interface IQuestionService
     void RemoveAndAdjustOrder(Quiz quiz, Question questionToDelete);
     void ChangeOrders(Quiz quiz, ICollection<UpdateQuestionOrderDto> orderChanges);
     void ResetIds(IEnumerable<Question> questions);
-    QuestionWithAnswersDto MapToQuestionWithAnswersDto(Question question);
+    Task<QuestionWithAnswersDto> MapToQuestionWithAnswersDtoAsync(Question question, bool isPrivate);
 }

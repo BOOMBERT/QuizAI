@@ -4,17 +4,20 @@ using QuizAI.Application.Questions.Dtos;
 using QuizAI.Domain.Entities;
 using QuizAI.Domain.Enums;
 using QuizAI.Domain.Exceptions;
+using QuizAI.Domain.Repositories;
 
 namespace QuizAI.Application.Services;
 
 public class QuestionService : IQuestionService
 {
     private readonly IMapper _mapper;
+    private readonly IImagesRepository _imagesRepository;
     private readonly byte _maxNumberOfQuestions;
 
-    public QuestionService(IMapper mapper, byte maxNumberOfQuestions)
+    public QuestionService(IMapper mapper, IImagesRepository imagesRepository, byte maxNumberOfQuestions)
     {
         _mapper = mapper;
+        _imagesRepository = imagesRepository;
         _maxNumberOfQuestions = maxNumberOfQuestions;
     }
 
@@ -82,7 +85,7 @@ public class QuestionService : IQuestionService
         }
     }
 
-    public QuestionWithAnswersDto MapToQuestionWithAnswersDto(Question question)
+    public async Task<QuestionWithAnswersDto> MapToQuestionWithAnswersDtoAsync(Question question, bool isPrivate)
     {
         return new QuestionWithAnswersDto(
                question.Id,
@@ -98,6 +101,9 @@ public class QuestionService : IQuestionService
                    : null,
                question.Type == QuestionType.TrueFalse
                    ? _mapper.Map<TrueFalseAnswerDto>(question.TrueFalseAnswer)
+                   : null,
+               (!isPrivate && question.ImageId != null) 
+                   ? $"/api/uploads/{question.ImageId}{await _imagesRepository.GetFileExtensionAsync((Guid)question.ImageId)}"
                    : null
            );
     }

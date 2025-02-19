@@ -26,12 +26,12 @@ public class GetLatestAttemptQueryHandler : IRequestHandler<GetLatestAttemptQuer
     {
         var currentUser = _userContext.GetCurrentUser();
 
-        var (quizName, questionCount) = await _quizzesRepository.GetNameAndQuestionCountAsync(request.QuizId)
+        var (quizName, questionCount, isPrivate) = await _quizzesRepository.GetNameAndQuestionCountAndIsPrivateAsync(request.QuizId)
             ?? throw new NotFoundException($"Quiz with ID {request.QuizId} was not found");
 
         var latestFinishedAttempt = await _quizAttemptsRepository.GetLatestFinishedAsync(request.QuizId, currentUser.Id)
             ?? throw new NotFoundException($"No finished quiz attempt found for quiz with ID {request.QuizId} and user with ID {currentUser.Id}");
 
-        return await _quizAttemptService.GetWithUserAnsweredQuestionsAsync(latestFinishedAttempt, questionCount, quizName);
+        return await _quizAttemptService.GetWithUserAnsweredQuestionsAsync(latestFinishedAttempt, questionCount, quizName, isPrivate);
     }
 }

@@ -22,13 +22,6 @@ public class ImagesRepository : IImagesRepository
             .FirstOrDefaultAsync();
     }
 
-    public async Task<bool> IsInStorageAsync(byte[] hash, bool privateStorage)
-    {
-        return await _context.Images
-            .Include(i => i.Quizzes)
-            .AnyAsync(i => i.Quizzes.Any(qz => qz.IsPrivate == privateStorage));
-    }
-
     public async Task<bool> IsAssignedToAnyQuizAsync(Guid imageId, Guid? quizIdToSkip, bool? onlyPrivate = null)
     {
         var baseQuery = _context.Quizzes
@@ -47,7 +40,7 @@ public class ImagesRepository : IImagesRepository
         }
 
         return await baseQuery
-                .AnyAsync(qz => qz.ImageId == imageId && qz.Id != quizIdToSkip);
+            .AnyAsync(qz => qz.ImageId == imageId && qz.Id != quizIdToSkip);
     }
 
     public async Task<bool> IsAssignedToAnyQuestionAsync(Guid imageId, int? questionIdToSkip, bool? onlyPrivate = null)

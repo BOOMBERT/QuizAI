@@ -13,8 +13,7 @@ public class ChangeQuizPrivacyCommandHandler : IRequestHandler<ChangeQuizPrivacy
     private readonly IImagesRepository _imagesRepository;
     private readonly IImageService _imageService;
 
-    public ChangeQuizPrivacyCommandHandler(
-        IRepository repository, IQuizService quizService, IImagesRepository imagesRepository, IImageService imageService)
+    public ChangeQuizPrivacyCommandHandler(IRepository repository, IQuizService quizService, IImagesRepository imagesRepository, IImageService imageService)
     {
         _repository = repository;
         _quizService = quizService;
