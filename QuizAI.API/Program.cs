@@ -17,7 +17,7 @@ Directory.CreateDirectory(publicStoragePath);
 Directory.CreateDirectory(privateStoragePath);
 
 builder.AddPresentation();
-builder.Services.AddApplication(publicStoragePath, privateStoragePath);
+builder.Services.AddApplication(builder.Configuration, publicStoragePath, privateStoragePath);
 builder.Services.AddInfrastructure(builder.Configuration);
 
 var app = builder.Build();

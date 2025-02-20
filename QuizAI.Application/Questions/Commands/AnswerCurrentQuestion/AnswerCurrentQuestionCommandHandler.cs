@@ -45,7 +45,7 @@ public class AnswerCurrentQuestionCommandHandler : IRequestHandler<AnswerCurrent
         var questionToAnswer = await _questionsRepository.GetByOrderAsync(request.GetQuizId(), unfinishedAttempt.CurrentOrder, true);
 
         _answerService.ValidateUserAnswer(request.UserAnswer, questionToAnswer!.Type);
-        var isUserAnswerCorrect = _answerService.CheckUserAnswer(request.UserAnswer, questionToAnswer);
+        var isUserAnswerCorrect = await _answerService.CheckUserAnswerAsync(request.UserAnswer, questionToAnswer);
 
         var userAnswer = new UserAnswer
         {

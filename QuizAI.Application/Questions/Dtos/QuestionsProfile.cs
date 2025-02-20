@@ -20,14 +20,15 @@ public class QuestionsProfile : Profile
             })))
             .ForMember(dest => dest.TrueFalseAnswer, opt => opt.MapFrom(src => src.TrueFalseAnswer == null ? null : new TrueFalseAnswer
             {
-                Id = src.Id,
+                Id = src.TrueFalseAnswer.Id,
                 IsCorrect = src.TrueFalseAnswer.IsCorrect
             }))
             .ForMember(dest => dest.OpenEndedAnswer, opt => opt.MapFrom(src => src.OpenEndedAnswer == null ? null : new OpenEndedAnswer
             {
-                Id = src.Id,
+                Id = src.OpenEndedAnswer.Id,
                 ValidContent = src.OpenEndedAnswer.ValidContent,
-                VerificationByAI = src.OpenEndedAnswer.VerificationByAI
+                VerificationByAI = src.OpenEndedAnswer.VerificationByAI,
+                IgnoreCaseAndSpaces = src.OpenEndedAnswer.IgnoreCaseAndSpaces
             }));
     }
 }

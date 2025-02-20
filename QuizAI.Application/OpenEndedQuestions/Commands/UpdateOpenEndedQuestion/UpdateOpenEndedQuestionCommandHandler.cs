@@ -35,6 +35,9 @@ public class UpdateOpenEndedQuestionCommandHandler : IRequestHandler<UpdateOpenE
         if (answerOfQuestionToUpdate.VerificationByAI != request.VerificationByAI)
             answerOfQuestionToUpdate.VerificationByAI = request.VerificationByAI;
 
+        if (answerOfQuestionToUpdate.IgnoreCaseAndSpaces != request.IgnoreCaseAndSpaces)
+            answerOfQuestionToUpdate.IgnoreCaseAndSpaces = request.IgnoreCaseAndSpaces;
+
         if (createdNewQuiz)
         {
             _questionService.ResetIds(quiz.Questions);

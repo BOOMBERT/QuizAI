@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using FluentValidation;
 using FluentValidation.AspNetCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using QuizAI.Application.Interfaces;
 using QuizAI.Application.Services;
@@ -11,7 +12,7 @@ namespace QuizAI.Application.Extensions;
 
 public static class ServiceCollectionExtensions
 {
-    public static void AddApplication(this IServiceCollection services, string publicStoragePath, string privateStoragePath)
+    public static void AddApplication(this IServiceCollection services, IConfiguration configuration, string publicStoragePath, string privateStoragePath)
     {
         var applicationAssembly = typeof(ServiceCollectionExtensions).Assembly;
         
@@ -23,10 +24,7 @@ public static class ServiceCollectionExtensions
         services.AddHttpContextAccessor();
         services.AddScoped<IUserContext, UserContext>();
 
-        services.AddScoped<IFileStorageService>(provider =>
-        {
-            return new FileStorageService(publicStoragePath, privateStoragePath);
-        });
+        services.AddScoped<IFileStorageService>(provider => new FileStorageService(publicStoragePath, privateStoragePath));
 
         services.AddScoped<IImageService, ImageService>(provider =>
         {
@@ -50,5 +48,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IAnswerService, AnswerService>();
         services.AddScoped<IQuizAttemptService, QuizAttemptService>();
         services.AddScoped<IQuizAuthorizationService, QuizAuthorizationService>();
+
+        services.AddScoped<IOpenAiService, OpenAiService>(provider => new OpenAiService(configuration["OpenAI:ApiKey"]!, configuration["OpenAI:Model"]!));
     }
 }

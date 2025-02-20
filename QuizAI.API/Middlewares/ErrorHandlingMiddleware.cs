@@ -17,7 +17,7 @@ public class ErrorHandlingMiddleware : IMiddleware
         {
             await next.Invoke(context);
 
-            if (context.Response.StatusCode == StatusCodes.Status401Unauthorized)
+            if (context.Response.StatusCode == StatusCodes.Status401Unauthorized && context.GetEndpoint()?.DisplayName != "HTTP: POST api/identity/login")
             {
                 throw new UnauthorizedException("User is not authenticated");
             }
@@ -37,7 +37,7 @@ public class ErrorHandlingMiddleware : IMiddleware
     private async Task ReturnErrorResponse(HttpContext context, string title, HttpStatusCode statusCode, object details)
     {
         context.Response.StatusCode = (int)statusCode;
-        context.Response.ContentType = "application/json";
+        context.Response.ContentType = "application/problem+json";
 
         var errorResponse = new ErrorResponse(title, statusCode, details, context.Request.Path.Value!, context.TraceIdentifier);
 

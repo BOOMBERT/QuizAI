@@ -39,6 +39,7 @@ public class CreateOpenEndedQuestionCommandHandler : IRequestHandler<CreateOpenE
         {
             ValidContent = request.Answers,
             VerificationByAI = request.VerificationByAI,
+            IgnoreCaseAndSpaces = request.IgnoreCaseAndSpaces,
             Question = question
         };
 

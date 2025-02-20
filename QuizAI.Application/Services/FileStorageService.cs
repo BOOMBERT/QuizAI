@@ -48,7 +48,8 @@ public class FileStorageService : IFileStorageService
         string oldFullFilePath = GetFullFilePathIfExists(filename, fileExtension, isPrivate);
         string newFullFilePath = Path.Combine(GetProperStoragePath(!isPrivate), filename.ToString() + fileExtension.ToLower());
 
-        File.Copy(oldFullFilePath, newFullFilePath, overwrite: false);
+        if (!File.Exists(newFullFilePath))
+            File.Copy(oldFullFilePath, newFullFilePath);
     }
 
     private string GetFullFilePathIfExists(Guid filename, string fileExtension, bool isPrivate)

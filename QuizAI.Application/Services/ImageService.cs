@@ -106,14 +106,13 @@ public class ImageService : IImageService
         }
     }
 
-    public async Task MoveImagesAsync(HashSet<(Guid imageId, string imageExtension)> images, bool isPrivate, bool doNotDelete = false)
+    public async Task MoveImagesAsync(HashSet<(Guid imageId, string imageExtension)> images, bool isPrivate)
     {
         foreach (var (imageId, imageExtension) in images)
         {
             _fileStorageService.CopyImage(imageId, imageExtension, isPrivate);
 
-            if (!doNotDelete &&
-                !await _imagesRepository.IsAssignedToAnyQuizAsync(imageId, null, isPrivate) && 
+            if (!await _imagesRepository.IsAssignedToAnyQuizAsync(imageId, null, isPrivate) && 
                 !await _imagesRepository.IsAssignedToAnyQuestionAsync(imageId, null, isPrivate))
             {
                 _fileStorageService.Delete(imageId, imageExtension, isPrivate);

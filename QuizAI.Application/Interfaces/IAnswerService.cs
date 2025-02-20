@@ -9,5 +9,5 @@ public interface IAnswerService
     public void RemoveUnusedMultipleChoiceAnswers(Question question, ICollection<CreateMultipleChoiceAnswerDto> requestedNewAnswers);
     Task UpdateOrAddNewAnswersAsync(Question question, ICollection<MultipleChoiceAnswer> newAnswers);
     void ValidateUserAnswer(ICollection<string> userAnswer, QuestionType questionType);
-    bool CheckUserAnswer(ICollection<string> userAnswer, Question question);
+    Task<bool> CheckUserAnswerAsync(ICollection<string> userAnswer, Question question);
 }

@@ -10,10 +10,12 @@ namespace QuizAI.Application.Services;
 public class AnswerService : IAnswerService
 {
     private readonly IRepository _repository;
+    private readonly IOpenAiService _openAiService;
 
-    public AnswerService(IRepository repository)
+    public AnswerService(IRepository repository, IOpenAiService openAiService)
     {
         _repository = repository;
+        _openAiService = openAiService;
     }
 
     public void RemoveUnusedMultipleChoiceAnswers(Question question, ICollection<CreateMultipleChoiceAnswerDto> requestedNewAnswers)
@@ -68,7 +70,7 @@ public class AnswerService : IAnswerService
         }
     }
 
-    public bool CheckUserAnswer(ICollection<string> userAnswer, Question question)
+    public async Task<bool> CheckUserAnswerAsync(ICollection<string> userAnswer, Question question)
     {
         if (question.Type == QuestionType.TrueFalse)
         {
@@ -76,13 +78,20 @@ public class AnswerService : IAnswerService
         }
         else if (question.Type == QuestionType.OpenEnded)
         {
-            if (question.OpenEndedAnswer.ValidContent.Contains(userAnswer.First()))
-                return true;
+            var answer = userAnswer.First();
 
-            /*if (question.OpenEndedAnswer.VerificationByAI)
+            if (question.OpenEndedAnswer.IgnoreCaseAndSpaces)
             {
-                // TODO: Verify answer using AI
-            }*/
+                if (question.OpenEndedAnswer.ValidContent.Any(vc => String.Equals(vc.Replace(" ", ""), answer.Replace(" ", ""), StringComparison.OrdinalIgnoreCase)))
+                    return true;
+            }
+            else if (question.OpenEndedAnswer.ValidContent.Contains(answer))
+            {
+                return true;
+            }
+
+            if (question.OpenEndedAnswer.VerificationByAI)
+                return await _openAiService.IsAnswerCorrectAsync(question.Content, answer, question.OpenEndedAnswer.ValidContent);
 
             return false;
         }

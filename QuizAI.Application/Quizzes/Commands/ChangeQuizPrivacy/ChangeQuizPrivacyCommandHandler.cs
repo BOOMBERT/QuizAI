@@ -44,7 +44,7 @@ public class ChangeQuizPrivacyCommandHandler : IRequestHandler<ChangeQuizPrivacy
         }
 
         if (allImages.Any())
-            await _imageService.MoveImagesAsync(imageIdsAndExtensions, !quizToUpdate.IsPrivate, createdNewQuiz);
+            await _imageService.MoveImagesAsync(imageIdsAndExtensions, !quizToUpdate.IsPrivate);
 
         return new LatestQuizId(quizToUpdate.Id);
     }

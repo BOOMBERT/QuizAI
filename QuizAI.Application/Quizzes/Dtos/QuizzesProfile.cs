@@ -60,7 +60,8 @@ public class QuizzesProfile : Profile
                         newQuestion.OpenEndedAnswer = new OpenEndedAnswer
                         {
                             ValidContent = qn.OpenEndedAnswer.ValidContent,
-                            VerificationByAI = qn.OpenEndedAnswer.VerificationByAI
+                            VerificationByAI = qn.OpenEndedAnswer.VerificationByAI,
+                            IgnoreCaseAndSpaces = qn.OpenEndedAnswer.IgnoreCaseAndSpaces
                         };
                         break;
                 }

@@ -9,6 +9,7 @@ public class CreateOpenEndedQuestionCommand : IRequest<LatestQuizId>
     public string Content { get; set; } = string.Empty;
     public List<string> Answers { get; set; } = new List<string>();
     public bool VerificationByAI { get; set; }
+    public bool IgnoreCaseAndSpaces { get; set; }
 
     public void SetQuizId(Guid id)
     {
