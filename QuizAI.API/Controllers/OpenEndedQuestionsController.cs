@@ -4,6 +4,8 @@ using Microsoft.AspNetCore.Mvc;
 using QuizAI.Application.Common;
 using QuizAI.Application.OpenEndedQuestions.Commands.CreateOpenEndedQuestion;
 using QuizAI.Application.OpenEndedQuestions.Commands.UpdateOpenEndedQuestion;
+using QuizAI.Application.OpenEndedQuestions.Dtos;
+using QuizAI.Application.OpenEndedQuestions.Queries.GenerateOpenEndedQuestion;
 
 namespace QuizAI.API.Controllers
 {
@@ -45,6 +47,18 @@ namespace QuizAI.API.Controllers
 
             var newQuizId = await _mediator.Send(command);
             return Ok(newQuizId);
+        }
+
+        [HttpGet("{quizId}/questions/open-ended/generate")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesErrorResponseType(typeof(ErrorResponse))]
+        [ProducesResponseType(StatusCodes.Status409Conflict)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<ActionResult<OpenEndedAnswersWithQuestionDto>> GenerateOpenEndedQuestion(Guid quizId, string? suggestions)
+        {
+            var generatedQuestion = await _mediator.Send(new GenerateOpenEndedQuestionQuery(quizId, suggestions));
+            return Ok(generatedQuestion);
         }
     }
 }

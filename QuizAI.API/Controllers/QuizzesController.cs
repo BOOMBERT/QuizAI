@@ -13,115 +13,116 @@ using QuizAI.Application.Quizzes.Queries.GetAllQuizzes;
 using QuizAI.Application.Quizzes.Queries.GetQuizById;
 using QuizAI.Application.Quizzes.Queries.GetQuizStats;
 
-namespace QuizAI.API.Controllers;
-
-[Route("api/quizzes")]
-[ApiController]
-[Authorize]
-public class QuizzesController : ControllerBase
+namespace QuizAI.API.Controllers
 {
-    private readonly IMediator _mediator;
-
-    public QuizzesController(IMediator mediator)
+    [Route("api/quizzes")]
+    [ApiController]
+    [Authorize]
+    public class QuizzesController : ControllerBase
     {
-        _mediator = mediator;
-    }
+        private readonly IMediator _mediator;
 
-    [HttpPost]
-    [RequestSizeLimit(5 * 1024 * 1024)] // 5MB
-    [ProducesResponseType(StatusCodes.Status201Created)]
-    [ProducesErrorResponseType(typeof(ErrorResponse))]
-    [ProducesResponseType(StatusCodes.Status413RequestEntityTooLarge)]
-    [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
-    [ProducesResponseType(StatusCodes.Status415UnsupportedMediaType)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> CreateQuiz(CreateQuizCommand command)
-    {
-        var id = await _mediator.Send(command);
-        return CreatedAtAction(nameof(GetQuiz), new { quizId = id }, null);
-    }
+        public QuizzesController(IMediator mediator)
+        {
+            _mediator = mediator;
+        }
 
-    [HttpGet]
-    [ProducesResponseType(StatusCodes.Status200OK)]
-    [ProducesErrorResponseType(typeof(ErrorResponse))]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public async Task<ActionResult<PagedResponse<QuizDto>>> GetAllQuizzes([FromQuery] GetAllQuizzesQuery query)
-    {
-        var quizzes = await _mediator.Send(query);
-        return Ok(quizzes);
-    }
+        [HttpPost]
+        [RequestSizeLimit(5 * 1024 * 1024)] // 5MB
+        [ProducesResponseType(StatusCodes.Status201Created)]
+        [ProducesErrorResponseType(typeof(ErrorResponse))]
+        [ProducesResponseType(StatusCodes.Status413RequestEntityTooLarge)]
+        [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
+        [ProducesResponseType(StatusCodes.Status415UnsupportedMediaType)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> CreateQuiz(CreateQuizCommand command)
+        {
+            var id = await _mediator.Send(command);
+            return CreatedAtAction(nameof(GetQuiz), new { quizId = id }, null);
+        }
 
-    [HttpGet("{quizId}")]
-    [ProducesResponseType(StatusCodes.Status200OK)]
-    [ProducesErrorResponseType(typeof(ErrorResponse))]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public async Task<ActionResult<QuizDto>> GetQuiz(Guid quizId)
-    {
-        var quiz = await _mediator.Send(new GetQuizByIdQuery(quizId));
-        return Ok(quiz);
-    }
+        [HttpGet]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesErrorResponseType(typeof(ErrorResponse))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<ActionResult<PagedResponse<QuizDto>>> GetAllQuizzes([FromQuery] GetAllQuizzesQuery query)
+        {
+            var quizzes = await _mediator.Send(query);
+            return Ok(quizzes);
+        }
 
-    [HttpPut("{quizId}")]
-    [ProducesResponseType(StatusCodes.Status200OK)]
-    [ProducesErrorResponseType(typeof(ErrorResponse))]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public async Task<ActionResult<LatestQuizId>> UpdateQuiz(Guid quizId, UpdateQuizCommand command)
-    {
-        command.SetId(quizId);
+        [HttpGet("{quizId}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesErrorResponseType(typeof(ErrorResponse))]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<ActionResult<QuizDto>> GetQuiz(Guid quizId)
+        {
+            var quiz = await _mediator.Send(new GetQuizByIdQuery(quizId));
+            return Ok(quiz);
+        }
 
-        var newQuizId = await _mediator.Send(command);
-        return Ok(newQuizId);
-    }
+        [HttpPut("{quizId}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesErrorResponseType(typeof(ErrorResponse))]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<ActionResult<LatestQuizId>> UpdateQuiz(Guid quizId, UpdateQuizCommand command)
+        {
+            command.SetId(quizId);
 
-    [HttpPatch("{quizId}/privacy")]
-    [ProducesResponseType(StatusCodes.Status200OK)]
-    [ProducesErrorResponseType(typeof(ErrorResponse))]
-    [ProducesResponseType(StatusCodes.Status409Conflict)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public async Task<ActionResult<LatestQuizId>> ChangeQuizPrivacy(Guid quizId, ChangeQuizPrivacyCommand command)
-    {
-        command.SetId(quizId);
+            var newQuizId = await _mediator.Send(command);
+            return Ok(newQuizId);
+        }
 
-        var newQuizId = await _mediator.Send(command);
-        return Ok(newQuizId);
-    }
+        [HttpPatch("{quizId}/privacy")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesErrorResponseType(typeof(ErrorResponse))]
+        [ProducesResponseType(StatusCodes.Status409Conflict)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<ActionResult<LatestQuizId>> ChangeQuizPrivacy(Guid quizId, ChangeQuizPrivacyCommand command)
+        {
+            command.SetId(quizId);
 
-    [HttpDelete("{quizId}")]
-    [ProducesResponseType(StatusCodes.Status204NoContent)]
-    [ProducesErrorResponseType(typeof(ErrorResponse))]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> DeleteQuiz(Guid quizId)
-    {
-        var command = new DeleteQuizCommand();
-        command.SetId(quizId);
+            var newQuizId = await _mediator.Send(command);
+            return Ok(newQuizId);
+        }
+
+        [HttpDelete("{quizId}")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesErrorResponseType(typeof(ErrorResponse))]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> DeleteQuiz(Guid quizId)
+        {
+            var command = new DeleteQuizCommand();
+            command.SetId(quizId);
         
-        await _mediator.Send(command);
-        return NoContent();
-    }
+            await _mediator.Send(command);
+            return NoContent();
+        }
 
-    [HttpGet("{quizId}/attempts/latest")]
-    [ProducesResponseType(StatusCodes.Status200OK)]
-    [ProducesErrorResponseType(typeof(ErrorResponse))]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public async Task<ActionResult<QuizAttemptViewWithUserAnsweredQuestionsDto>> GetLatestAttempt(Guid quizId)
-    {
-        var latestAttempt = await _mediator.Send(new GetLatestAttemptQuery(quizId));
-        return Ok(latestAttempt);
-    }
+        [HttpGet("{quizId}/attempts/latest")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesErrorResponseType(typeof(ErrorResponse))]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<ActionResult<QuizAttemptViewWithUserAnsweredQuestionsDto>> GetLatestAttempt(Guid quizId)
+        {
+            var latestAttempt = await _mediator.Send(new GetLatestAttemptQuery(quizId));
+            return Ok(latestAttempt);
+        }
 
-    [HttpGet("{quizId}/stats")]
-    [ProducesResponseType(StatusCodes.Status200OK)]
-    [ProducesErrorResponseType(typeof(ErrorResponse))]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public async Task<ActionResult<QuizStatsDto>> GetQuizStats(Guid quizId, bool includeDeprecatedVersions)
-    {
-        var quizStats = await _mediator.Send(new GetQuizStatsQuery(quizId, includeDeprecatedVersions));
-        return Ok(quizStats);
+        [HttpGet("{quizId}/stats")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesErrorResponseType(typeof(ErrorResponse))]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<ActionResult<QuizStatsDto>> GetQuizStats(Guid quizId, bool includeDeprecatedVersions)
+        {
+            var quizStats = await _mediator.Send(new GetQuizStatsQuery(quizId, includeDeprecatedVersions));
+            return Ok(quizStats);
+        }
     }
 }
