@@ -6,7 +6,7 @@ namespace QuizAI.Application.Interfaces;
 
 public interface IAnswerService
 {
-    public void RemoveUnusedMultipleChoiceAnswers(Question question, ICollection<MultipleChoiceAnswersDto> requestedNewAnswers);
+    public void RemoveUnusedMultipleChoiceAnswers(Question question, ICollection<MultipleChoiceAnswerDto> requestedNewAnswers);
     Task UpdateOrAddNewAnswersAsync(Question question, ICollection<MultipleChoiceAnswer> newAnswers);
     void ValidateUserAnswer(ICollection<string> userAnswer, QuestionType questionType);
     Task<bool> CheckUserAnswerAsync(ICollection<string> userAnswer, Question question);

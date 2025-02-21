@@ -10,5 +10,5 @@ public interface IQuestionService
     void ChangeOrders(Quiz quiz, ICollection<UpdateQuestionOrderDto> orderChanges);
     void ResetIds(IEnumerable<Question> questions);
     Task<QuestionWithAnswersDto> MapToQuestionWithAnswersDtoAsync(Question question, bool isPrivate);
-    Task<QuestionWithAnswersForGenerationDto> MapToQuestionWithAnswersForGenerationDtoAsync(Question question);
+    QuestionWithAnswersForGenerationDto MapToQuestionWithAnswersForGenerationDtoAsync(Question question);
 }

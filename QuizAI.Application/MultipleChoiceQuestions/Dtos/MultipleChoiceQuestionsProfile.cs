@@ -7,6 +7,6 @@ public class MultipleChoiceQuestionsProfile : Profile
 {
     public MultipleChoiceQuestionsProfile()
     {
-        CreateMap<MultipleChoiceAnswersDto, MultipleChoiceAnswer>();
+        CreateMap<MultipleChoiceAnswerDto, MultipleChoiceAnswer>();
     }
 }

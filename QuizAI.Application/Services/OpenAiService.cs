@@ -6,6 +6,7 @@ using System.Text.Json;
 using System.Text;
 using QuizAI.Domain.Enums;
 using QuizAI.Application.OpenEndedQuestions.Dtos;
+using QuizAI.Application.MultipleChoiceQuestions.Dtos;
 
 namespace QuizAI.Application.Services;
 
@@ -193,6 +194,91 @@ public class OpenAiService : IOpenAiService
             structuredResponseJson.RootElement.GetProperty("ValidContent").EnumerateArray().Select(x => x.GetString()).ToList()!,
             true,
             true
+            );
+
+        return result;
+    }
+
+    public async Task<MultipleChoiceAnswersWithQuestionDto> GenerateMultipleChoiceQuestionAsync(
+        string quizName,
+        string? quizDescription,
+        IEnumerable<string> quizCategories,
+        IEnumerable<QuestionWithAnswersForGenerationDto> quizQuestionsWithAnswers,
+        string? userSuggestions)
+    {
+        ChatClient client = new(model: _model, apiKey: _apiKey);
+
+        var promptBuilder = new StringBuilder($"""
+            You are an AI assistant that generates a multiple-choice quiz question based on your knowledge, existing quiz content, and user suggestions.
+            
+            - Ensure the question is clear, direct, and specific, requiring a factual answers that matches exactly to the correct answers.
+            - The answers should be a mix of both true and false answers, with flexibility in adjusting the proportions as needed based on the question.
+            - The answers must follow these strict validation rules:
+                - There must be at least 2 answers and up to 8 answers.
+                - All answers must be unique - NO DUPLICATES.
+                - Answers cannot be empty or consist only of whitespace.
+                - Each answer content must not exceed 255 characters.
+                - The total number of answers must adhere to the constraints and be suitable for the question.
+            """);
+
+        promptBuilder.AppendLine(BASE_QUESTION_GENERATION_PROMPT);
+        promptBuilder.AppendLine();
+
+        var enteredInfoPrompt = GetPromptWithQuizAndQuestionsWithAnswersAndUserSuggestions(
+            quizName, quizDescription, quizCategories, quizQuestionsWithAnswers, userSuggestions);
+
+        promptBuilder.AppendLine(enteredInfoPrompt);
+
+        List<ChatMessage> messages =
+        [
+            new UserChatMessage(promptBuilder.ToString())
+        ];
+
+        var schema = JsonSerializer.Serialize(new
+        {
+            type = "object",
+            properties = new
+            {
+                QuestionContent = new { type = "string" },
+                Answers = new
+                {
+                    type = "array",
+                    items = new
+                    {
+                        type = "object",
+                        properties = new
+                        {
+                            Content = new { type = "string" },
+                            IsCorrect = new { type = "boolean" }
+                        },
+                        required = new[] { "Content", "IsCorrect" },
+                        additionalProperties = false
+                    }
+                }
+            },
+            required = new[] { "QuestionContent", "Answers" },
+            additionalProperties = false
+        });
+
+        ChatCompletionOptions options = new()
+        {
+            ResponseFormat = ChatResponseFormat.CreateJsonSchemaFormat(
+            jsonSchemaFormatName: "multiple_choice_question",
+            jsonSchema: BinaryData.FromBytes(Encoding.UTF8.GetBytes(schema)))
+        };
+
+        ChatCompletion completion = await client.CompleteChatAsync(messages, options);
+
+        var response = completion.Content[0].Text;
+        using JsonDocument structuredResponseJson = JsonDocument.Parse(response);
+
+        var result = new MultipleChoiceAnswersWithQuestionDto(
+            structuredResponseJson.RootElement.GetProperty("QuestionContent").GetString()!,
+            structuredResponseJson.RootElement.GetProperty("Answers").EnumerateArray().Select(x =>
+                new MultipleChoiceAnswerDto(
+                    x.GetProperty("Content").GetString()!,
+                    x.GetProperty("IsCorrect").GetBoolean()
+                    )).ToList()
             );
 
         return result;

@@ -38,8 +38,8 @@ internal static class ValidationExtensions
             .MaximumLength(512).WithMessage("Question content must be at most 512 characters long");
     }
 
-    internal static IRuleBuilderOptions<T, ICollection<MultipleChoiceAnswersDto>> IsValidMultipleChoiceAnswers<T>(
-        this IRuleBuilder<T, ICollection<MultipleChoiceAnswersDto>> ruleBuilder)
+    internal static IRuleBuilderOptions<T, ICollection<MultipleChoiceAnswerDto>> IsValidMultipleChoiceAnswers<T>(
+        this IRuleBuilder<T, ICollection<MultipleChoiceAnswerDto>> ruleBuilder)
     {
         return ruleBuilder
             .Must(a => a.Count >= 2).WithMessage("At least two answers are required")

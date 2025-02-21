@@ -94,8 +94,8 @@ public class QuestionService : IQuestionService
                question.Order,
                question.ImageId != null,
                question.Type == QuestionType.MultipleChoice
-                   ? question.MultipleChoiceAnswers.Select(mca => new MultipleChoiceAnswersDto(mca.Content, mca.IsCorrect))
-                   : Enumerable.Empty<MultipleChoiceAnswersDto>(),
+                   ? question.MultipleChoiceAnswers.Select(mca => new MultipleChoiceAnswerDto(mca.Content, mca.IsCorrect))
+                   : Enumerable.Empty<MultipleChoiceAnswerDto>(),
                question.Type == QuestionType.OpenEnded
                    ? new OpenEndedAnswersDto(question.OpenEndedAnswer.ValidContent, question.OpenEndedAnswer.VerificationByAI, question.OpenEndedAnswer.IgnoreCaseAndSpaces)
                    : null,
@@ -108,14 +108,14 @@ public class QuestionService : IQuestionService
                    );
     }
 
-    public async Task<QuestionWithAnswersForGenerationDto> MapToQuestionWithAnswersForGenerationDtoAsync(Question question)
+    public QuestionWithAnswersForGenerationDto MapToQuestionWithAnswersForGenerationDtoAsync(Question question)
     {
         return new QuestionWithAnswersForGenerationDto(
             question.Content,
             question.Type,
             question.Type == QuestionType.MultipleChoice
-                ? question.MultipleChoiceAnswers.Select(mca => new MultipleChoiceAnswersDto(mca.Content, mca.IsCorrect))
-                : Enumerable.Empty<MultipleChoiceAnswersDto>(),
+                ? question.MultipleChoiceAnswers.Select(mca => new MultipleChoiceAnswerDto(mca.Content, mca.IsCorrect))
+                : Enumerable.Empty<MultipleChoiceAnswerDto>(),
             question.Type == QuestionType.OpenEnded
                 ? new OpenEndedAnswersDto(question.OpenEndedAnswer.ValidContent, question.OpenEndedAnswer.VerificationByAI, question.OpenEndedAnswer.IgnoreCaseAndSpaces)
                 : null,

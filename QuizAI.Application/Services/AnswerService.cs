@@ -18,7 +18,7 @@ public class AnswerService : IAnswerService
         _openAiService = openAiService;
     }
 
-    public void RemoveUnusedMultipleChoiceAnswers(Question question, ICollection<MultipleChoiceAnswersDto> requestedNewAnswers)
+    public void RemoveUnusedMultipleChoiceAnswers(Question question, ICollection<MultipleChoiceAnswerDto> requestedNewAnswers)
     {
         var answersToRemove = question.MultipleChoiceAnswers
             .Where(mca => !requestedNewAnswers.Any(na => na.Content == mca.Content));

@@ -1,4 +1,5 @@
-﻿using QuizAI.Application.OpenEndedQuestions.Dtos;
+﻿using QuizAI.Application.MultipleChoiceQuestions.Dtos;
+using QuizAI.Application.OpenEndedQuestions.Dtos;
 using QuizAI.Application.Questions.Dtos;
 using QuizAI.Application.TrueFalseQuestions.Dtos;
 
@@ -14,6 +15,12 @@ public interface IOpenAiService
         IEnumerable<QuestionWithAnswersForGenerationDto> quizQuestionsWithAnswers,
         string? userSuggestions);
     Task<OpenEndedAnswersWithQuestionDto> GenerateOpenEndedQuestionAsync(
+        string quizName,
+        string? quizDescription,
+        IEnumerable<string> quizCategories,
+        IEnumerable<QuestionWithAnswersForGenerationDto> quizQuestionsWithAnswers,
+        string? userSuggestions);
+    Task<MultipleChoiceAnswersWithQuestionDto> GenerateMultipleChoiceQuestionAsync(
         string quizName,
         string? quizDescription,
         IEnumerable<string> quizCategories,

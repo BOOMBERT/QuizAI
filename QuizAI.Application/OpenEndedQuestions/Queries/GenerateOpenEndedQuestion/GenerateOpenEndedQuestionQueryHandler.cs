@@ -25,6 +25,9 @@ public class GenerateOpenEndedQuestionQueryHandler : IRequestHandler<GenerateOpe
 
     public async Task<OpenEndedAnswersWithQuestionDto> Handle(GenerateOpenEndedQuestionQuery request, CancellationToken cancellationToken)
     {
+        if (request.Suggestions?.Length > 255)
+            throw new BadRequestException("Suggestions cannot exceed 255 characters");
+
         var quiz = await _quizzesRepository.GetAsync(request.QuizId, true, true, false) 
             ?? throw new NotFoundException($"Quiz with ID {request.QuizId} was not found");
 
@@ -33,9 +36,7 @@ public class GenerateOpenEndedQuestionQueryHandler : IRequestHandler<GenerateOpe
         if (quiz.QuestionCount < 2)
             throw new ConflictException($"Quiz with ID {quiz.Id} contains only {quiz.QuestionCount} question(s), but at least 2 are required to generate a new question");
 
-        var quizQuestionsWithAnswers = await Task.WhenAll(
-            quiz.Questions.Select(_questionService.MapToQuestionWithAnswersForGenerationDtoAsync)
-            );
+        var quizQuestionsWithAnswers = quiz.Questions.Select(_questionService.MapToQuestionWithAnswersForGenerationDtoAsync);
 
         return await _openAiService.GenerateOpenEndedQuestionAsync(
             quiz.Name, quiz.Description, quiz.Categories.Select(c => c.Name), quizQuestionsWithAnswers, request.Suggestions);

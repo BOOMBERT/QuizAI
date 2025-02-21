@@ -11,7 +11,7 @@ public record QuestionWithAnswersDto(
     QuestionType Type, 
     int Order,
     bool HasImage,
-    IEnumerable<MultipleChoiceAnswersDto> MultipleChoiceAnswers, 
+    IEnumerable<MultipleChoiceAnswerDto> MultipleChoiceAnswers, 
     OpenEndedAnswersDto? OpenEndedAnswer, 
     TrueFalseAnswerDto? TrueFalseAnswer,
     string? PublicImageUrl

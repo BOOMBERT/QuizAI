@@ -8,7 +8,7 @@ namespace QuizAI.Application.Questions.Dtos;
 public record QuestionWithAnswersForGenerationDto(
     string QuestionContent,
     QuestionType QuestionType,
-    IEnumerable<MultipleChoiceAnswersDto> MultipleChoiceAnswers,
+    IEnumerable<MultipleChoiceAnswerDto> MultipleChoiceAnswers,
     OpenEndedAnswersDto? OpenEndedAnswer,
     TrueFalseAnswerDto? TrueFalseAnswer
     );

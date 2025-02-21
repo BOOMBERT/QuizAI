@@ -1,20 +1,20 @@
 ﻿using MediatR;
 using QuizAI.Application.Interfaces;
-using QuizAI.Application.TrueFalseQuestions.Dtos;
+using QuizAI.Application.MultipleChoiceQuestions.Dtos;
 using QuizAI.Domain.Constants;
 using QuizAI.Domain.Exceptions;
 using QuizAI.Domain.Repositories;
 
-namespace QuizAI.Application.TrueFalseQuestions.Queries.GenerateTrueFalseQuestion;
+namespace QuizAI.Application.MultipleChoiceQuestions.Queries.GenerateMultipleChoiceQuestion;
 
-public class GenerateTrueFalseQuestionQueryHandler : IRequestHandler<GenerateTrueFalseQuestionQuery, TrueFalseAnswerWithQuestionDto>
+public class GenerateMultipleChoiceQuestionQueryHandler : IRequestHandler<GenerateMultipleChoiceQuestionQuery, MultipleChoiceAnswersWithQuestionDto>
 {
     private readonly IQuizzesRepository _quizzesRepository;
     private readonly IQuizAuthorizationService _quizAuthorizationService;
     private readonly IOpenAiService _openAiService;
     private readonly IQuestionService _questionService;
 
-    public GenerateTrueFalseQuestionQueryHandler(
+    public GenerateMultipleChoiceQuestionQueryHandler(
         IQuizzesRepository quizzesRepository, IQuizAuthorizationService quizAuthorizationService, IOpenAiService openAiService, IQuestionService questionService)
     {
         _quizzesRepository = quizzesRepository;
@@ -23,14 +23,14 @@ public class GenerateTrueFalseQuestionQueryHandler : IRequestHandler<GenerateTru
         _questionService = questionService;
     }
 
-    public async Task<TrueFalseAnswerWithQuestionDto> Handle(GenerateTrueFalseQuestionQuery request, CancellationToken cancellationToken)
+    public async Task<MultipleChoiceAnswersWithQuestionDto> Handle(GenerateMultipleChoiceQuestionQuery request, CancellationToken cancellationToken)
     {
         if (request.Suggestions?.Length > 255)
             throw new BadRequestException("Suggestions cannot exceed 255 characters");
 
-        var quiz = await _quizzesRepository.GetAsync(request.QuizId, true, true, false) 
+        var quiz = await _quizzesRepository.GetAsync(request.QuizId, true, true, false)
             ?? throw new NotFoundException($"Quiz with ID {request.QuizId} was not found");
-    
+
         await _quizAuthorizationService.AuthorizeAsync(quiz, null, ResourceOperation.RestrictedRead);
 
         if (quiz.QuestionCount < 2)
@@ -38,7 +38,7 @@ public class GenerateTrueFalseQuestionQueryHandler : IRequestHandler<GenerateTru
 
         var quizQuestionsWithAnswers = quiz.Questions.Select(_questionService.MapToQuestionWithAnswersForGenerationDtoAsync);
 
-        return await _openAiService.GenerateTrueFalseQuestionAsync(
+        return await _openAiService.GenerateMultipleChoiceQuestionAsync(
             quiz.Name, quiz.Description, quiz.Categories.Select(c => c.Name), quizQuestionsWithAnswers, request.Suggestions);
     }
 }
