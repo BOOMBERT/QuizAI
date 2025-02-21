@@ -7,10 +7,6 @@ public class QuestionsProfile : Profile
 {
     public QuestionsProfile()
     {
-        CreateMap<MultipleChoiceAnswer, MultipleChoiceAnswerDto>();
-        CreateMap<OpenEndedAnswer, OpenEndedAnswerDto>();
-        CreateMap<TrueFalseAnswer, TrueFalseAnswerDto>();
-
         CreateMap<Question, Question>()
             .ForMember(dest => dest.MultipleChoiceAnswers, opt => opt.MapFrom(src => src.MultipleChoiceAnswers.Select(mca => new MultipleChoiceAnswer
             {

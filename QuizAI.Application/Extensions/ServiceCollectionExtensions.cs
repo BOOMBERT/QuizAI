@@ -37,10 +37,9 @@ public static class ServiceCollectionExtensions
 
         services.AddScoped<IQuestionService, QuestionService>(provider =>
         {
-            var mapper = provider.GetRequiredService<IMapper>();
             var imagesRepository = provider.GetRequiredService<IImagesRepository>();
             byte maxNumberOfQuestions = 20;
-            return new QuestionService(mapper, imagesRepository, maxNumberOfQuestions);
+            return new QuestionService(imagesRepository, maxNumberOfQuestions);
         });
 
         services.AddScoped<ICategoryService, CategoryService>();

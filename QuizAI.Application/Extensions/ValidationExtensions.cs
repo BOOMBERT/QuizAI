@@ -35,11 +35,11 @@ internal static class ValidationExtensions
     {
         return ruleBuilder
             .Must(qc => !string.IsNullOrWhiteSpace(qc)).WithMessage("Question content cannot be empty or whitespace")
-            .MaximumLength(255).WithMessage("Question content must be at most 255 characters long");
+            .MaximumLength(512).WithMessage("Question content must be at most 512 characters long");
     }
 
-    internal static IRuleBuilderOptions<T, ICollection<CreateMultipleChoiceAnswerDto>> IsValidMultipleChoiceAnswers<T>(
-        this IRuleBuilder<T, ICollection<CreateMultipleChoiceAnswerDto>> ruleBuilder)
+    internal static IRuleBuilderOptions<T, ICollection<MultipleChoiceAnswersDto>> IsValidMultipleChoiceAnswers<T>(
+        this IRuleBuilder<T, ICollection<MultipleChoiceAnswersDto>> ruleBuilder)
     {
         return ruleBuilder
             .Must(a => a.Count >= 2).WithMessage("At least two answers are required")

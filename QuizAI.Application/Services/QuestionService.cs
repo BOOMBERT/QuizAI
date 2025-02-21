@@ -1,6 +1,8 @@
-﻿using AutoMapper;
-using QuizAI.Application.Interfaces;
+﻿using QuizAI.Application.Interfaces;
+using QuizAI.Application.MultipleChoiceQuestions.Dtos;
+using QuizAI.Application.OpenEndedQuestions.Dtos;
 using QuizAI.Application.Questions.Dtos;
+using QuizAI.Application.TrueFalseQuestions.Dtos;
 using QuizAI.Domain.Entities;
 using QuizAI.Domain.Enums;
 using QuizAI.Domain.Exceptions;
@@ -10,13 +12,11 @@ namespace QuizAI.Application.Services;
 
 public class QuestionService : IQuestionService
 {
-    private readonly IMapper _mapper;
     private readonly IImagesRepository _imagesRepository;
     private readonly byte _maxNumberOfQuestions;
 
-    public QuestionService(IMapper mapper, IImagesRepository imagesRepository, byte maxNumberOfQuestions)
+    public QuestionService(IImagesRepository imagesRepository, byte maxNumberOfQuestions)
     {
-        _mapper = mapper;
         _imagesRepository = imagesRepository;
         _maxNumberOfQuestions = maxNumberOfQuestions;
     }
@@ -94,17 +94,34 @@ public class QuestionService : IQuestionService
                question.Order,
                question.ImageId != null,
                question.Type == QuestionType.MultipleChoice
-                   ? question.MultipleChoiceAnswers.Select(_mapper.Map<MultipleChoiceAnswerDto>)
-                   : Enumerable.Empty<MultipleChoiceAnswerDto>(),
+                   ? question.MultipleChoiceAnswers.Select(mca => new MultipleChoiceAnswersDto(mca.Content, mca.IsCorrect))
+                   : Enumerable.Empty<MultipleChoiceAnswersDto>(),
                question.Type == QuestionType.OpenEnded
-                   ? _mapper.Map<OpenEndedAnswerDto>(question.OpenEndedAnswer)
+                   ? new OpenEndedAnswersDto(question.OpenEndedAnswer.ValidContent, question.OpenEndedAnswer.VerificationByAI, question.OpenEndedAnswer.IgnoreCaseAndSpaces)
                    : null,
                question.Type == QuestionType.TrueFalse
-                   ? _mapper.Map<TrueFalseAnswerDto>(question.TrueFalseAnswer)
+                   ? new TrueFalseAnswerDto(question.TrueFalseAnswer.IsCorrect)
                    : null,
                (!isPrivate && question.ImageId != null) 
                    ? $"/api/uploads/{question.ImageId}{await _imagesRepository.GetFileExtensionAsync((Guid)question.ImageId)}"
                    : null
-           );
+                   );
+    }
+
+    public async Task<QuestionWithAnswersForGenerationDto> MapToQuestionWithAnswersForGenerationDtoAsync(Question question)
+    {
+        return new QuestionWithAnswersForGenerationDto(
+            question.Content,
+            question.Type,
+            question.Type == QuestionType.MultipleChoice
+                ? question.MultipleChoiceAnswers.Select(mca => new MultipleChoiceAnswersDto(mca.Content, mca.IsCorrect))
+                : Enumerable.Empty<MultipleChoiceAnswersDto>(),
+            question.Type == QuestionType.OpenEnded
+                ? new OpenEndedAnswersDto(question.OpenEndedAnswer.ValidContent, question.OpenEndedAnswer.VerificationByAI, question.OpenEndedAnswer.IgnoreCaseAndSpaces)
+                : null,
+            question.Type == QuestionType.TrueFalse
+                ? new TrueFalseAnswerDto(question.TrueFalseAnswer.IsCorrect)
+                : null
+                );
     }
 }

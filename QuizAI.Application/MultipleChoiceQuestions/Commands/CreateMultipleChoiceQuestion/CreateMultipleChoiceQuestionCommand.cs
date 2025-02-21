@@ -8,7 +8,7 @@ public class CreateMultipleChoiceQuestionCommand : IRequest<LatestQuizId>
 {
     private Guid QuizId { get; set; }
     public string Content { get; set; } = string.Empty;
-    public ICollection<CreateMultipleChoiceAnswerDto> Answers { get; set; } = new List<CreateMultipleChoiceAnswerDto>();
+    public ICollection<MultipleChoiceAnswersDto> Answers { get; set; } = new List<MultipleChoiceAnswersDto>();
 
     public void SetQuizId(Guid id)
     {
