@@ -16,6 +16,7 @@ It also provides __full validation__ and __error logging__.
 - __Logging and Validation__: Serilog, FluentValidation
 - __Mapping and AI__: AutoMapper, OpenAI
 - __Image Processing and Hashing__: SixLabors.ImageSharp, Shipwreck.Phash.Bitmaps
+- __Testing__: XUnit, Moq
 
 # ✨ Features
 

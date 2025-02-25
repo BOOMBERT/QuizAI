@@ -17,7 +17,7 @@ public class UserContext : IUserContext
     public CurrentUser GetCurrentUser()
     {
         var user = _httpContextAccessor?.HttpContext?.User 
-            ?? throw new NotFoundException("The user could not be retrieved from HttpContext");
+            ?? throw new BadRequestException("User context is not present");
 
         if (user.Identity == null || !user.Identity.IsAuthenticated)
             throw new UnauthorizedException("User is not authenticated");
