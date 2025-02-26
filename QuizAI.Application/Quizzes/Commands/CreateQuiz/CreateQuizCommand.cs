@@ -5,7 +5,7 @@ namespace QuizAI.Application.Quizzes.Commands.CreateQuiz;
 
 public class CreateQuizCommand : IRequest<Guid>
 {
-    public required string Name { get; set; }
+    public string Name { get; set; } = string.Empty;
     public string? Description { get; set; }
     public IFormFile? Image { get; set; }
     public bool IsPrivate { get; set; }

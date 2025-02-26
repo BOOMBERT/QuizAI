@@ -13,12 +13,16 @@ public static class ValidationExtensions
 
     public static IRuleBuilderOptions<T, string> IsValidQuizName<T>(this IRuleBuilder<T, string> ruleBuilder)
     {
-        return ruleBuilder.MaximumLength(128).WithMessage("Quiz name must be at most 128 characters long");
+        return ruleBuilder
+            .Must(qn => !string.IsNullOrWhiteSpace(qn)).WithMessage("Quiz name cannot be empty or whitespace")
+            .MaximumLength(128).WithMessage("Quiz name must be at most 128 characters long");
     }
 
     public static IRuleBuilderOptions<T, string?> IsValidQuizDescription<T>(this IRuleBuilder<T, string?> ruleBuilder)
     {
-        return ruleBuilder.MaximumLength(512).WithMessage("Quiz description must be at most 512 characters long");
+        return ruleBuilder
+            .Must(qd => qd == null || !string.IsNullOrWhiteSpace(qd)).WithMessage("Quiz description cannot be empty or whitespace")
+            .MaximumLength(512).WithMessage("Quiz description must be at most 512 characters long");
     }
 
     public static IRuleBuilderOptions<T, ICollection<string>> IsValidQuizCategories<T>(this IRuleBuilder<T, ICollection<string>> ruleBuilder)
@@ -27,7 +31,7 @@ public static class ValidationExtensions
             .NotEmpty().WithMessage("At least one category is required")
             .Must(c => c.Count <= 10).WithMessage("You can specify up to 10 categories")
             .Must(c => c.All(c => !string.IsNullOrWhiteSpace(c))).WithMessage("Category cannot be empty or whitespace")
-            .Must(c => c.Select(c => c?.Trim().ToLower()).ToHashSet().Count == c.Count).WithMessage("Categories must be unique")
+            .Must(c => c.Select(c => c.Replace(" ", "").ToLower()).ToHashSet().Count == c.Count).WithMessage("Categories must be unique")
             .Must(c => c.All(c => c == null || c.Length <= 64)).WithMessage("Each category must not exceed 64 characters");
     }
 
