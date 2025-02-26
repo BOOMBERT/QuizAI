@@ -6,12 +6,10 @@ public class CustomException : Exception
 {
     public string Title { get; init; }
     public HttpStatusCode StatusCode { get; init; }
-    public object Details { get; init; }
 
-    public CustomException(string title, HttpStatusCode statusCode, object details)
+    public CustomException(string title, HttpStatusCode statusCode, object details) : base(details.ToString())
     {
         Title = title;
         StatusCode = statusCode;
-        Details = details;
     }
 }

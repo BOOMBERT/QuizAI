@@ -71,7 +71,7 @@ public class UserContextTests
         // assert
 
         var exception = Assert.Throws<UnauthorizedException>(action);
-        Assert.Equal("User is not authenticated", exception.Details);
+        Assert.Equal("User is not authenticated", exception.Message);
     }
 
     [Fact()]
@@ -97,7 +97,7 @@ public class UserContextTests
         // assert
 
         var exception = Assert.Throws<UnauthorizedException>(action);
-        Assert.Equal("User is not authenticated", exception.Details);
+        Assert.Equal("User is not authenticated", exception.Message);
     }
 
     [Fact()]
@@ -118,6 +118,6 @@ public class UserContextTests
         // assert
 
         var exception = Assert.Throws<BadRequestException>(action);
-        Assert.Equal("User context is not present", exception.Details);
+        Assert.Equal("User context is not present", exception.Message);
     }
 }

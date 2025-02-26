@@ -26,10 +26,10 @@ public class ErrorHandlingMiddleware : IMiddleware
         {
             var (title, statusCode, details, logLevel) = ex switch
             {
-                CustomException customException => (customException.Title, customException.StatusCode, customException.Details, LogEventLevel.Error),
+                CustomException customException => (customException.Title, customException.StatusCode, customException.Message, LogEventLevel.Error),
                 _ => ("An Unexpected Error Occurred", HttpStatusCode.InternalServerError, ex.Message, LogEventLevel.Fatal)
             };
-
+            
             LogError(context, details, logLevel, statusCode);
             await ReturnErrorResponse(context, title, statusCode, details);
         }
