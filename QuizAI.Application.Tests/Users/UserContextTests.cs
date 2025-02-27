@@ -8,12 +8,12 @@ namespace QuizAI.Application.Users.Tests;
 
 public class UserContextTests
 {
-    [Theory()]
+    [Theory]
     [InlineData("1", "test@test.com")]
     [InlineData("2", "user@example.com")]
     public void GetCurrentUser_WhenAuthenticatedUser_ShouldReturnCurrentUser(string userId, string email)
     {
-        // arrange
+        // Arrange
 
         var httpContextAccessorMock = new Mock<IHttpContextAccessor>();
 
@@ -32,20 +32,20 @@ public class UserContextTests
 
         var userContext = new UserContext(httpContextAccessorMock.Object);
 
-        // act
+        // Act
 
         var currentUser = userContext.GetCurrentUser();
 
-        // assert
+        // Assert
 
         Assert.Equal(userId, currentUser.Id);
         Assert.Equal(email, currentUser.Email);
     }
 
-    [Fact()]
+    [Fact]
     public void GetCurrentUser_WhenUnauthenticatedUser_ShouldThrowUnauthorizedException()
     {
-        // arrange
+        // Arrange
 
         var httpContextAccessorMock = new Mock<IHttpContextAccessor>();
 
@@ -64,20 +64,20 @@ public class UserContextTests
 
         var userContext = new UserContext(httpContextAccessorMock.Object);
 
-        // act
+        // Act
 
         Action action = () => userContext.GetCurrentUser();
 
-        // assert
+        // Assert
 
         var exception = Assert.Throws<UnauthorizedException>(action);
         Assert.Equal("User is not authenticated", exception.Message);
     }
 
-    [Fact()]
+    [Fact]
     public void GetCurrentUser_WhenUserIdentityIsNull_ShouldThrowUnauthorizedException()
     {
-        // arrange
+        // Arrange
 
         var httpContextAccessorMock = new Mock<IHttpContextAccessor>();
 
@@ -90,20 +90,20 @@ public class UserContextTests
 
         var userContext = new UserContext(httpContextAccessorMock.Object);
 
-        // act
+        // Act
 
         Action action = () => userContext.GetCurrentUser();
 
-        // assert
+        // Assert
 
         var exception = Assert.Throws<UnauthorizedException>(action);
         Assert.Equal("User is not authenticated", exception.Message);
     }
 
-    [Fact()]
+    [Fact]
     public void GetCurrentUser_WhenUserContextNotPresent_ShouldThrowBadRequestException()
     {
-        // arrange
+        // Arrange
 
         var httpContextAccessorMock = new Mock<IHttpContextAccessor>();
 
@@ -111,11 +111,11 @@ public class UserContextTests
 
         var userContext = new UserContext(httpContextAccessorMock.Object);
 
-        // act
+        // Act
 
         Action action = () => userContext.GetCurrentUser();
 
-        // assert
+        // Assert
 
         var exception = Assert.Throws<BadRequestException>(action);
         Assert.Equal("User context is not present", exception.Message);

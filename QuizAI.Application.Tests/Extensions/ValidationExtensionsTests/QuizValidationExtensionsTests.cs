@@ -6,58 +6,67 @@ namespace QuizAI.Application.Extensions.Tests;
 
 public class QuizValidationExtensionsTests
 {
+    private readonly InlineValidator<string> _isValidQuizNameValidator;
+    private readonly InlineValidator<string?> _isValidQuizDescriptionValidator;
+    private readonly InlineValidator<ICollection<string>> _isValidQuizCategoriesValidator;
+
+    public QuizValidationExtensionsTests()
+    {
+        _isValidQuizNameValidator = new InlineValidator<string>();
+        _isValidQuizNameValidator.RuleFor(x => x).IsValidQuizName();
+
+        _isValidQuizDescriptionValidator = new InlineValidator<string?>();
+        _isValidQuizDescriptionValidator.RuleFor(x => x).IsValidQuizDescription();
+
+        _isValidQuizCategoriesValidator = new InlineValidator<ICollection<string>>();
+        _isValidQuizCategoriesValidator.RuleFor(x => x).IsValidQuizCategories();
+    }
+
     #region Test Quiz Name
 
-    [Fact()]
+    [Fact]
     public void IsValidQuizName_WhenValidQuizName_ShouldNotHaveValidationErrors()
     {
-        // arrange
+        // Arrange
 
-        var validator = new InlineValidator<string>();
-        validator.RuleFor(x => x).IsValidQuizName();
+        var validQuizName = "Valid Quiz Name";
 
-        // act
+        // Act
 
-        var result = validator.TestValidate("Valid Quiz Name");
+        var result = _isValidQuizNameValidator.TestValidate(validQuizName);
 
-        // assert
+        // Assert
 
         result.ShouldNotHaveAnyValidationErrors();
     }
 
-    [Fact()]
+    [Fact]
     public void IsValidQuizName_WhenTooLongQuizName_ShouldHaveValidationError()
     {
-        // arrange
+        // Arrange
 
-        var validator = new InlineValidator<string>();
-        validator.RuleFor(x => x).IsValidQuizName();
+        var tooLongQuizName = new string('A', 129);
 
-        // act
+        // Act
 
-        var result = validator.TestValidate(new string('A', 129));
+        var result = _isValidQuizNameValidator.TestValidate(tooLongQuizName);
 
-        // assert
+        // Assert
 
         result.ShouldHaveValidationErrorFor(x => x)
             .WithErrorMessage("Quiz name must be at most 128 characters long");
     }
 
-    [Theory()]
+    [Theory]
     [InlineData("")]
     [InlineData(" ")]
     public void IsValidQuizName_WhenEmptyOrWhitespaceQuizName_ShouldHaveValidationError(string quizName)
     {
-        // arrange
+        // Act
 
-        var validator = new InlineValidator<string>();
-        validator.RuleFor(x => x).IsValidQuizName();
+        var result = _isValidQuizNameValidator.TestValidate(quizName);
 
-        // act
-
-        var result = validator.TestValidate(quizName);
-
-        // assert
+        // Assert
 
         result.ShouldHaveValidationErrorFor(x => x)
             .WithErrorMessage("Quiz name cannot be empty or whitespace");
@@ -67,56 +76,49 @@ public class QuizValidationExtensionsTests
 
     #region Test Quiz Description
 
-    [Fact()]
+    [Fact]
     public void IsValidQuizDescription_WhenValidQuizDescription_ShouldNotHaveValidationErrors()
     {
-        // arrange
+        // Arrange
 
-        var validator = new InlineValidator<string?>();
-        validator.RuleFor(x => x).IsValidQuizDescription();
+        var validQuizDescription = "Valid Quiz Description";
 
-        // act
+        // Act
 
-        var result = validator.TestValidate("Valid Quiz Description");
+        var result = _isValidQuizDescriptionValidator.TestValidate(validQuizDescription);
 
-        // assert
+        // Assert
 
         result.ShouldNotHaveAnyValidationErrors();
     }
 
-    [Fact()]
+    [Fact]
     public void IsValidQuizDescription_WhenTooLongQuizDescription_ShouldHaveValidationError()
     {
-        // arrange
-        
-        var validator = new InlineValidator<string?>();
-        validator.RuleFor(x => x).IsValidQuizDescription();
+        // Arrange
 
-        // act
+        var tooLongQuizDescription = new string('A', 513);
 
-        var result = validator.TestValidate(new string('A', 513));
+        // Act
 
-        // assert
+        var result = _isValidQuizDescriptionValidator.TestValidate(tooLongQuizDescription);
+
+        // Assert
 
         result.ShouldHaveValidationErrorFor(x => x)
             .WithErrorMessage("Quiz description must be at most 512 characters long");
     }
 
-    [Theory()]
+    [Theory]
     [InlineData("")]
     [InlineData(" ")]
     public void IsValidQuizDescription_WhenEmptyOrWhitespaceQuizDescription_ShouldHaveValidationError(string quizDescription)
     {
-        // arrange
+        // Act
 
-        var validator = new InlineValidator<string?>();
-        validator.RuleFor(x => x).IsValidQuizDescription();
+        var result = _isValidQuizDescriptionValidator.TestValidate(quizDescription);
 
-        // act
-
-        var result = validator.TestValidate(quizDescription);
-
-        // assert
+        // Assert
 
         result.ShouldHaveValidationErrorFor(x => x)
             .WithErrorMessage("Quiz description cannot be empty or whitespace");
@@ -126,85 +128,73 @@ public class QuizValidationExtensionsTests
 
     #region Test Quiz Categories
 
-    [Theory()]
+    [Theory]
     [InlineData((object)new string[] { "test" })]
     [InlineData((object)new string[] { "test 1", "test 2" })]
     [InlineData((object)new string[] { "1", "2", "3", "4", "5", "6", "7", "8", "9", "10" })]
     public void IsValidQuizCategories_WhenValidQuizCategories_ShouldNotHaveValidationErrors(ICollection<string> quizCategories)
     {
-        // arrange
+        // Act
 
-        var validator = new InlineValidator<ICollection<string>>();
-        validator.RuleFor(x => x).IsValidQuizCategories();
+        var result = _isValidQuizCategoriesValidator.TestValidate(quizCategories);
 
-        // act
-
-        var result = validator.TestValidate(quizCategories);
-
-        // assert
+        // Assert
 
         result.ShouldNotHaveAnyValidationErrors();
     }
 
-    [Fact()]
+    [Fact]
     public void IsValidQuizCategories_WhenEmptyQuizCategories_ShouldHaveValidationError()
     {
-        // arrange
+        // Arrange
 
-        var validator = new InlineValidator<ICollection<string>>();
-        validator.RuleFor(x => x).IsValidQuizCategories();
+        var emptyQuizCategories = Array.Empty<string>();
 
-        // act
+        // Act
 
-        var result = validator.TestValidate(Array.Empty<string>());
+        var result = _isValidQuizCategoriesValidator.TestValidate(emptyQuizCategories);
 
-        // assert
+        // Assert
 
         result.ShouldHaveValidationErrorFor(x => x)
             .WithErrorMessage("At least one category is required");
     }
 
-    [Fact()]
+    [Fact]
     public void IsValidQuizCategories_WhenTooManyQuizCategories_ShouldHaveValidationError()
     {
-        // arrange
+        // Arrange
 
-        var validator = new InlineValidator<ICollection<string>>();
-        validator.RuleFor(x => x).IsValidQuizCategories();
+        var tooManyQuizCategories = new string[] { "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11" };
 
-        // act
+        // Act
 
-        var result = validator.TestValidate(new string[] { "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11" });
+        var result = _isValidQuizCategoriesValidator.TestValidate(tooManyQuizCategories);
 
-        // assert
+        // Assert
 
         result.ShouldHaveValidationErrorFor(x => x)
             .WithErrorMessage("You can specify up to 10 categories");
     }
 
-    [Theory()]
+    [Theory]
     [InlineData((object)new string[] { "" } )]
     [InlineData((object)new string[] { " " })]
     [InlineData((object)new string[] { "test", "" })]
     [InlineData((object)new string[] { "test", " " })]
     public void IsValidQuizCategories_WhenEmptyOrWhitespaceAnyQuizCategory_ShouldHaveValidationError(ICollection<string> quizCategories)
     {
-        // arrange
+        // Act
 
-        var validator = new InlineValidator<ICollection<string>>();
-        validator.RuleFor(x => x).IsValidQuizCategories();
+        var result = _isValidQuizCategoriesValidator.TestValidate(quizCategories);
 
-        // act
-
-        var result = validator.TestValidate(quizCategories);
-
-        // assert
+        // Assert
 
         result.ShouldHaveValidationErrorFor(x => x)
             .WithErrorMessage("Category cannot be empty or whitespace");
     }
 
-    [Theory()]
+    [Theory]
     [InlineData((object)new string[] { "test", "test" })]
     [InlineData((object)new string[] { "test", "TEST" })]
     [InlineData((object)new string[] { "test", "TeSt" })]
@@ -212,39 +202,31 @@ public class QuizValidationExtensionsTests
     [InlineData((object)new string[] { "test", "test 2", "test" })]
     public void IsValidQuizCategories_WhenNotUniqueQuizCategoriesRegardlessOfCaseAndSpaces_ShouldHaveValidationError(ICollection<string> quizCategories)
     {
-        // arrange
+        // Act
 
-        var validator = new InlineValidator<ICollection<string>>();
-        validator.RuleFor(x => x).IsValidQuizCategories();
+        var result = _isValidQuizCategoriesValidator.TestValidate(quizCategories);
 
-        // act
-
-        var result = validator.TestValidate(quizCategories);
-
-        // assert
+        // Assert
 
         result.ShouldHaveValidationErrorFor(x => x)
             .WithErrorMessage("Categories must be unique");
     }
 
-    [Theory()]
+    [Theory]
     [InlineData((object)new string[] { })]
     [InlineData((object)new string[] { "test" })]
     public void IsValidQuizCategories_WhenTooLongAnyQuizCategory_ShouldHaveValidationError(ICollection<string> quizCategories)
     {
-        // arrange
-
-        var validator = new InlineValidator<ICollection<string>>();
-        validator.RuleFor(x => x).IsValidQuizCategories();
+        // Arrange
 
         var quizCategoriesList = quizCategories.ToList();
         quizCategoriesList.Add(new string('A', 65));
 
-        // act
+        // Act
 
-        var result = validator.TestValidate(quizCategoriesList);
+        var result = _isValidQuizCategoriesValidator.TestValidate(quizCategoriesList);
 
-        // assert
+        // Assert
 
         result.ShouldHaveValidationErrorFor(x => x)
             .WithErrorMessage("Each category must not exceed 64 characters");

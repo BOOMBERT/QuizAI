@@ -1,6 +1,5 @@
 ﻿using FluentValidation;
 using QuizAI.Application.Extensions;
-using QuizAI.Application.QuizAttempts.Dtos;
 using QuizAI.Application.QuizAttempts.Queries.GetAllAttempts;
 using QuizAI.Domain.Entities;
 

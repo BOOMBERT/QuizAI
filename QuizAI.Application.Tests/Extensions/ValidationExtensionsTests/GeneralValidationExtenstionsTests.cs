@@ -6,6 +6,14 @@ namespace QuizAI.Application.Extensions.Tests;
 
 public class GeneralValidationExtensionsTests
 {
+    private readonly InlineValidator<DateTime?> _IsNotFutureUtcDateTimeValidator;
+
+    public GeneralValidationExtensionsTests()
+    {
+        _IsNotFutureUtcDateTimeValidator = new InlineValidator<DateTime?>();
+        _IsNotFutureUtcDateTimeValidator.RuleFor(x => x).IsNotFutureUtcDateTime();
+    }
+
     [Theory]
     [InlineData(0)] // now
     [InlineData(-1)] // 1 minute
@@ -14,18 +22,15 @@ public class GeneralValidationExtensionsTests
     [InlineData(-5256000)] // ~ 10 years
     public void IsNotFutureUtcDateTime_WhenValidUtcDateTime_ShouldNotHaveValidationErrors(int minutesOffset)
     {
-        // arrange
-        
-        var validator = new InlineValidator<DateTime?>();
-        validator.RuleFor(x => x).IsNotFutureUtcDateTime();
+        // Arrange
 
         var validUtcDateTime = DateTime.UtcNow.AddMinutes(minutesOffset);
 
-        // act
+        // Act
 
-        var result = validator.TestValidate(validUtcDateTime);
+        var result = _IsNotFutureUtcDateTimeValidator.TestValidate(validUtcDateTime);
 
-        // assert
+        // Assert
 
         result.ShouldNotHaveAnyValidationErrors();
     }
@@ -37,18 +42,15 @@ public class GeneralValidationExtensionsTests
     [InlineData(5256000)] // ~ 10 years
     public void IsNotFutureUtcDateTime_WhenFutureUtcDateTime_ShouldHaveValidationError(int minutesOffset)
     {
-        // arrange
-
-        var validator = new InlineValidator<DateTime?>();
-        validator.RuleFor(x => x).IsNotFutureUtcDateTime();
+        // Arrange
 
         var futureUtcDateTime = DateTime.UtcNow.AddMinutes(minutesOffset);
 
-        // act
+        // Act
 
-        var result = validator.TestValidate(futureUtcDateTime);
+        var result = _IsNotFutureUtcDateTimeValidator.TestValidate(futureUtcDateTime);
 
-        // assert
+        // Assert
 
         result.ShouldHaveValidationErrorFor(x => x)
             .WithErrorMessage("The date cannot exceed the current date");

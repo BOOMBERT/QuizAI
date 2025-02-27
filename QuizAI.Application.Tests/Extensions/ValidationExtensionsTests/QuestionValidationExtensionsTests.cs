@@ -6,56 +6,57 @@ namespace QuizAI.Application.Extensions.Tests;
 
 public class QuestionValidationExtensionsTests
 {
-    [Fact()]
+    private readonly InlineValidator<string> _IsValidQuestionContentValidator;
+
+    public QuestionValidationExtensionsTests()
+    {
+        _IsValidQuestionContentValidator = new InlineValidator<string>();
+        _IsValidQuestionContentValidator.RuleFor(x => x).IsValidQuestionContent();
+    }
+
+    [Fact]
     public void IsValidQuestionContent_WhenValidQuestionContent_ShouldNotHaveValidationErrors()
     {
-        // arrange
+        // Arrange
 
-        var validator = new InlineValidator<string>();
-        validator.RuleFor(x => x).IsValidQuestionContent();
+        var validQuestionContent = "Valid Question Content";
 
-        // act
+        // Act
 
-        var result = validator.TestValidate("Valid Question Content");
+        var result = _IsValidQuestionContentValidator.TestValidate(validQuestionContent);
 
-        // assert
+        // Assert
 
         result.ShouldNotHaveAnyValidationErrors();
     }
 
-    [Theory()]
+    [Theory]
     [InlineData("")]
     [InlineData(" ")]
     public void IsValidQuestionContent_WhenEmptyOrWhitespaceQuestionContent_ShouldHaveValidationError(string questionContent)
     {
-        // arrange
+        // Act
 
-        var validator = new InlineValidator<string>();
-        validator.RuleFor(x => x).IsValidQuestionContent();
+        var result = _IsValidQuestionContentValidator.TestValidate(questionContent);
 
-        // act
-
-        var result = validator.TestValidate(questionContent);
-
-        // assert
+        // Assert
 
         result.ShouldHaveValidationErrorFor(x => x)
             .WithErrorMessage("Question content cannot be empty or whitespace");
     }
 
-    [Fact()]
+    [Fact]
     public void IsValidQuestionContent_WhenTooLongQuestionContent_ShouldHaveValidationError()
     {
-        // arrange
+        // Arrange
 
-        var validator = new InlineValidator<string>();
-        validator.RuleFor(x => x).IsValidQuestionContent();
+        var tooLongQuestionContent = new string('A', 513);
 
-        // act
+        // Act
 
-        var result = validator.TestValidate(new string('A', 513));
+        var result = _IsValidQuestionContentValidator.TestValidate(tooLongQuestionContent);
 
-        // assert
+        // Assert
 
         result.ShouldHaveValidationErrorFor(x => x)
             .WithErrorMessage("Question content must be at most 512 characters long");
