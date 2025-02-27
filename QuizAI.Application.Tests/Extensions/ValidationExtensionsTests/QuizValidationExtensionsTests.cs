@@ -187,7 +187,7 @@ public class QuizValidationExtensionsTests
     [InlineData((object)new string[] { " " })]
     [InlineData((object)new string[] { "test", "" })]
     [InlineData((object)new string[] { "test", " " })]
-    public void IsValidQuizCategories_WhenAnyQuizCategoryIsEmptyOrWhitespace_ShouldHaveValidationError(ICollection<string> quizCategories)
+    public void IsValidQuizCategories_WhenEmptyOrWhitespaceAnyQuizCategory_ShouldHaveValidationError(ICollection<string> quizCategories)
     {
         // arrange
 
@@ -210,7 +210,7 @@ public class QuizValidationExtensionsTests
     [InlineData((object)new string[] { "test", "TeSt" })]
     [InlineData((object)new string[] { "test", " t e s t " })]
     [InlineData((object)new string[] { "test", "test 2", "test" })]
-    public void IsValidQuizCategories_WhenQuizCategoriesAreNotUniqueRegardlessOfCaseAndSpaces_ShouldHaveValidationError(ICollection<string> quizCategories)
+    public void IsValidQuizCategories_WhenNotUniqueQuizCategoriesRegardlessOfCaseAndSpaces_ShouldHaveValidationError(ICollection<string> quizCategories)
     {
         // arrange
 
@@ -230,7 +230,7 @@ public class QuizValidationExtensionsTests
     [Theory()]
     [InlineData((object)new string[] { })]
     [InlineData((object)new string[] { "test" })]
-    public void IsValidQuizCategories_WhenAnyQuizCategoryIsTooLong_ShouldHaveValidationError(ICollection<string> quizCategories)
+    public void IsValidQuizCategories_WhenTooLongAnyQuizCategory_ShouldHaveValidationError(ICollection<string> quizCategories)
     {
         // arrange
 

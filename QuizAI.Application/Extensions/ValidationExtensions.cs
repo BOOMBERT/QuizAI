@@ -56,7 +56,7 @@ public static class ValidationExtensions
     public static IRuleBuilderOptions<T, ICollection<string>> IsValidOpenEndedAnswers<T>(this IRuleBuilder<T, ICollection<string>> ruleBuilder)
     {
         return ruleBuilder
-            .Must(a => a.Count >= 1).WithMessage("At least one answer is required")
+            .NotEmpty().WithMessage("At least one answer is required")
             .Must(a => a.Count <= 20).WithMessage("You can specify up to 20 answers")
             .Must(a => a.ToHashSet().Count == a.Count).WithMessage("Answers must be unique")
             .Must(a => a.All(a => !string.IsNullOrWhiteSpace(a))).WithMessage("Answer cannot be empty or whitespace")
@@ -72,7 +72,7 @@ public static class ValidationExtensions
         });
     }
 
-    public static IRuleBuilder<T, DateTime?> IsValidUtcDateTime<T>(this IRuleBuilder<T, DateTime?> ruleBuilder)
+    public static IRuleBuilder<T, DateTime?> IsNotFutureUtcDateTime<T>(this IRuleBuilder<T, DateTime?> ruleBuilder)
     {
         return ruleBuilder
             .Must(d => !d.HasValue || d.Value <= DateTime.UtcNow)
