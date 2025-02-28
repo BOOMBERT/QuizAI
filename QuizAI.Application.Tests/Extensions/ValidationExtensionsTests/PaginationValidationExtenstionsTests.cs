@@ -1,25 +1,21 @@
 ﻿using FluentValidation;
 using FluentValidation.TestHelper;
 using QuizAI.Application.Interfaces;
-using QuizAI.Domain.Constants;
+using QuizAI.Application.Tests.TestHelpers;
 using Xunit;
 
 namespace QuizAI.Application.Extensions.Tests;
 
 public class PaginationValidationExtensionsTests
 {
-    private readonly InlineValidator<IPaginationQuery> _IsValidPageNumberValidator;
-    private readonly InlineValidator<IPaginationQuery> _IsValidPageSizeValidator;
+    #region Test Page Number
 
-    private readonly int[] allowPageSizes = [5, 10, 15, 30];
-
-    public PaginationValidationExtensionsTests()
+    private InlineValidator<IPaginationQuery> GetIsValidPageNumberValidator()
     {
-        _IsValidPageNumberValidator = new InlineValidator<IPaginationQuery>();
-        _IsValidPageNumberValidator.RuleFor(x => x.PageNumber).IsValidPageNumber();
+        var validator = new InlineValidator<IPaginationQuery>();
+        validator.RuleFor(x => x.PageNumber).IsValidPageNumber();
 
-        _IsValidPageSizeValidator = new InlineValidator<IPaginationQuery>();
-        _IsValidPageSizeValidator.RuleFor(x => x.PageSize).IsValidPageSize(allowPageSizes);
+        return validator;
     }
 
     [Theory]
@@ -33,7 +29,7 @@ public class PaginationValidationExtensionsTests
 
         // Act
 
-        var result = _IsValidPageNumberValidator.TestValidate(paginationQuery);
+        var result = GetIsValidPageNumberValidator().TestValidate(paginationQuery);
 
         // Assert
 
@@ -51,12 +47,26 @@ public class PaginationValidationExtensionsTests
 
         // Act
 
-        var result = _IsValidPageNumberValidator.TestValidate(paginationQuery);
+        var result = GetIsValidPageNumberValidator().TestValidate(paginationQuery);
 
         // Assert
 
         result.ShouldHaveValidationErrorFor(x => x.PageNumber)
             .WithErrorMessage("Page number must be greater than or equal to 1");
+    }
+
+    #endregion
+
+    #region Test Page Size
+
+    private readonly int[] allowPageSizes = [5, 10, 15, 30];
+
+    private InlineValidator<IPaginationQuery> GetIsValidPageSizeValidator()
+    {
+        var validator = new InlineValidator<IPaginationQuery>();
+        validator.RuleFor(x => x.PageSize).IsValidPageSize(allowPageSizes);
+
+        return validator;
     }
 
     [Theory]
@@ -70,7 +80,7 @@ public class PaginationValidationExtensionsTests
 
         // Act
 
-        var result = _IsValidPageSizeValidator.TestValidate(paginationQuery);
+        var result = GetIsValidPageSizeValidator().TestValidate(paginationQuery);
 
         // Assert
 
@@ -89,19 +99,13 @@ public class PaginationValidationExtensionsTests
 
         // Act
 
-        var result = _IsValidPageSizeValidator.TestValidate(paginationQuery);
+        var result = GetIsValidPageSizeValidator().TestValidate(paginationQuery);
 
         // Assert
 
         result.ShouldHaveValidationErrorFor(x => x.PageSize)
             .WithErrorMessage($"Page size must be in [{string.Join(",", allowPageSizes)}]");
     }
-}
 
-internal class PaginationQuery : IPaginationQuery
-{
-    public int PageNumber { get; set; }
-    public int PageSize { get; set; }
-    public string? SortBy { get; set; }
-    public SortDirection? SortDirection { get; set; }
+    #endregion
 }

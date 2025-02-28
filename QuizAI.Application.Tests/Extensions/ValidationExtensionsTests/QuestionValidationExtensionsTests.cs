@@ -6,12 +6,12 @@ namespace QuizAI.Application.Extensions.Tests;
 
 public class QuestionValidationExtensionsTests
 {
-    private readonly InlineValidator<string> _IsValidQuestionContentValidator;
-
-    public QuestionValidationExtensionsTests()
+    private InlineValidator<string> GetIsValidQuestionContentValidator()
     {
-        _IsValidQuestionContentValidator = new InlineValidator<string>();
-        _IsValidQuestionContentValidator.RuleFor(x => x).IsValidQuestionContent();
+        var validator = new InlineValidator<string>();
+        validator.RuleFor(x => x).IsValidQuestionContent();
+
+        return validator;
     }
 
     [Fact]
@@ -23,7 +23,7 @@ public class QuestionValidationExtensionsTests
 
         // Act
 
-        var result = _IsValidQuestionContentValidator.TestValidate(validQuestionContent);
+        var result = GetIsValidQuestionContentValidator().TestValidate(validQuestionContent);
 
         // Assert
 
@@ -37,7 +37,7 @@ public class QuestionValidationExtensionsTests
     {
         // Act
 
-        var result = _IsValidQuestionContentValidator.TestValidate(questionContent);
+        var result = GetIsValidQuestionContentValidator().TestValidate(questionContent);
 
         // Assert
 
@@ -54,7 +54,7 @@ public class QuestionValidationExtensionsTests
 
         // Act
 
-        var result = _IsValidQuestionContentValidator.TestValidate(tooLongQuestionContent);
+        var result = GetIsValidQuestionContentValidator().TestValidate(tooLongQuestionContent);
 
         // Assert
 

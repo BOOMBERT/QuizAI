@@ -6,12 +6,12 @@ namespace QuizAI.Application.Extensions.Tests;
 
 public class GeneralValidationExtensionsTests
 {
-    private readonly InlineValidator<DateTime?> _IsNotFutureUtcDateTimeValidator;
-
-    public GeneralValidationExtensionsTests()
+    private InlineValidator<DateTime?> GetIsNotFutureUtcDateTimeValidator()
     {
-        _IsNotFutureUtcDateTimeValidator = new InlineValidator<DateTime?>();
-        _IsNotFutureUtcDateTimeValidator.RuleFor(x => x).IsNotFutureUtcDateTime();
+        var validator = new InlineValidator<DateTime?>();
+        validator.RuleFor(x => x).IsNotFutureUtcDateTime();
+
+        return validator;
     }
 
     [Theory]
@@ -28,7 +28,7 @@ public class GeneralValidationExtensionsTests
 
         // Act
 
-        var result = _IsNotFutureUtcDateTimeValidator.TestValidate(validUtcDateTime);
+        var result = GetIsNotFutureUtcDateTimeValidator().TestValidate(validUtcDateTime);
 
         // Assert
 
@@ -48,7 +48,7 @@ public class GeneralValidationExtensionsTests
 
         // Act
 
-        var result = _IsNotFutureUtcDateTimeValidator.TestValidate(futureUtcDateTime);
+        var result = GetIsNotFutureUtcDateTimeValidator().TestValidate(futureUtcDateTime);
 
         // Assert
 

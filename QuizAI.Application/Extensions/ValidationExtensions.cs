@@ -9,7 +9,7 @@ namespace QuizAI.Application.Extensions;
 
 public static class ValidationExtensions
 {
-    private const int MaxImageSizeInBytes = 2 * 1024 * 1024; // 2MB
+    private const int MaxImageSizeInBytes = 5 * 1024 * 1024; // 5MB
 
     public static IRuleBuilderOptions<T, string> IsValidQuizName<T>(this IRuleBuilder<T, string> ruleBuilder)
     {

@@ -15,18 +15,18 @@ public static class FileValidationUtil
 
     private static readonly string[] _supportedImageExtensions = _imageMagicNumbers.Keys.ToArray();
     
-    public static void Validate(IFormFile file, int maxSizeInBytes)
+    public static void Validate(IFormFile file, int imageMaxSizeInBytes)
     {
         if (file == null || file.Length == 0)
             throw new UnprocessableEntityException("The file is empty or missing");
-        
-        if (file.Length > maxSizeInBytes)
-            throw new RequestEntityTooLargeException($"The file exceeds the maximum allowed size of {maxSizeInBytes / (1024 * 1024)} MB");
 
         var fileExtension = Path.GetExtension(file.FileName).ToLower();
 
         if (_supportedImageExtensions.Contains(fileExtension))
         {
+            if (file.Length > imageMaxSizeInBytes)
+                throw new RequestEntityTooLargeException($"The image file exceeds the maximum allowed size of {imageMaxSizeInBytes / (1024 * 1024)} MB");
+
             if (!ValidateImage(file))
                 throw new UnprocessableEntityException("Invalid image file");
         }
@@ -38,30 +38,22 @@ public static class FileValidationUtil
 
     private static bool ValidateImage(IFormFile file)
     {
-        if (!file.ContentType.StartsWith("image/"))
+        var imageExtension = Path.GetExtension(file.FileName).ToLower();
+        var imageContentType = $"image/{(imageExtension == FileExtension.Jpg ? FileExtension.Jpeg.Substring(1) : imageExtension.Substring(1))}";
+
+        if (!file.ContentType.Equals(imageContentType))
             return false;
 
-        using (var stream = file.OpenReadStream())
-        {
-            var sizeForMagicNumber = _imageMagicNumbers.Max(mn => mn.Value.Length);
-            var buffer = new byte[sizeForMagicNumber];
+        if (!_imageMagicNumbers.TryGetValue(imageExtension, out var imageMagicNumber))
+            throw new UnsupportedMediaTypeException($"The file extension {imageExtension} is not supported");
 
-            stream.Read(buffer, 0, buffer.Length);
+        using var stream = file.OpenReadStream();
+        var buffer = new byte[imageMagicNumber.Length];
 
-            foreach (var supportedImageExtension in _supportedImageExtensions)
-            {
-                if (IsMatchingMagicNumber(buffer, supportedImageExtension))
-                    return true;
-            }
+        int bytesRead = stream.Read(buffer, 0, buffer.Length);
+        if (bytesRead != imageMagicNumber.Length)
             return false;
-        }
-    }
 
-    private static bool IsMatchingMagicNumber(byte[] buffer, string fileExtension)
-    {
-        if (!_imageMagicNumbers.TryGetValue(fileExtension, out var fileMagicNumbers))
-            throw new UnsupportedMediaTypeException($"The file extension {fileExtension} is not supported");
-
-        return buffer.Length >= fileMagicNumbers.Length && buffer.Take(fileMagicNumbers.Length).SequenceEqual(fileMagicNumbers);
+        return buffer.SequenceEqual(imageMagicNumber);
     }
 }

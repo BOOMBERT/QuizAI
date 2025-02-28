@@ -7,24 +7,17 @@ namespace QuizAI.Application.Extensions.Tests;
 
 public class AnswerValidationExtensionsTests
 {
-    private readonly InlineValidator<ICollection<string>> _IsValidOpenEndedAnswersValidator;
-
-    public AnswerValidationExtensionsTests()
-    {
-        _IsValidOpenEndedAnswersValidator = new InlineValidator<ICollection<string>>();
-        _IsValidOpenEndedAnswersValidator.RuleFor(x => x).IsValidOpenEndedAnswers();
-    }
-
     #region Test Multiple Choice Answers
 
-    private (InlineValidator<ICollection<MultipleChoiceAnswerDto>>, ICollection<MultipleChoiceAnswerDto>) GetValidatorAndMultipleChoiceAnswerDtos(string[] answersContent)
+    private ICollection<MultipleChoiceAnswerDto> GetMultipleChoiceAnswerDtos(string[] answersContent) 
+        => answersContent.Select(ac => new MultipleChoiceAnswerDto(ac, true)).ToList();
+
+    private InlineValidator<ICollection<MultipleChoiceAnswerDto>> GetIsValidMultipleChoiceAnswersValidator()
     {
         var validator = new InlineValidator<ICollection<MultipleChoiceAnswerDto>>();
         validator.RuleFor(x => x).IsValidMultipleChoiceAnswers();
 
-        var multipleChoiceAnswerDtos = answersContent.Select(ac => new MultipleChoiceAnswerDto(ac, true)).ToList();
-
-        return (validator, multipleChoiceAnswerDtos);
+        return validator;
     }
 
     [Theory]
@@ -35,11 +28,11 @@ public class AnswerValidationExtensionsTests
     {
         // Arrange
 
-        var (validator, validMultipleChoiceAnswerDtos) = GetValidatorAndMultipleChoiceAnswerDtos(answersContent);
+        var validMultipleChoiceAnswerDtos = GetMultipleChoiceAnswerDtos(answersContent);
 
         // Act
 
-        var result = validator.TestValidate(validMultipleChoiceAnswerDtos);
+        var result = GetIsValidMultipleChoiceAnswersValidator().TestValidate(validMultipleChoiceAnswerDtos);
 
         // Assert
 
@@ -53,11 +46,11 @@ public class AnswerValidationExtensionsTests
     {
         // Arrange
 
-        var (validator, multipleChoiceAnswerDtos) = GetValidatorAndMultipleChoiceAnswerDtos(answersContent);
+        var multipleChoiceAnswerDtos = GetMultipleChoiceAnswerDtos(answersContent);
 
         // Act
 
-        var result = validator.TestValidate(multipleChoiceAnswerDtos);
+        var result = GetIsValidMultipleChoiceAnswersValidator().TestValidate(multipleChoiceAnswerDtos);
 
         // Assert
 
@@ -70,11 +63,11 @@ public class AnswerValidationExtensionsTests
     {
         // Arrange
 
-        var (validator, multipleChoiceAnswerDtos) = GetValidatorAndMultipleChoiceAnswerDtos(new string[] { "1", "2", "3", "4", "5", "6", "7", "8", "9" });
+        var multipleChoiceAnswerDtos = GetMultipleChoiceAnswerDtos(new string[] { "1", "2", "3", "4", "5", "6", "7", "8", "9" });
 
         // Act
 
-        var result = validator.TestValidate(multipleChoiceAnswerDtos);
+        var result = GetIsValidMultipleChoiceAnswersValidator().TestValidate(multipleChoiceAnswerDtos);
 
         // Assert
 
@@ -89,11 +82,11 @@ public class AnswerValidationExtensionsTests
     {
         // Arrange
 
-        var (validator, multipleChoiceAnswerDtos) = GetValidatorAndMultipleChoiceAnswerDtos(answersContent);
+        var multipleChoiceAnswerDtos = GetMultipleChoiceAnswerDtos(answersContent);
 
         // Act
 
-        var result = validator.TestValidate(multipleChoiceAnswerDtos);
+        var result = GetIsValidMultipleChoiceAnswersValidator().TestValidate(multipleChoiceAnswerDtos);
 
         // Assert
 
@@ -108,11 +101,11 @@ public class AnswerValidationExtensionsTests
     {
         // Arrange
 
-        var (validator, multipleChoiceAnswerDtos) = GetValidatorAndMultipleChoiceAnswerDtos(answersContent);
+        var multipleChoiceAnswerDtos = GetMultipleChoiceAnswerDtos(answersContent);
 
         // Act
 
-        var result = validator.TestValidate(multipleChoiceAnswerDtos);
+        var result = GetIsValidMultipleChoiceAnswersValidator().TestValidate(multipleChoiceAnswerDtos);
 
         // Assert
 
@@ -125,11 +118,11 @@ public class AnswerValidationExtensionsTests
     {
         // Arrange
 
-        var (validator, multipleChoiceAnswerDtos) = GetValidatorAndMultipleChoiceAnswerDtos(new string[] { new string('A', 256), "test" });
+        var multipleChoiceAnswerDtos = GetMultipleChoiceAnswerDtos(new string[] { new string('A', 256), "test" });
 
         // Act
 
-        var result = validator.TestValidate(multipleChoiceAnswerDtos);
+        var result = GetIsValidMultipleChoiceAnswersValidator().TestValidate(multipleChoiceAnswerDtos);
 
         // Assert
 
@@ -140,7 +133,15 @@ public class AnswerValidationExtensionsTests
     #endregion
 
     #region Test Open Ended Answers
-    
+
+    private InlineValidator<ICollection<string>> GetIsValidOpenEndedAnswersValidator()
+    {
+        var validator  = new InlineValidator<ICollection<string>>();
+        validator.RuleFor(x => x).IsValidOpenEndedAnswers();
+
+        return validator;
+    }
+
     [Theory]
     [InlineData((object)new string[] { "test" })]
     [InlineData((object)new string[] { "test", "Test" })]
@@ -150,7 +151,7 @@ public class AnswerValidationExtensionsTests
     {        
         // Act
         
-        var result = _IsValidOpenEndedAnswersValidator.TestValidate(openEndedAnswers);
+        var result = GetIsValidOpenEndedAnswersValidator().TestValidate(openEndedAnswers);
 
         // Assert
 
@@ -166,7 +167,7 @@ public class AnswerValidationExtensionsTests
 
         // Act
 
-        var result = _IsValidOpenEndedAnswersValidator.TestValidate(emptyOpenEndedAnswers);
+        var result = GetIsValidOpenEndedAnswersValidator().TestValidate(emptyOpenEndedAnswers);
 
         // Assert
 
@@ -183,7 +184,7 @@ public class AnswerValidationExtensionsTests
 
         // Act
 
-        var result = _IsValidOpenEndedAnswersValidator.TestValidate(tooManyOpenEndedAnswers);
+        var result = GetIsValidOpenEndedAnswersValidator().TestValidate(tooManyOpenEndedAnswers);
 
         // Assert
 
@@ -198,7 +199,7 @@ public class AnswerValidationExtensionsTests
     {
         // Act
 
-        var result = _IsValidOpenEndedAnswersValidator.TestValidate(openEndedAnswers);
+        var result = GetIsValidOpenEndedAnswersValidator().TestValidate(openEndedAnswers);
 
         // Assert
 
@@ -215,7 +216,7 @@ public class AnswerValidationExtensionsTests
     {
         // Act
 
-        var result = _IsValidOpenEndedAnswersValidator.TestValidate(openEndedAnswers);
+        var result = GetIsValidOpenEndedAnswersValidator().TestValidate(openEndedAnswers);
 
         // Assert
 
@@ -236,7 +237,7 @@ public class AnswerValidationExtensionsTests
 
         // Act
 
-        var result = _IsValidOpenEndedAnswersValidator.TestValidate(openEndedAnswersWithTooLongTotalLength);
+        var result = GetIsValidOpenEndedAnswersValidator().TestValidate(openEndedAnswersWithTooLongTotalLength);
 
         // Assert
 

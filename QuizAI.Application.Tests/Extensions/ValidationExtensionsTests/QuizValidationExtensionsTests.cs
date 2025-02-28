@@ -6,23 +6,15 @@ namespace QuizAI.Application.Extensions.Tests;
 
 public class QuizValidationExtensionsTests
 {
-    private readonly InlineValidator<string> _isValidQuizNameValidator;
-    private readonly InlineValidator<string?> _isValidQuizDescriptionValidator;
-    private readonly InlineValidator<ICollection<string>> _isValidQuizCategoriesValidator;
-
-    public QuizValidationExtensionsTests()
-    {
-        _isValidQuizNameValidator = new InlineValidator<string>();
-        _isValidQuizNameValidator.RuleFor(x => x).IsValidQuizName();
-
-        _isValidQuizDescriptionValidator = new InlineValidator<string?>();
-        _isValidQuizDescriptionValidator.RuleFor(x => x).IsValidQuizDescription();
-
-        _isValidQuizCategoriesValidator = new InlineValidator<ICollection<string>>();
-        _isValidQuizCategoriesValidator.RuleFor(x => x).IsValidQuizCategories();
-    }
-
     #region Test Quiz Name
+
+    private InlineValidator<string> GetIsValidQuizNameValidator()
+    {
+        var validator = new InlineValidator<string>();
+        validator.RuleFor(x => x).IsValidQuizName();
+
+        return validator;
+    }
 
     [Fact]
     public void IsValidQuizName_WhenValidQuizName_ShouldNotHaveValidationErrors()
@@ -33,7 +25,7 @@ public class QuizValidationExtensionsTests
 
         // Act
 
-        var result = _isValidQuizNameValidator.TestValidate(validQuizName);
+        var result = GetIsValidQuizNameValidator().TestValidate(validQuizName);
 
         // Assert
 
@@ -49,7 +41,7 @@ public class QuizValidationExtensionsTests
 
         // Act
 
-        var result = _isValidQuizNameValidator.TestValidate(tooLongQuizName);
+        var result = GetIsValidQuizNameValidator().TestValidate(tooLongQuizName);
 
         // Assert
 
@@ -64,7 +56,7 @@ public class QuizValidationExtensionsTests
     {
         // Act
 
-        var result = _isValidQuizNameValidator.TestValidate(quizName);
+        var result = GetIsValidQuizNameValidator().TestValidate(quizName);
 
         // Assert
 
@@ -76,6 +68,14 @@ public class QuizValidationExtensionsTests
 
     #region Test Quiz Description
 
+    private InlineValidator<string?> GetIsValidQuizDescriptionValidator()
+    {
+        var validator = new InlineValidator<string?>();
+        validator.RuleFor(x => x).IsValidQuizDescription();
+
+        return validator;
+    }
+
     [Fact]
     public void IsValidQuizDescription_WhenValidQuizDescription_ShouldNotHaveValidationErrors()
     {
@@ -85,7 +85,7 @@ public class QuizValidationExtensionsTests
 
         // Act
 
-        var result = _isValidQuizDescriptionValidator.TestValidate(validQuizDescription);
+        var result = GetIsValidQuizDescriptionValidator().TestValidate(validQuizDescription);
 
         // Assert
 
@@ -101,7 +101,7 @@ public class QuizValidationExtensionsTests
 
         // Act
 
-        var result = _isValidQuizDescriptionValidator.TestValidate(tooLongQuizDescription);
+        var result = GetIsValidQuizDescriptionValidator().TestValidate(tooLongQuizDescription);
 
         // Assert
 
@@ -116,7 +116,7 @@ public class QuizValidationExtensionsTests
     {
         // Act
 
-        var result = _isValidQuizDescriptionValidator.TestValidate(quizDescription);
+        var result = GetIsValidQuizDescriptionValidator().TestValidate(quizDescription);
 
         // Assert
 
@@ -128,6 +128,14 @@ public class QuizValidationExtensionsTests
 
     #region Test Quiz Categories
 
+    private InlineValidator<ICollection<string>> GetIsValidQuizCategoriesValidator()
+    {
+        var validator = new InlineValidator<ICollection<string>>();
+        validator.RuleFor(x => x).IsValidQuizCategories();
+
+        return validator;
+    }
+
     [Theory]
     [InlineData((object)new string[] { "test" })]
     [InlineData((object)new string[] { "test 1", "test 2" })]
@@ -136,7 +144,7 @@ public class QuizValidationExtensionsTests
     {
         // Act
 
-        var result = _isValidQuizCategoriesValidator.TestValidate(quizCategories);
+        var result = GetIsValidQuizCategoriesValidator().TestValidate(quizCategories);
 
         // Assert
 
@@ -152,7 +160,7 @@ public class QuizValidationExtensionsTests
 
         // Act
 
-        var result = _isValidQuizCategoriesValidator.TestValidate(emptyQuizCategories);
+        var result = GetIsValidQuizCategoriesValidator().TestValidate(emptyQuizCategories);
 
         // Assert
 
@@ -169,7 +177,7 @@ public class QuizValidationExtensionsTests
 
         // Act
 
-        var result = _isValidQuizCategoriesValidator.TestValidate(tooManyQuizCategories);
+        var result = GetIsValidQuizCategoriesValidator().TestValidate(tooManyQuizCategories);
 
         // Assert
 
@@ -186,7 +194,7 @@ public class QuizValidationExtensionsTests
     {
         // Act
 
-        var result = _isValidQuizCategoriesValidator.TestValidate(quizCategories);
+        var result = GetIsValidQuizCategoriesValidator().TestValidate(quizCategories);
 
         // Assert
 
@@ -204,7 +212,7 @@ public class QuizValidationExtensionsTests
     {
         // Act
 
-        var result = _isValidQuizCategoriesValidator.TestValidate(quizCategories);
+        var result = GetIsValidQuizCategoriesValidator().TestValidate(quizCategories);
 
         // Assert
 
@@ -224,7 +232,7 @@ public class QuizValidationExtensionsTests
 
         // Act
 
-        var result = _isValidQuizCategoriesValidator.TestValidate(quizCategoriesList);
+        var result = GetIsValidQuizCategoriesValidator().TestValidate(quizCategoriesList);
 
         // Assert
 
