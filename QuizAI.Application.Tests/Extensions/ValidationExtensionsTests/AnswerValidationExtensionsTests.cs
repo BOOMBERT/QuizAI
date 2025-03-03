@@ -1,6 +1,7 @@
 ﻿using FluentValidation;
 using FluentValidation.TestHelper;
 using QuizAI.Application.MultipleChoiceQuestions.Dtos;
+using QuizAI.Application.Tests.TestHelpers;
 using Xunit;
 
 namespace QuizAI.Application.Extensions.Tests;
@@ -232,8 +233,7 @@ public class AnswerValidationExtensionsTests
     {
         // Arrange
 
-        int lengthPerAnswer = (int)Math.Ceiling(1276.0 / numberOfAnswers);
-        var openEndedAnswersWithTooLongTotalLength = Enumerable.Repeat(new string('A', lengthPerAnswer), numberOfAnswers).ToList();
+        var openEndedAnswersWithTooLongTotalLength = AnswerTestHelper.GenerateAnswersExceedingMaxTotalLength(numberOfAnswers, 1275);
 
         // Act
 
