@@ -6,7 +6,7 @@ namespace QuizAI.Application.Quizzes.Commands.UpdateQuiz;
 public class UpdateQuizCommand : IRequest<LatestQuizId>
 {
     private Guid Id { get; set; }
-    public required string Name { get; set; }
+    public string Name { get; set; } = string.Empty;
     public string? Description { get; set; }
     public ICollection<string> Categories { get; set; } = new List<string>();
 

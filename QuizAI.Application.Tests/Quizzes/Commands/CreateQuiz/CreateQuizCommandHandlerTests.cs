@@ -11,6 +11,26 @@ namespace QuizAI.Application.Quizzes.Commands.CreateQuiz.Tests;
 
 public class CreateQuizCommandHandlerTests
 {
+    private readonly Mock<IMapper> _mapperMock;
+    private readonly Mock<IRepository> _repositoryMock;
+    private readonly Mock<IImageService> _imageServiceMock;
+    private readonly Mock<ICategoryService> _categoryServiceMock;
+    private readonly Mock<IUserContext> _userContextMock;
+
+    private readonly CreateQuizCommandHandler _handler;
+
+    public CreateQuizCommandHandlerTests()
+    {
+        _mapperMock = new Mock<IMapper>();
+        _repositoryMock = new Mock<IRepository>();
+        _imageServiceMock = new Mock<IImageService>();
+        _categoryServiceMock = new Mock<ICategoryService>();
+        _userContextMock = new Mock<IUserContext>();
+
+        _handler = new CreateQuizCommandHandler(
+            _mapperMock.Object, _repositoryMock.Object, _imageServiceMock.Object, _categoryServiceMock.Object, _userContextMock.Object);
+    }
+
     [Theory]
     [InlineData(true, new string[] { "test category 1", "test category 2" })]
     [InlineData(false, new string[] { "Test category" })]
@@ -26,14 +46,32 @@ public class CreateQuizCommandHandlerTests
 
         var quiz = new Quiz();
 
-        var mapperMock = new Mock<IMapper>();
-        mapperMock
+        var currentUser = new CurrentUser("creator-id", "test@test.com");
+        _userContextMock
+            .Setup(u => u.GetCurrentUser())
+            .Returns(currentUser);
+
+        _mapperMock
             .Setup(m => m.Map<Quiz>(command))
             .Returns(quiz);
 
-        var repositoryMock = new Mock<IRepository>();
-        repositoryMock
-            .Setup(r => r.AddAsync(It.IsAny<Quiz>()))
+        _categoryServiceMock
+            .Setup(s => s.GetOrCreateEntitiesAsync(command.Categories))
+            .ReturnsAsync(command.Categories.Select(c => new Category { Name = c }).ToList());
+
+        _imageServiceMock
+            .Setup(s => s.UploadAsync(command.Image!, command.IsPrivate))
+            .ReturnsAsync(
+                new Image
+                {
+                    Id = Guid.NewGuid(),
+                    FileExtension = ".png",
+                    Hash = new byte[] { 1, 2, 3 }
+                }
+            );
+
+        _repositoryMock
+            .Setup(r => r.AddAsync(quiz))
             .Callback<Quiz>(qz =>
             {
                 qz.Id = Guid.NewGuid();
@@ -41,46 +79,9 @@ public class CreateQuizCommandHandlerTests
                 if (qz.Image != null) qz.ImageId = qz.Image.Id;
             });
 
-        repositoryMock
-            .Setup(r => r.SaveChangesAsync())
-            .ReturnsAsync(true);
-
-        var imageServiceMock = new Mock<IImageService>();
-        Guid imageId = default;
-
-        if (withImage)
-        {
-            imageId = Guid.NewGuid();
-
-            imageServiceMock
-                .Setup(s => s.UploadAsync(It.IsAny<IFormFile>(), It.IsAny<bool>()))
-                .ReturnsAsync(
-                    new Image
-                    {
-                        Id = imageId,
-                        FileExtension = ".png",
-                        Hash = new byte[] { 1, 2, 3 }
-                    }
-                );
-        }
-
-        var categoryServiceMock = new Mock<ICategoryService>();
-        categoryServiceMock
-            .Setup(s => s.GetOrCreateEntitiesAsync(It.IsAny<IEnumerable<string>>()))
-            .ReturnsAsync(command.Categories.Select(c => new Category { Name = c }).ToList());
-
-        var userContextMock = new Mock<IUserContext>();
-        var currentUser = new CurrentUser("creator-id", "test@test.com");
-        userContextMock
-            .Setup(u => u.GetCurrentUser())
-            .Returns(currentUser);
-
-        var commandHandler = new CreateQuizCommandHandler(
-            mapperMock.Object, repositoryMock.Object, imageServiceMock.Object, categoryServiceMock.Object, userContextMock.Object);
-
         // Act
 
-        var result = await commandHandler.Handle(command, CancellationToken.None);
+        var result = await _handler.Handle(command, CancellationToken.None);
 
         // Assert
 
@@ -91,26 +92,25 @@ public class CreateQuizCommandHandlerTests
         Assert.Null(quiz.LatestVersionId);
         Assert.Equal(0, quiz.QuestionCount);
         Assert.Equal(currentUser.Id, quiz.CreatorId);
-        Assert.Equal(quizCategories, quiz.Categories.Select(c => c.Name).ToList());
+        Assert.Equal(command.Categories, quiz.Categories.Select(c => c.Name).ToList());
 
         if (withImage)
         {
             Assert.NotNull(quiz.Image);
             Assert.NotEqual(Guid.Empty, quiz.ImageId);
-            Assert.Equal(imageId, quiz.ImageId);
-            Assert.Equal(imageId, quiz.Image!.Id);
+            Assert.Equal(quiz.Image.Id, quiz.ImageId);
             Assert.Equal(".png", quiz.Image.FileExtension);
             Assert.Equal(new byte[] { 1, 2, 3 }, quiz.Image.Hash);
-            imageServiceMock.Verify(s => s.UploadAsync(It.IsAny<IFormFile>(), It.IsAny<bool>()), Times.Once);
+            _imageServiceMock.Verify(s => s.UploadAsync(command.Image, command.IsPrivate), Times.Once);
         }
         else
         {
             Assert.Null(quiz.Image);
             Assert.Null(quiz.ImageId);
-            imageServiceMock.Verify(s => s.UploadAsync(It.IsAny<IFormFile>(), It.IsAny<bool>()), Times.Never);
+            _imageServiceMock.Verify(s => s.UploadAsync(command.Image, command.IsPrivate), Times.Never);
         }
 
-        repositoryMock.Verify(r => r.AddAsync(quiz), Times.Once);
-        repositoryMock.Verify(r => r.SaveChangesAsync(), Times.Once);
+        _repositoryMock.Verify(r => r.AddAsync(quiz), Times.Once);
+        _repositoryMock.Verify(r => r.SaveChangesAsync(), Times.Once);
     }
 }
