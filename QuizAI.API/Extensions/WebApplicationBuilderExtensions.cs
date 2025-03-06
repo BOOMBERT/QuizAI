@@ -1,6 +1,8 @@
-﻿using Microsoft.OpenApi.Models;
+﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
 using QuizAI.API.Middlewares;
 using Serilog;
+using System.Text;
 
 namespace QuizAI.API.Extensions;
 
@@ -8,27 +10,37 @@ public static class WebApplicationBuilderExtensions
 {
     public static void AddPresentation(this WebApplicationBuilder builder)
     {
-        builder.Services.AddAuthentication();
-        builder.Services.AddControllers();
-        builder.Services.AddSwaggerGen(c =>
+        builder.Services.AddAuthentication(options =>
         {
-            c.AddSecurityDefinition("bearerAuth", new OpenApiSecurityScheme
+            options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+            options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            options.DefaultSignInScheme = JwtBearerDefaults.AuthenticationScheme;
+        }).AddJwtBearer(options =>
+        {
+            options.TokenValidationParameters = new TokenValidationParameters
             {
-                Type = SecuritySchemeType.Http,
-                Scheme = "Bearer"
-            });
+                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JwtSettings:Key"]!)),
+                ValidateAudience = false,
+                ValidateIssuer = false,
+                ValidateLifetime = true,
+                ValidateIssuerSigningKey = true
+            };
 
-            c.AddSecurityRequirement(new OpenApiSecurityRequirement
+            options.Events = new JwtBearerEvents
             {
+                OnMessageReceived = context =>
                 {
-                    new OpenApiSecurityScheme
-                    {
-                        Reference = new OpenApiReference { Type = ReferenceType.SecurityScheme, Id = "bearerAuth" }
-                    },
-                    []
+                    context.Token = context.Request.Cookies["ACCESS_TOKEN"];
+                    return Task.CompletedTask;
                 }
-            });
+            };
         });
+
+        builder.Services.AddAuthorization();
+
+        builder.Services.AddControllers();
+
+        builder.Services.AddSwaggerGen();
 
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddScoped<ErrorHandlingMiddleware>();

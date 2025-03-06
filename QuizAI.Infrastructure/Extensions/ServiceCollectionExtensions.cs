@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using QuizAI.Domain.Entities;
@@ -15,8 +16,14 @@ public static class ServiceCollectionExtensions
         var connectionString = configuration.GetConnectionString("QuizAIDatabase");
         services.AddDbContext<AppDbContext>(options => options.UseSqlServer(connectionString));
 
-        services.AddIdentityApiEndpoints<User>()
-            .AddEntityFrameworkStores<AppDbContext>();
+        services.AddIdentity<User, IdentityRole>(opt =>
+        {
+            opt.Password.RequireDigit = true;
+            opt.Password.RequireLowercase = true;
+            opt.Password.RequireUppercase = true;
+            opt.Password.RequireNonAlphanumeric = true;
+            opt.Password.RequiredLength = 8;
+        }).AddEntityFrameworkStores<AppDbContext>();
 
         services.AddScoped<IRepository, Repository>();
         services.AddScoped<ICategoriesRepository, CategoriesRepository>();

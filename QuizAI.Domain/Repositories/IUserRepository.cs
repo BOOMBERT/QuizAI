@@ -4,4 +4,5 @@ public interface IUserRepository
 {
     Task<string?> GetIdAsync(string email);
     Task<string?> GetEmailAsync(string id);
+    Task<bool> ExistsByEmailAsync(string email);
 }

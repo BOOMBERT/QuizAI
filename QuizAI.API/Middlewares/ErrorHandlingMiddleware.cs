@@ -17,7 +17,7 @@ public class ErrorHandlingMiddleware : IMiddleware
         {
             await next.Invoke(context);
 
-            if (context.Response.StatusCode == StatusCodes.Status401Unauthorized && context.GetEndpoint()?.DisplayName != "HTTP: POST api/identity/login")
+            if (context.Response.StatusCode == StatusCodes.Status401Unauthorized)
             {
                 throw new UnauthorizedException("User is not authenticated");
             }

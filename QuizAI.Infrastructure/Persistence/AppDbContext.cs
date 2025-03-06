@@ -19,6 +19,7 @@ public class AppDbContext : IdentityDbContext<User>
     internal DbSet<QuizAttempt> QuizAttempts { get; set; }
     internal DbSet<UserAnswer> UserAnswers { get; set; }
     internal DbSet<QuizPermission> QuizPermissions { get; set; }
+    internal DbSet<User> Users { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -34,5 +35,6 @@ public class AppDbContext : IdentityDbContext<User>
         modelBuilder.ApplyConfiguration(new QuizAttemptConfiguration());
         modelBuilder.ApplyConfiguration(new UserAnswerConfiguration());
         modelBuilder.ApplyConfiguration(new QuizPermissionConfiguration());
+        modelBuilder.ApplyConfiguration(new UserConfiguration());
     }
 }

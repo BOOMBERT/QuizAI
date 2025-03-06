@@ -28,4 +28,10 @@ public class UserRepository : IUserRepository
             .Select(u => u.Email)
             .SingleOrDefaultAsync();
     }
+
+    public async Task<bool> ExistsByEmailAsync(string email)
+    {
+        return await _context.Users
+            .AnyAsync(u => u.NormalizedEmail == email.ToUpper());
+    }
 }

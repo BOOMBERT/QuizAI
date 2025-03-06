@@ -1,6 +1,6 @@
-﻿using AutoMapper;
-using FluentValidation;
+﻿using FluentValidation;
 using FluentValidation.AspNetCore;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using QuizAI.Application.Interfaces;
@@ -49,5 +49,14 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IQuizAuthorizationService, QuizAuthorizationService>();
 
         services.AddScoped<IOpenAiService, OpenAiService>(provider => new OpenAiService(configuration["OpenAI:ApiKey"]!, configuration["OpenAI:Model"]!));
+
+        services.AddScoped<IAuthenticationService, AuthenticationService>(provider =>
+        {
+            var httpContextAccessor = provider.GetService<IHttpContextAccessor>();
+            var config = provider.GetRequiredService<IConfiguration>();
+            var accessTokenExpirationInMinutes = double.Parse(config["JwtSettings:AccessToken:ExpirationInMinutes"]!);
+            var refreshTokenExpirationInMinutes = double.Parse(config["JwtSettings:RefreshToken:ExpirationInMinutes"]!);
+            return new AuthenticationService(httpContextAccessor!, config["JwtSettings:Key"]!, accessTokenExpirationInMinutes, refreshTokenExpirationInMinutes);
+        });
     }
 }

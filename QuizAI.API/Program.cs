@@ -2,7 +2,6 @@ using Microsoft.Extensions.FileProviders;
 using QuizAI.API.Extensions;
 using QuizAI.API.Middlewares;
 using QuizAI.Application.Extensions;
-using QuizAI.Domain.Entities;
 using QuizAI.Infrastructure.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -16,9 +15,9 @@ var privateStoragePath = Path.Combine(builder.Environment.ContentRootPath, priva
 Directory.CreateDirectory(publicStoragePath);
 Directory.CreateDirectory(privateStoragePath);
 
+builder.Services.AddInfrastructure(builder.Configuration);
 builder.AddPresentation();
 builder.Services.AddApplication(builder.Configuration, publicStoragePath, privateStoragePath);
-builder.Services.AddInfrastructure(builder.Configuration);
 
 var app = builder.Build();
 
@@ -39,7 +38,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-app.MapGroup("api/identity").MapIdentityApi<User>();
+app.UseAuthentication();
 
 app.UseAuthorization();
 
