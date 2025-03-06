@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using QuizAI.Domain.Entities;
 using QuizAI.Domain.Repositories;
 using QuizAI.Infrastructure.Persistence;
 
@@ -33,5 +34,11 @@ public class UserRepository : IUserRepository
     {
         return await _context.Users
             .AnyAsync(u => u.NormalizedEmail == email.ToUpper());
+    }
+
+    public async Task<User?> GetUserByRefreshTokenAsync(string refreshToken)
+    {
+        return await _context.Users
+            .FirstOrDefaultAsync(u => u.RefreshToken == refreshToken);
     }
 }

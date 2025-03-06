@@ -2,7 +2,7 @@
 
 namespace QuizAI.Application.Interfaces;
 
-public interface IAuthenticationService
+public interface IAuthService
 {
     (string jwtToken, DateTime expiresAtUtc) GenerateJwtToken(User user);
     (string refreshToken, DateTime expiresAtUtc) GenerateRefreshToken();

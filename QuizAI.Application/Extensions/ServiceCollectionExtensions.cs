@@ -50,13 +50,13 @@ public static class ServiceCollectionExtensions
 
         services.AddScoped<IOpenAiService, OpenAiService>(provider => new OpenAiService(configuration["OpenAI:ApiKey"]!, configuration["OpenAI:Model"]!));
 
-        services.AddScoped<IAuthenticationService, AuthenticationService>(provider =>
+        services.AddScoped<IAuthService, AuthService>(provider =>
         {
             var httpContextAccessor = provider.GetService<IHttpContextAccessor>();
             var config = provider.GetRequiredService<IConfiguration>();
             var accessTokenExpirationInMinutes = double.Parse(config["JwtSettings:AccessToken:ExpirationInMinutes"]!);
             var refreshTokenExpirationInMinutes = double.Parse(config["JwtSettings:RefreshToken:ExpirationInMinutes"]!);
-            return new AuthenticationService(httpContextAccessor!, config["JwtSettings:Key"]!, accessTokenExpirationInMinutes, refreshTokenExpirationInMinutes);
+            return new AuthService(httpContextAccessor!, config["JwtSettings:Key"]!, accessTokenExpirationInMinutes, refreshTokenExpirationInMinutes);
         });
     }
 }

@@ -9,14 +9,14 @@ using System.Text;
 
 namespace QuizAI.Application.Services;
 
-public class AuthenticationService : IAuthenticationService
+public class AuthService : IAuthService
 {
     private readonly IHttpContextAccessor _httpContextAccessor;
     private readonly string _jwtKey;
     private readonly double _accessTokenExpirationInMinutes;
     private readonly double _refreshTokenExpirationInMinutes;
 
-    public AuthenticationService(IHttpContextAccessor httpContextAccessor, string jwtKey, double accessTokenExpirationInMinutes, double refreshTokenExpirationInMinutes)
+    public AuthService(IHttpContextAccessor httpContextAccessor, string jwtKey, double accessTokenExpirationInMinutes, double refreshTokenExpirationInMinutes)
     {
         _httpContextAccessor = httpContextAccessor;
         _jwtKey = jwtKey;
