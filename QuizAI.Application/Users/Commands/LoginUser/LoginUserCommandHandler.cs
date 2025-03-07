@@ -24,6 +24,9 @@ public class LoginUserCommandHandler : IRequestHandler<LoginUserCommand>
         if (user == null || !await _userManager.CheckPasswordAsync(user, request.Password))
             throw new UnauthorizedException($"Invalid email ({request.Email}) or password");
 
+        if (!await _userManager.IsEmailConfirmedAsync(user))
+            throw new UnauthorizedException($"The email address {request.Email} is not confirmed");
+
         var (jwtToken, jwtTokenExpirationDateInUtc) = _authService.GenerateJwtToken(user);
         var (refreshToken, refreshTokenExpirationDateInUtc) = _authService.GenerateRefreshToken();
 

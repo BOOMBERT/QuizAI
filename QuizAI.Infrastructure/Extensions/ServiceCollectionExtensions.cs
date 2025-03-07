@@ -16,14 +16,16 @@ public static class ServiceCollectionExtensions
         var connectionString = configuration.GetConnectionString("QuizAIDatabase");
         services.AddDbContext<AppDbContext>(options => options.UseSqlServer(connectionString));
 
-        services.AddIdentity<User, IdentityRole>(opt =>
+        services.AddIdentity<User, IdentityRole>(options =>
         {
-            opt.Password.RequireDigit = true;
-            opt.Password.RequireLowercase = true;
-            opt.Password.RequireUppercase = true;
-            opt.Password.RequireNonAlphanumeric = true;
-            opt.Password.RequiredLength = 8;
-        }).AddEntityFrameworkStores<AppDbContext>();
+            options.Password.RequireDigit = true;
+            options.Password.RequireLowercase = true;
+            options.Password.RequireUppercase = true;
+            options.Password.RequireNonAlphanumeric = true;
+            options.Password.RequiredLength = 8;
+        })
+            .AddEntityFrameworkStores<AppDbContext>()
+            .AddDefaultTokenProviders();
 
         services.AddScoped<IRepository, Repository>();
         services.AddScoped<ICategoriesRepository, CategoriesRepository>();

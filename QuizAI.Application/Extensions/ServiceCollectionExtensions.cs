@@ -1,11 +1,14 @@
 ﻿using FluentValidation;
 using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using QuizAI.Application.Interfaces;
 using QuizAI.Application.Services;
 using QuizAI.Application.Users;
+using QuizAI.Domain.Entities;
 using QuizAI.Domain.Repositories;
 
 namespace QuizAI.Application.Extensions;
@@ -58,5 +61,19 @@ public static class ServiceCollectionExtensions
             var refreshTokenExpirationInMinutes = double.Parse(config["JwtSettings:RefreshToken:ExpirationInMinutes"]!);
             return new AuthService(httpContextAccessor!, config["JwtSettings:Key"]!, accessTokenExpirationInMinutes, refreshTokenExpirationInMinutes);
         });
+
+        services.AddSingleton<IEmailSender, EmailSenderService>(provider =>
+        {
+            var config = provider.GetRequiredService<IConfiguration>();
+            var smtpServer = config["EmailSettings:SmtpServer"]!;
+            var fromEmail = config["EmailSettings:FromEmail"]!;
+            var password = config["EmailSettings:Password"]!;
+            var port = int.Parse(config["EmailSettings:Port"]!);
+            return new EmailSenderService(smtpServer, fromEmail, password, port);
+        });
+        var queueName = "emailQueue";
+        services.AddSingleton<IRabbitMqService, RabbitMqService>(provider => new RabbitMqService(provider.GetService<IHttpContextAccessor>()!, queueName));
+        services.AddSingleton<IEmailConsumerService, EmailConsumerService>(provider => new EmailConsumerService(provider.GetService<IEmailSender>()!, queueName));
+        services.AddHostedService<EmailConsumerHostedService>();
     }
 }

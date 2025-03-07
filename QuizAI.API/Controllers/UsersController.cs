@@ -3,9 +3,11 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using QuizAI.Application.Common;
 using QuizAI.Application.Users.Commands.ChangeUserPassword;
+using QuizAI.Application.Users.Commands.ConfirmUserEmail;
 using QuizAI.Application.Users.Commands.LoginUser;
 using QuizAI.Application.Users.Commands.RefreshUserTokens;
 using QuizAI.Application.Users.Commands.RegisterUser;
+using QuizAI.Application.Users.Commands.ResendUserConfirmationEmail;
 using QuizAI.Application.Users.Dtos;
 using QuizAI.Application.Users.Queries.GetUserInfo;
 
@@ -84,15 +86,23 @@ namespace QuizAI.API.Controllers
         }
 
         [HttpGet("confirm-email")]
-        public async Task<IActionResult> ConfirmUserEmail()
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesErrorResponseType(typeof(ErrorResponse))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> ConfirmUserEmail([FromQuery] ConfirmUserEmailCommand command)
         {
-            return NoContent(); // TODO
+            await _mediator.Send(command);
+            return Ok(new { Message = "Email confirmed successfully!" });
         }
 
         [HttpPost("resend-confirmation-email")]
-        public async Task<IActionResult> ResendUserConfirmationEmail()
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesErrorResponseType(typeof(ErrorResponse))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> ResendUserConfirmationEmail(ResendUserConfirmationEmailCommand command)
         {
-            return NoContent(); // TODO
+            await _mediator.Send(command);
+            return NoContent();
         }
 
     }
