@@ -4,6 +4,6 @@ namespace QuizAI.Application.Interfaces;
 
 public interface IRabbitMqService
 {
-    Task SendEmailToQueueAsync(string recipientEmail, string subject, string htmlMessage);
+    Task SendEmailToQueueAsync(string toEmail, string subject, string htmlMessage);
     Task SendRegistrationConfirmationEmailToQueueAsync(User user, string token);
 }

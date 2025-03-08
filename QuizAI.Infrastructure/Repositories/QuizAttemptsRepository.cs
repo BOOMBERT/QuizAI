@@ -140,12 +140,20 @@ public class QuizAttemptsRepository : IQuizAttemptsRepository
             );
     }
 
-    public async Task<bool> HasAnyAsync(Guid quizId, string? userId = null, bool ? finished = null)
+    public async Task<bool> HasAnyAsync(Guid quizId, string? userId = null, bool? finished = null)
     {
         return await _context.QuizAttempts
             .AnyAsync(qa => 
             qa.QuizId == quizId && 
             (userId == null || qa.UserId == userId) &&
+            (finished == null || (finished.Value ? qa.FinishedAt != null : qa.FinishedAt == null)));
+    }
+
+    public async Task<int> HowManyAsync(Guid quizId, bool? finished = null)
+    {
+        return await _context.QuizAttempts
+            .CountAsync(qa => 
+            qa.QuizId == quizId && 
             (finished == null || (finished.Value ? qa.FinishedAt != null : qa.FinishedAt == null)));
     }
 }

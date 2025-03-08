@@ -101,13 +101,13 @@ public class CreateQuizCommandHandlerTests
             Assert.Equal(quiz.Image.Id, quiz.ImageId);
             Assert.Equal(".png", quiz.Image.FileExtension);
             Assert.Equal(new byte[] { 1, 2, 3 }, quiz.Image.Hash);
-            _imageServiceMock.Verify(s => s.UploadAsync(command.Image, command.IsPrivate), Times.Once);
+            _imageServiceMock.Verify(s => s.UploadAsync(command.Image!, command.IsPrivate), Times.Once);
         }
         else
         {
             Assert.Null(quiz.Image);
             Assert.Null(quiz.ImageId);
-            _imageServiceMock.Verify(s => s.UploadAsync(command.Image, command.IsPrivate), Times.Never);
+            _imageServiceMock.Verify(s => s.UploadAsync(command.Image!, command.IsPrivate), Times.Never);
         }
 
         _repositoryMock.Verify(r => r.AddAsync(quiz), Times.Once);

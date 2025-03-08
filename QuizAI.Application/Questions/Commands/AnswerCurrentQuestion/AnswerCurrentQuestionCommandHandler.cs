@@ -14,17 +14,20 @@ public class AnswerCurrentQuestionCommandHandler : IRequestHandler<AnswerCurrent
     private readonly IQuizAuthorizationService _quizAuthorizationService;
     private readonly IQuestionsRepository _questionsRepository;
     private readonly IQuizAttemptsRepository _quizAttemptsRepository;
+    private readonly IQuizAttemptService _quizAttemptService;
     private readonly IAnswerService _answerService;
 
     public AnswerCurrentQuestionCommandHandler(
         IRepository repository, IUserContext userContext, IQuizAuthorizationService quizAuthorizationService, 
-        IQuestionsRepository questionsRepository, IQuizAttemptsRepository quizAttemptsRepository, IAnswerService answerService)
+        IQuestionsRepository questionsRepository, IQuizAttemptsRepository quizAttemptsRepository, IQuizAttemptService quizAttemptService, 
+        IAnswerService answerService)
     {
         _repository = repository;
         _userContext = userContext;
         _quizAuthorizationService = quizAuthorizationService;
         _questionsRepository = questionsRepository;
         _quizAttemptsRepository = quizAttemptsRepository;
+        _quizAttemptService = quizAttemptService;
         _answerService = answerService;
     }
 
@@ -57,7 +60,8 @@ public class AnswerCurrentQuestionCommandHandler : IRequestHandler<AnswerCurrent
 
         if (isUserAnswerCorrect) unfinishedAttempt.CorrectAnswers++;
 
-        if (quiz.QuestionCount == unfinishedAttempt.CurrentOrder)
+        var isLastQuestion = quiz.QuestionCount == unfinishedAttempt.CurrentOrder;
+        if (isLastQuestion)
         {
             unfinishedAttempt.CurrentOrder = 0;
             unfinishedAttempt.FinishedAt = DateTime.UtcNow;
@@ -69,5 +73,8 @@ public class AnswerCurrentQuestionCommandHandler : IRequestHandler<AnswerCurrent
 
         await _repository.AddAsync(userAnswer);
         await _repository.SaveChangesAsync();
+
+        if (isLastQuestion)
+            await _quizAttemptService.CheckAndSendAchievementForNumberOfAttemptsAsync(quiz);
     }
 }

@@ -2,6 +2,7 @@
 using Newtonsoft.Json;
 using QuizAI.Application.Common;
 using QuizAI.Application.Interfaces;
+using QuizAI.Domain.Exceptions;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using System.Text;
@@ -12,8 +13,8 @@ public class EmailConsumerService : IEmailConsumerService
 {
     private readonly IEmailSender _emailSender;
     private readonly string _queueName;
-    private IConnection _connection;
-    private IChannel _channel;
+    private IConnection? _connection;
+    private IChannel? _channel;
 
     public EmailConsumerService(IEmailSender emailSender, string queueName)
     {
@@ -38,6 +39,9 @@ public class EmailConsumerService : IEmailConsumerService
 
     public async Task StartConsumingAsync()
     {
+        if (_connection == null || _channel == null)
+            throw new ConflictException("Cannot start consuming: the connection or channel is not initialized");
+
         var consumer = new AsyncEventingBasicConsumer(_channel);
         consumer.ReceivedAsync += async (model, ea) =>
         {

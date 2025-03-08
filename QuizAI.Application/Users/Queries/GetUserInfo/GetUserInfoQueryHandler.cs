@@ -17,6 +17,6 @@ public class GetUserInfoQueryHandler : IRequestHandler<GetUserInfoQuery, UserDto
     {
         var currentUser = _userContext.GetCurrentUser();
 
-        return new UserDto(currentUser.Email);
+        return await Task.FromResult(new UserDto(currentUser.Email));
     }
 }

@@ -5,7 +5,7 @@ namespace QuizAI.Application.QuizPermissions.Commands.ManageUsersQuizPermissions
 public class ManageUsersQuizPermissionsCommand : IRequest
 {
     private Guid QuizId { get; set; }
-    private string UserEmail { get; set; }
+    private string UserEmail { get; set; } = string.Empty;
     public bool CanEdit { get; set; }
     public bool CanPlay { get; set; }
 

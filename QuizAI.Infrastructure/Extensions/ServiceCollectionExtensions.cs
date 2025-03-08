@@ -23,6 +23,7 @@ public static class ServiceCollectionExtensions
             options.Password.RequireUppercase = true;
             options.Password.RequireNonAlphanumeric = true;
             options.Password.RequiredLength = 8;
+            options.User.RequireUniqueEmail = true;
         })
             .AddEntityFrameworkStores<AppDbContext>()
             .AddDefaultTokenProviders();
