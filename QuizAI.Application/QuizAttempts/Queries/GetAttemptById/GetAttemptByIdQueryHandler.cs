@@ -29,8 +29,8 @@ public class GetAttemptByIdQueryHandler : IRequestHandler<GetAttemptByIdQuery, Q
         var finishedQuizAttempt = await _quizAttemptsRepository.GetFinishedByIdAsync(request.QuizAttemptId, currentUser.Id)
             ?? throw new NotFoundException($"No finished quiz attempt found with ID {request.QuizAttemptId} for user with ID {currentUser.Id}");
 
-        var quizNameAndQuestionCount = await _quizzesRepository.GetNameAndQuestionCountAndIsPrivateAsync(finishedQuizAttempt.QuizId);
-        var (quizName, questionCount, isPrivate) = quizNameAndQuestionCount.Value;
+        var quizNameAndQuestionCountAndIsPrivate = await _quizzesRepository.GetNameAndQuestionCountAndIsPrivateAsync(finishedQuizAttempt.QuizId);
+        var (quizName, questionCount, isPrivate) = quizNameAndQuestionCountAndIsPrivate.Value;
 
         return await _quizAttemptService.GetWithUserAnsweredQuestionsAsync(finishedQuizAttempt, questionCount, quizName, isPrivate);
     }

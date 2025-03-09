@@ -2,13 +2,14 @@
 __QuizAI__ is a fully functional __API__ designed according to the principles of __Clean Architecture__ and the __CQRS__ pattern. 
 It enables seamless __quiz management__ and includes __versioning__, providing access to __previous quiz attempts__ while ensuring that active attempts are __never interrupted__.
 
-The API supports __three types of questions__ and includes a built-in __permission management system__, allowing __collaborative quiz creation__ as well as the ability to __grant access to private quizzes__ for selected users.
+The API supports __three types of questions__ (true/false, multiple choice, and open-ended) and includes a built-in __permission management system__, allowing __collaborative quiz creation__ as well as the ability to __grant access to private quizzes__ for selected users.
+Additionally, it includes a __queue-based__ system for __email notifications__.
 
 QuizAI supports __images__ that are __optimizing__, with their __storage and serving adjusted__ to the __quiz's privacy__ level.
-It also offers __AI-powered__ functionalities for __verifying answer accuracy__ and __generating questions__.
+It also offers __AI-powered__ functionalities for __verifying open-ended answer accuracy__ and __generating all types of questions__.
 
 With its __optimized structure__, QuizAI __avoids data duplication and unnecessary storage__, ensuring both __efficiency and performance__. 
-It also provides __full validation__ and __error logging__.
+It also provides __full validation__, __error logging__, as well as __tests__.
 
 # 🛠️ Technologies
 - __Backend__: .NET 8, ASP.NET Web API, MediatR
@@ -17,6 +18,7 @@ It also provides __full validation__ and __error logging__.
 - __Mapping and AI__: AutoMapper, OpenAI
 - __Image Processing and Hashing__: SixLabors.ImageSharp, Shipwreck.Phash.Bitmaps
 - __Testing__: XUnit, Moq
+- __Message Queueing__: RabbitMQ
 
 # ✨ Features
 
@@ -39,6 +41,12 @@ It also provides __full validation__ and __error logging__.
 - users can collaboratively create quizzes and share them with a limited group of recipients, enabling more flexible quiz creation. 
   Permissions are continuously updated or copied to the latest quiz version, allowing for a smooth editing process.
 
+## 🔹 Email Notifications
+### _The email notification system is designed to:_
+- send a confirmation email to users to verify their email address.
+- progressively notify quiz creators about the growing popularity of their quiz, including general statistics of user attempts.
+- utilize a queue system to handle email sending efficiently.
+
 ## 🔹 Images
 ### _Quizzes and questions may contain images, which:_
 - are optimized for file size during upload, and their dimensions are adjusted to meet requirements.
@@ -52,12 +60,12 @@ It also provides __full validation__ and __error logging__.
 
 # 💾 Database Diagram
 
-![QuizAI-Database-Diagram-Image](https://github.com/user-attachments/assets/dfa86350-1458-4730-83fc-0b9dc513de84)
+![QuizAI-Database-Diagram-Image](https://github.com/user-attachments/assets/7c5697d6-0ec3-4c4c-ab4f-af82312a0156)
 _It does not include the AspNetCore.Identity tables that are not used in the API_
 
 # 🌐 Endpoints Preview
 
-![QuizAI-SwaggerUI-Overview-Image](https://github.com/user-attachments/assets/db75c8b9-334b-48b5-a0cf-b673cd07c405)
+![QuizAI-SwaggerUI-Overview-Image](https://github.com/user-attachments/assets/fae37893-a0be-4f7c-9a24-6f83c405c72f)
 
 ## 🔹 Quizzes
 
@@ -436,52 +444,6 @@ _It does not include the AspNetCore.Identity tables that are not used in the API
 - __Parameters:__ `quizId`, `questionId`
 - Deletes the image of the specified question of the quiz
 
-## 🔹 Identity
-
-### POST: `/api/identity/register`
-- __Parameters:__ `email`, `password`
-- Registers a new user with the provided details
-
-### POST: `/api/identity/login`
-- __Parameters:__ `email`, `password`
-- Authenticates a user and returns both access and refresh tokens upon successful login
-- Example output:
-    ```json
-    {
-        "tokenType": "Bearer",
-        "accessToken": "CfDJ8KYPMFRNa2NGsZYBbRtvUZH7JPxPwlI0QmbI73u...",
-        "expiresIn": 3600,
-        "refreshToken": "CfDJ8KYPMFRNa2NGsZYBbRtvUZGWdnDvsXfrQgTQe0..."
-    }
-    ```
-
-### POST: `/api/identity/refresh`
-- __Parameters:__ `refreshToken`
-- Refreshes both access and refresh tokens using the provided refresh token.
-- Example output:
-    ```json
-    {
-        "tokenType": "Bearer",
-        "accessToken": "CfDJ8KYPMFRNa2NGsZYBbRtvUZH7JPxPwlI0QmbI73u...",
-        "expiresIn": 3600,
-        "refreshToken": "CfDJ8KYPMFRNa2NGsZYBbRtvUZGWdnDvsXfrQgTQe0..."
-    }
-    ```
-
-### GET: `/api/identity/manage/info`
-- __Parameters:__ None
-- Retrieves the user's email
-- Example output:
-    ```json
-    {
-        "email": "test@test.com",
-    }
-    ```
-
-### POST: `/api/identity/manage/info`
-- __Parameters:__ `newPassword`, `oldPassword`
-- Updates the user's password
-
 ## 🔹 TrueFalseQuestions
 
 ### POST: `api/quizzes/{{quizId}}/questions/true-false`
@@ -745,3 +707,39 @@ _It does not include the AspNetCore.Identity tables that are not used in the API
         }
     ]
     ```
+
+## 🔹 Users
+
+### POST: `/api/users/register`
+- __Parameters:__ `email`, `password`
+- Registers a new user with the provided details and sends a confirmation email
+
+### POST: `/api/users/login`
+- __Parameters:__ `email`, `password`
+- Authenticates a user and, upon successful login (email confirmation required), returns access and refresh tokens as cookies
+
+### POST: `/api/users/refresh`
+- __Parameters:__ None
+- Refreshes access and refresh tokens using the refresh token from a cookie
+
+### GET: `api/users/me`
+- __Parameters:__ None
+- Retrieves the authenticated user's data
+- Example output:
+    ```json
+    {
+      "email": "user@example.com"
+    }
+    ```
+
+### PATCH: `api/users/change-password`
+- __Parameters:__ `oldPassword`, `newPassword`
+- Changes the authenticated user's password
+
+### GET: `api/users/confirm-email`
+- __Parameters:__ `Id`, `Token`
+- Confirms a user's email address using the provided ID and token
+
+### POST: `api/users/resend-confirmation-email`
+- __Parameters:__ `email`
+- Resends a confirmation email
