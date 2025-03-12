@@ -11,22 +11,16 @@ namespace QuizAI.Application.Quizzes.Commands.CreateQuiz.Tests;
 
 public class CreateQuizCommandHandlerTests
 {
-    private readonly Mock<IMapper> _mapperMock;
-    private readonly Mock<IRepository> _repositoryMock;
-    private readonly Mock<IImageService> _imageServiceMock;
-    private readonly Mock<ICategoryService> _categoryServiceMock;
-    private readonly Mock<IUserContext> _userContextMock;
+    private readonly Mock<IMapper> _mapperMock = new();
+    private readonly Mock<IRepository> _repositoryMock = new();
+    private readonly Mock<IImageService> _imageServiceMock = new();
+    private readonly Mock<ICategoryService> _categoryServiceMock = new();
+    private readonly Mock<IUserContext> _userContextMock = new();
 
     private readonly CreateQuizCommandHandler _handler;
 
     public CreateQuizCommandHandlerTests()
     {
-        _mapperMock = new Mock<IMapper>();
-        _repositoryMock = new Mock<IRepository>();
-        _imageServiceMock = new Mock<IImageService>();
-        _categoryServiceMock = new Mock<ICategoryService>();
-        _userContextMock = new Mock<IUserContext>();
-
         _handler = new CreateQuizCommandHandler(
             _mapperMock.Object, _repositoryMock.Object, _imageServiceMock.Object, _categoryServiceMock.Object, _userContextMock.Object);
     }

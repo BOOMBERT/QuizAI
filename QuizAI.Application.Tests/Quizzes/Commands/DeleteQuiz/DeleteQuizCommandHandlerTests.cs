@@ -10,26 +10,18 @@ namespace QuizAI.Application.Quizzes.Commands.DeleteQuiz.Tests;
 
 public class DeleteQuizCommandHandlerTests
 {
-    private readonly Mock<IRepository> _repositoryMock;
-    private readonly Mock<IQuizAuthorizationService> _quizAuthorizationServiceMock;
-    private readonly Mock<IQuizzesRepository> _quizzesRepositoryMock;
-    private readonly Mock<IQuizAttemptsRepository> _quizAttemptsRepositoryMock;
-    private readonly Mock<ICategoryService> _categoryServiceMock;
-    private readonly Mock<IImageService> _imageServiceMock;
-    private readonly Mock<IQuizPermissionsRepository> _quizPermissionsRepositoryMock;
+    private readonly Mock<IRepository> _repositoryMock = new();
+    private readonly Mock<IQuizAuthorizationService> _quizAuthorizationServiceMock = new();
+    private readonly Mock<IQuizzesRepository> _quizzesRepositoryMock = new();
+    private readonly Mock<IQuizAttemptsRepository> _quizAttemptsRepositoryMock = new();
+    private readonly Mock<ICategoryService> _categoryServiceMock = new();
+    private readonly Mock<IImageService> _imageServiceMock = new();
+    private readonly Mock<IQuizPermissionsRepository> _quizPermissionsRepositoryMock = new();
 
     private readonly DeleteQuizCommandHandler _handler;
 
     public DeleteQuizCommandHandlerTests()
     {
-        _repositoryMock = new Mock<IRepository>();
-        _quizAuthorizationServiceMock = new Mock<IQuizAuthorizationService>();
-        _quizzesRepositoryMock = new Mock<IQuizzesRepository>();
-        _quizAttemptsRepositoryMock = new Mock<IQuizAttemptsRepository>();
-        _categoryServiceMock = new Mock<ICategoryService>();
-        _imageServiceMock = new Mock<IImageService>();
-        _quizPermissionsRepositoryMock = new Mock<IQuizPermissionsRepository>();
-
         _handler = new DeleteQuizCommandHandler(
             _repositoryMock.Object, _quizAuthorizationServiceMock.Object, _quizzesRepositoryMock.Object, _quizAttemptsRepositoryMock.Object, 
             _categoryServiceMock.Object, _imageServiceMock.Object, _quizPermissionsRepositoryMock.Object);

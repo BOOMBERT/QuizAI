@@ -9,20 +9,15 @@ namespace QuizAI.Application.Quizzes.Commands.UpdateQuiz.Tests;
 
 public class UpdateQuizCommandHandlerTests
 {
-    private readonly Mock<IQuizService> _quizServiceMock;
-    private readonly Mock<ICategoryService> _categoryServiceMock;
-    private readonly Mock<IMapper> _mapperMock;
-    private readonly Mock<IRepository> _repositoryMock;
+    private readonly Mock<IQuizService> _quizServiceMock = new();
+    private readonly Mock<ICategoryService> _categoryServiceMock = new();
+    private readonly Mock<IMapper> _mapperMock = new();
+    private readonly Mock<IRepository> _repositoryMock = new();
 
     private readonly UpdateQuizCommandHandler _handler;
 
     public UpdateQuizCommandHandlerTests()
     {
-        _quizServiceMock = new Mock<IQuizService>();
-        _categoryServiceMock = new Mock<ICategoryService>();
-        _mapperMock = new Mock<IMapper>();
-        _repositoryMock = new Mock<IRepository>();
-
         _handler = new UpdateQuizCommandHandler(_mapperMock.Object, _repositoryMock.Object, _quizServiceMock.Object, _categoryServiceMock.Object);
     }
 

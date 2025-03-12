@@ -13,24 +13,17 @@ namespace QuizAI.Application.Tests.Quizzes.Queries.GetQuizById;
 
 public class GetQuizByIdQueryHandlerTests
 {
-    private readonly Mock<IMapper> _mapperMock;
-    private readonly Mock<IUserContext> _userContextMock;
-    private readonly Mock<IQuizzesRepository> _quizzesRepositoryMock;
-    private readonly Mock<IQuizAuthorizationService> _quizAuthorizationServiceMock;
-    private readonly Mock<IQuizAttemptsRepository> _quizAttemptsRepositoryMock;
-    private readonly Mock<IImagesRepository> _imagesRepositoryMock;
+    private readonly Mock<IMapper> _mapperMock = new();
+    private readonly Mock<IUserContext> _userContextMock = new();
+    private readonly Mock<IQuizzesRepository> _quizzesRepositoryMock = new();
+    private readonly Mock<IQuizAuthorizationService> _quizAuthorizationServiceMock = new();
+    private readonly Mock<IQuizAttemptsRepository> _quizAttemptsRepositoryMock = new();
+    private readonly Mock<IImagesRepository> _imagesRepositoryMock = new();
 
     private readonly GetQuizByIdQueryHandler _handler;
 
     public GetQuizByIdQueryHandlerTests()
     {
-        _mapperMock = new Mock<IMapper>();
-        _userContextMock = new Mock<IUserContext>();
-        _quizzesRepositoryMock = new Mock<IQuizzesRepository>();
-        _quizAuthorizationServiceMock = new Mock<IQuizAuthorizationService>();
-        _quizAttemptsRepositoryMock = new Mock<IQuizAttemptsRepository>();
-        _imagesRepositoryMock = new Mock<IImagesRepository>();
-
         _handler = new GetQuizByIdQueryHandler(
             _mapperMock.Object, _userContextMock.Object, _quizAuthorizationServiceMock.Object, _quizzesRepositoryMock.Object,
             _quizAttemptsRepositoryMock.Object, _imagesRepositoryMock.Object);

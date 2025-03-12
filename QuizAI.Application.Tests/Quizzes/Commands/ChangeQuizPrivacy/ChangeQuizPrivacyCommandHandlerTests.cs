@@ -9,20 +9,15 @@ namespace QuizAI.Application.Quizzes.Commands.ChangeQuizPrivacy.Tests;
 
 public class ChangeQuizPrivacyCommandHandlerTests
 {
-    private readonly Mock<IRepository> _repositoryMock;
-    private readonly Mock<IQuizService> _quizServiceMock;
-    private readonly Mock<IImagesRepository> _imagesRepositoryMock;
-    private readonly Mock<IImageService> _imageServiceMock;
+    private readonly Mock<IRepository> _repositoryMock = new();
+    private readonly Mock<IQuizService> _quizServiceMock = new();
+    private readonly Mock<IImagesRepository> _imagesRepositoryMock = new();
+    private readonly Mock<IImageService> _imageServiceMock = new();
 
     private readonly ChangeQuizPrivacyCommandHandler _handler;
 
     public ChangeQuizPrivacyCommandHandlerTests()
     {
-        _repositoryMock = new Mock<IRepository>();
-        _quizServiceMock = new Mock<IQuizService>();
-        _imagesRepositoryMock = new Mock<IImagesRepository>();
-        _imageServiceMock = new Mock<IImageService>();
-
         _handler = new ChangeQuizPrivacyCommandHandler(_repositoryMock.Object, _quizServiceMock.Object, _imagesRepositoryMock.Object, _imageServiceMock.Object);
     }
 

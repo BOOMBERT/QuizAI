@@ -9,18 +9,14 @@ namespace QuizAI.Application.Quizzes.Queries.GetQuizStats.Tests;
 
 public class GetQuizStatsQueryHandlerTests
 {
-    private readonly Mock<IUserContext> _userContextMock;
-    private readonly Mock<IQuizzesRepository> _quizzesRepository;
-    private readonly Mock<IQuizAttemptsRepository> _quizAttemptsRepository;
+    private readonly Mock<IUserContext> _userContextMock = new();
+    private readonly Mock<IQuizzesRepository> _quizzesRepository = new();
+    private readonly Mock<IQuizAttemptsRepository> _quizAttemptsRepository = new();
 
     private readonly GetQuizStatsQueryHandler _handler;
     
     public GetQuizStatsQueryHandlerTests()
     {
-        _userContextMock = new Mock<IUserContext>();
-        _quizzesRepository = new Mock<IQuizzesRepository>();
-        _quizAttemptsRepository = new Mock<IQuizAttemptsRepository>();
-    
         _handler = new GetQuizStatsQueryHandler(_userContextMock.Object, _quizzesRepository.Object, _quizAttemptsRepository.Object);
     }
 

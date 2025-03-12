@@ -9,17 +9,17 @@ public class AppDbContext : IdentityDbContext<User>
 {
     public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
 
-    internal DbSet<Quiz> Quizzes { get; set; }
-    internal DbSet<Question> Questions { get; set; }
-    internal DbSet<MultipleChoiceAnswer> MultipleChoiceAnswers { get; set; }
-    internal DbSet<OpenEndedAnswer> OpenEndedAnswers { get; set; }
-    internal DbSet<TrueFalseAnswer> TrueFalseAnswers { get; set; }
-    internal DbSet<Category> Categories { get; set; }
-    internal DbSet<Image> Images { get; set; }
-    internal DbSet<QuizAttempt> QuizAttempts { get; set; }
-    internal DbSet<UserAnswer> UserAnswers { get; set; }
-    internal DbSet<QuizPermission> QuizPermissions { get; set; }
-    internal DbSet<User> Users { get; set; }
+    public DbSet<Quiz> Quizzes { get; set; }
+    public DbSet<Question> Questions { get; set; }
+    public DbSet<MultipleChoiceAnswer> MultipleChoiceAnswers { get; set; }
+    public DbSet<OpenEndedAnswer> OpenEndedAnswers { get; set; }
+    public DbSet<TrueFalseAnswer> TrueFalseAnswers { get; set; }
+    public DbSet<Category> Categories { get; set; }
+    public DbSet<Image> Images { get; set; }
+    public DbSet<QuizAttempt> QuizAttempts { get; set; }
+    public DbSet<UserAnswer> UserAnswers { get; set; }
+    public DbSet<QuizPermission> QuizPermissions { get; set; }
+    public DbSet<User> Users { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
