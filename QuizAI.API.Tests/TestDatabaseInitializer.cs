@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using QuizAI.Domain.Entities;
 using QuizAI.Infrastructure.Persistence;
 
@@ -8,7 +9,7 @@ internal class TestDatabaseInitializer
 {
     private readonly IServiceProvider _serviceProvider;
 
-    internal TestDatabaseInitializer(IServiceProvider serviceProvider)
+    public TestDatabaseInitializer(IServiceProvider serviceProvider)
     {
         _serviceProvider = serviceProvider;
     }
@@ -30,8 +31,20 @@ internal class TestDatabaseInitializer
 
             db.Database.EnsureCreated();
 
+            await ClearDatabaseAsync(db);
+
             await db.AddAsync(user);
             await db.SaveChangesAsync();
+        }
+    }
+
+    private async Task ClearDatabaseAsync(AppDbContext dbContext)
+    {
+        foreach (var entityType in dbContext.Model.GetEntityTypes())
+        {
+            var tableName = entityType.GetTableName();
+            var sql = $"DELETE FROM {tableName}";
+            await dbContext.Database.ExecuteSqlRawAsync(sql);
         }
     }
 }

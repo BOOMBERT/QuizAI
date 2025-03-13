@@ -27,8 +27,13 @@ public class UpdateQuizCommandHandler : IRequestHandler<UpdateQuizCommand, Lates
 
         await _categoryService.RemoveUnusedAsync(quizToUpdate, request.Categories);
 
-        quizToUpdate.Categories = await _categoryService.GetOrCreateEntitiesAsync(
-            request.Categories.Except(quizToUpdate.Categories.Select(c => c.Name)));
+        var newCategories = await _categoryService.GetOrCreateEntitiesAsync(
+            request.Categories.Except(quizToUpdate.Categories.Select(c => c.Name).ToArray()));
+
+        foreach (var newCategory in newCategories)
+        {
+            quizToUpdate.Categories.Add(newCategory);
+        }
 
         _mapper.Map(request, quizToUpdate);
 

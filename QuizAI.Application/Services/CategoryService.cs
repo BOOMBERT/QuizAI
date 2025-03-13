@@ -35,6 +35,8 @@ public class CategoryService : ICategoryService
 
     public async Task RemoveUnusedAsync(Quiz quiz, IEnumerable<string> newCategories)
     {
+        newCategories = Standardize(newCategories);
+
         var categoriesToRemove = quiz.Categories
             .Where(c => !newCategories.Contains(c.Name))
             .ToList();

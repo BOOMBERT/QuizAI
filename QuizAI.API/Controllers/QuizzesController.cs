@@ -38,7 +38,7 @@ namespace QuizAI.API.Controllers
         public async Task<IActionResult> CreateQuiz(CreateQuizCommand command)
         {
             var id = await _mediator.Send(command);
-            return CreatedAtAction(nameof(GetQuiz), new { quizId = id }, null);
+            return CreatedAtAction(nameof(GetQuizById), new { quizId = id }, null);
         }
 
         [HttpGet]
@@ -56,7 +56,7 @@ namespace QuizAI.API.Controllers
         [ProducesErrorResponseType(typeof(ErrorResponse))]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<ActionResult<QuizDto>> GetQuiz(Guid quizId)
+        public async Task<ActionResult<QuizDto>> GetQuizById(Guid quizId)
         {
             var quiz = await _mediator.Send(new GetQuizByIdQuery(quizId));
             return Ok(quiz);
@@ -71,8 +71,8 @@ namespace QuizAI.API.Controllers
         {
             command.SetId(quizId);
 
-            var newQuizId = await _mediator.Send(command);
-            return Ok(newQuizId);
+            var latestQuizId = await _mediator.Send(command);
+            return Ok(latestQuizId);
         }
 
         [HttpPatch("{quizId}/privacy")]
@@ -85,8 +85,8 @@ namespace QuizAI.API.Controllers
         {
             command.SetId(quizId);
 
-            var newQuizId = await _mediator.Send(command);
-            return Ok(newQuizId);
+            var latestQuizId = await _mediator.Send(command);
+            return Ok(latestQuizId);
         }
 
         [HttpDelete("{quizId}")]
