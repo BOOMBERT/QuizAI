@@ -12,16 +12,16 @@ With its __optimized structure__, QuizAI __avoids data duplication and unnecessa
 It also provides __full validation__, __error logging__, as well as __tests__.
 
 # 🛠️ Technologies
-- __Backend__: .NET 8, ASP.NET Web API, MediatR
+- __Backend__: .NET 8 (C#), ASP.NET Web API, MediatR
 - __Database__: Microsoft SQL Server, Microsoft.EntityFrameworkCore, AspNetCore.Identity
 - __Logging and Validation__: Serilog, FluentValidation
 - __Mapping and AI__: AutoMapper, OpenAI
 - __Image Processing and Hashing__: SixLabors.ImageSharp, Shipwreck.Phash.Bitmaps
-- __Testing__: XUnit, Moq
+- __Testing__: XUnit, Moq, SQLite
+- __Storage__: Azure Blob Storage
 - __Message Queueing__: RabbitMQ
 
 # ✨ Features
-
 ## 🔹 Solving Process
 ### _The quiz-solving process is designed such that:_
 - fetching the first question starts an attempt.
