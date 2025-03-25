@@ -4,6 +4,7 @@ using QuizAI.Application.Questions.Dtos;
 using QuizAI.Application.QuizAttempts.Dtos;
 using QuizAI.Domain.Entities;
 using QuizAI.Domain.Exceptions;
+using QuizAI.Domain.Interfaces;
 using QuizAI.Domain.Repositories;
 
 namespace QuizAI.Application.Services;

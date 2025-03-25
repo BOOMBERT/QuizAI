@@ -52,7 +52,7 @@ public class GetAllQuizzesQueryHandler : IRequestHandler<GetAllQuizzesQuery, Pag
                 : quiz.QuizAttempts.Any(qa => qa.UserId == currentUser.Id && qa.FinishedAt == null);
 
             string? publicImageUrl = (!dto.IsPrivate && dto.HasImage)
-                ? $"/api/uploads/{quiz.ImageId}{quiz.Image!.FileExtension}"
+                ? $"https://quizaistorage.blob.core.windows.net/public-uploads/{quiz.ImageId}{quiz.Image!.FileExtension}"
                 : null;
 
             return dto with

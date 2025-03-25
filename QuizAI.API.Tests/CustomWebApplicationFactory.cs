@@ -6,7 +6,9 @@ using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Moq;
 using QuizAI.Application.Services;
+using QuizAI.Domain.Interfaces;
 using QuizAI.Infrastructure.Persistence;
 using System.Data.Common;
 
@@ -17,6 +19,9 @@ public class CustomWebApplicationFactory<TProgram> : WebApplicationFactory<TProg
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
         base.ConfigureWebHost(builder);
+
+        Environment.SetEnvironmentVariable("DOTNET_ENVIRONMENT", "Testing");
+        Environment.SetEnvironmentVariable("JWT_KEY", "test");
 
         builder.ConfigureTestServices(services =>
         {
@@ -48,6 +53,10 @@ public class CustomWebApplicationFactory<TProgram> : WebApplicationFactory<TProg
                 var connection = container.GetRequiredService<DbConnection>();
                 options.UseSqlite(connection);
             });
+
+            services.AddSingleton(new Mock<IBlobStorageService>().Object);
+            services.AddSingleton(new Mock<IRabbitMqService>().Object);
+            services.AddSingleton(new Mock<IEmailConsumerService>().Object);
         });
     }
 }

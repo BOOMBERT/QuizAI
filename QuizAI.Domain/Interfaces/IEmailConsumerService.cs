@@ -1,4 +1,4 @@
-﻿namespace QuizAI.Application.Interfaces;
+﻿namespace QuizAI.Domain.Interfaces;
 
 public interface IEmailConsumerService
 {

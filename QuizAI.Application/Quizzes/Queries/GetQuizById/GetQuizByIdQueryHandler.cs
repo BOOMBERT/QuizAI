@@ -41,7 +41,7 @@ public class GetQuizByIdQueryHandler : IRequestHandler<GetQuizByIdQuery, QuizDto
         var hasUnfinishedAttempt = await _quizAttemptsRepository.HasAnyAsync(quiz.Id, currentUser.Id, false);
 
         var publicImageUrl = (!quiz.IsPrivate && quiz.ImageId != null) 
-            ? $"/api/uploads/{quiz.ImageId}{await _imagesRepository.GetFileExtensionAsync((Guid)quiz.ImageId)}" 
+            ? $"https://quizaistorage.blob.core.windows.net/public-uploads/{quiz.ImageId}{await _imagesRepository.GetFileExtensionAsync((Guid)quiz.ImageId)}" 
             : null;
 
         var quizDto = _mapper.Map<QuizDto>(quiz);

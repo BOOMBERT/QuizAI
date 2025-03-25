@@ -1,21 +1,21 @@
 ﻿using FluentValidation;
 using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using QuizAI.Application.Interfaces;
 using QuizAI.Application.Services;
 using QuizAI.Application.Users;
-using QuizAI.Domain.Entities;
+using QuizAI.Domain.Exceptions;
+using QuizAI.Domain.Interfaces;
 using QuizAI.Domain.Repositories;
 
 namespace QuizAI.Application.Extensions;
 
 public static class ServiceCollectionExtensions
 {
-    public static void AddApplication(this IServiceCollection services, IConfiguration configuration, string publicStoragePath, string privateStoragePath)
+    public static void AddApplication(this IServiceCollection services, IConfiguration configuration)
     {
         var applicationAssembly = typeof(ServiceCollectionExtensions).Assembly;
         
@@ -27,15 +27,13 @@ public static class ServiceCollectionExtensions
         services.AddHttpContextAccessor();
         services.AddScoped<IUserContext, UserContext>();
 
-        services.AddScoped<IFileStorageService>(provider => new FileStorageService(publicStoragePath, privateStoragePath));
-
         services.AddScoped<IImageService, ImageService>(provider =>
         {
             var repository = provider.GetRequiredService<IRepository>();
-            var fileStorageService = provider.GetRequiredService<IFileStorageService>();
+            var blobStorageService = provider.GetRequiredService<IBlobStorageService>();
             var imagesRepository = provider.GetRequiredService<IImagesRepository>();
             (ushort, ushort) imagesDefaultSize = (800, 800);
-            return new ImageService(repository, fileStorageService, imagesRepository, imagesDefaultSize);
+            return new ImageService(repository, blobStorageService, imagesRepository, imagesDefaultSize);
         });
 
         services.AddScoped<IQuestionService, QuestionService>(provider =>
@@ -51,29 +49,28 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IQuizAttemptService, QuizAttemptService>();
         services.AddScoped<IQuizAuthorizationService, QuizAuthorizationService>();
 
-        services.AddScoped<IOpenAiService, OpenAiService>(provider => new OpenAiService(configuration["OpenAI:ApiKey"]!, configuration["OpenAI:Model"]!));
+        services.AddScoped<IOpenAiService, OpenAiService>(
+            provider => new OpenAiService(
+                Environment.GetEnvironmentVariable("OPENAI_API_KEY") ?? throw new ConflictException("Missing OPENAI_API_KEY"), 
+                configuration["OpenAI:Model"]!)
+            );
 
         services.AddScoped<IAuthService, AuthService>(provider =>
         {
-            var httpContextAccessor = provider.GetService<IHttpContextAccessor>();
-            var config = provider.GetRequiredService<IConfiguration>();
-            var accessTokenExpirationInMinutes = double.Parse(config["JwtSettings:AccessToken:ExpirationInMinutes"]!);
-            var refreshTokenExpirationInMinutes = double.Parse(config["JwtSettings:RefreshToken:ExpirationInMinutes"]!);
-            return new AuthService(httpContextAccessor!, config["JwtSettings:Key"]!, accessTokenExpirationInMinutes, refreshTokenExpirationInMinutes);
+            var jwtKey = Environment.GetEnvironmentVariable("JWT_KEY") ?? throw new ConflictException("Missing JWT_KEY"); ;
+            var accessTokenExpirationInMinutes = double.Parse(configuration["JwtSettings:AccessToken:ExpirationInMinutes"]!);
+            var refreshTokenExpirationInMinutes = double.Parse(configuration["JwtSettings:RefreshToken:ExpirationInMinutes"]!);
+            return new AuthService(provider.GetService<IHttpContextAccessor>()!, jwtKey, accessTokenExpirationInMinutes, refreshTokenExpirationInMinutes);
         });
 
         services.AddSingleton<IEmailSender, EmailSenderService>(provider =>
         {
-            var config = provider.GetRequiredService<IConfiguration>();
-            var smtpServer = config["EmailSettings:SmtpServer"]!;
-            var fromEmail = config["EmailSettings:FromEmail"]!;
-            var password = config["EmailSettings:Password"]!;
-            var port = int.Parse(config["EmailSettings:Port"]!);
+            var port = int.Parse(configuration["EmailSettings:Port"]!);
+            var smtpServer = configuration["EmailSettings:SmtpServer"]!;
+            var fromEmail = configuration["EmailSettings:FromEmail"]!;
+            var password = Environment.GetEnvironmentVariable("EMAIL_PASSWORD") ?? throw new ConflictException("Missing EMAIL_PASSWORD");
             return new EmailSenderService(smtpServer, fromEmail, password, port);
         });
-        var queueName = "emailQueue";
-        services.AddSingleton<IRabbitMqService, RabbitMqService>(provider => new RabbitMqService(provider.GetService<IHttpContextAccessor>()!, queueName));
-        services.AddSingleton<IEmailConsumerService, EmailConsumerService>(provider => new EmailConsumerService(provider.GetService<IEmailSender>()!, queueName));
         services.AddHostedService<EmailConsumerHostedService>();
     }
 }

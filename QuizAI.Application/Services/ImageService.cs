@@ -4,23 +4,25 @@ using QuizAI.Application.Utils;
 using QuizAI.Domain.Entities;
 using QuizAI.Domain.Enums;
 using QuizAI.Domain.Exceptions;
+using QuizAI.Domain.Interfaces;
 using QuizAI.Domain.Repositories;
 using Shipwreck.Phash;
-using Shipwreck.Phash.Bitmaps;
+using SixLabors.ImageSharp.PixelFormats;
+using System.IO;
 
 namespace QuizAI.Application.Services;
 
 public class ImageService : IImageService
 {
     private readonly IRepository _repository;
-    private readonly IFileStorageService _fileStorageService;
+    private readonly IBlobStorageService _blobStorageService;
     private readonly IImagesRepository _imagesRepository;
     private readonly (ushort width, ushort height)? _imagesDefaultSize;
 
-    public ImageService(IRepository repository, IFileStorageService fileStorageService, IImagesRepository imagesRepository, (ushort width, ushort height)? imagesDefaultSize)
+    public ImageService(IRepository repository, IBlobStorageService fileStorageService, IImagesRepository imagesRepository, (ushort width, ushort height)? imagesDefaultSize)
     {
         _repository = repository;
-        _fileStorageService = fileStorageService;
+        _blobStorageService = fileStorageService;
         _imagesRepository = imagesRepository;
         _imagesDefaultSize = imagesDefaultSize;
     }
@@ -46,7 +48,7 @@ public class ImageService : IImageService
         var imageExtension = await _repository.GetFieldAsync<Image, string>(imageName, "FileExtension")
             ?? throw new NotFoundException($"Image for {questionErrorMessageContext}quiz with ID {quiz.Id} could not be found");
 
-        var imageData = await _fileStorageService.RetrieveAsync(imageName, imageExtension, quiz.IsPrivate);
+        var imageData = await _blobStorageService.RetrieveAsync(imageName, imageExtension, quiz.IsPrivate);
 
         if (imageExtension == FileExtension.Jpg) imageExtension = FileExtension.Jpeg;
         var contentType = "image/" + imageExtension.TrimStart('.');
@@ -55,9 +57,9 @@ public class ImageService : IImageService
 
     public async Task<Image> UploadAsync(IFormFile image, bool isPrivate)
     {
-        byte[] optimizedImage = await ImageOptimizationUtil.Optimize(image, _imagesDefaultSize);
+        var optimizedImageStream = await ImageOptimizationUtil.Optimize(image, _imagesDefaultSize);
 
-        var imageHash = HashByPhash(optimizedImage);
+        var imageHash = HashByPhash(optimizedImageStream);
         var imageInDb = await _imagesRepository.GetAsync(imageHash);
 
         string imageExtension;
@@ -68,13 +70,15 @@ public class ImageService : IImageService
             if (!await _imagesRepository.IsAssignedToAnyQuizAsync(imageInDb.Id, null, isPrivate) && 
                 !await _imagesRepository.IsAssignedToAnyQuestionAsync(imageInDb.Id, null, isPrivate))
             {
-                await _fileStorageService.UploadAsync(optimizedImage, imageExtension, isPrivate, imageInDb.Id);
+                await _blobStorageService.UploadAsync(optimizedImageStream, imageExtension, isPrivate, imageInDb.Id);
+                await optimizedImageStream.DisposeAsync();
             }
 
             return imageInDb;
         }
 
-        var imageName = await _fileStorageService.UploadAsync(optimizedImage, imageExtension, isPrivate);
+        var imageName = await _blobStorageService.UploadAsync(optimizedImageStream, imageExtension, isPrivate);
+        await optimizedImageStream.DisposeAsync();
 
         var newUploadedImage = new Image
         {
@@ -97,12 +101,12 @@ public class ImageService : IImageService
             !await _imagesRepository.IsAssignedToAnyQuestionAsync(imageId, questionIdToSkip))
         {
             await _repository.DeleteAsync<Image>(imageId);
-            _fileStorageService.Delete(imageId, imageExtension, isPrivate);
+            await _blobStorageService.DeleteAsync(imageId, imageExtension, isPrivate);
         }
         else if (!await _imagesRepository.IsAssignedToAnyQuizAsync(imageId, quizIdToSkip, isPrivate) && 
              !await _imagesRepository.IsAssignedToAnyQuestionAsync(imageId, questionIdToSkip, isPrivate))
         {
-            _fileStorageService.Delete(imageId, imageExtension, isPrivate);
+            await _blobStorageService.DeleteAsync(imageId, imageExtension, isPrivate);
         }
     }
 
@@ -110,24 +114,38 @@ public class ImageService : IImageService
     {
         foreach (var (imageId, imageExtension) in images)
         {
-            _fileStorageService.CopyImage(imageId, imageExtension, isPrivate);
+            await _blobStorageService.CopyImageAsync(imageId, imageExtension, isPrivate);
 
             if (!await _imagesRepository.IsAssignedToAnyQuizAsync(imageId, null, isPrivate) && 
                 !await _imagesRepository.IsAssignedToAnyQuestionAsync(imageId, null, isPrivate))
             {
-                _fileStorageService.Delete(imageId, imageExtension, isPrivate);
+                await _blobStorageService.DeleteAsync(imageId, imageExtension, isPrivate);
             }
         }
     }
 
-    private byte[] HashByPhash(byte[] imageBytes)
+    private byte[] HashByPhash(Stream imageStream)
     {
-        using (var bitmap = new System.Drawing.Bitmap(new MemoryStream(imageBytes)))
-        {
-            var luminanceImage = bitmap.ToLuminanceImage();
+        var image = SixLabors.ImageSharp.Image.Load<L8>(imageStream);
 
-            var hash = ImagePhash.ComputeDigest(luminanceImage);
-            return Convert.FromHexString(hash.ToString().AsSpan(2));
-        }
+        byte[] pixelData = new byte[image.Width * image.Height];
+        image.ProcessPixelRows(accessor =>
+        {
+            for (int y = 0; y < image.Height; y++)
+            {
+                var row = accessor.GetRowSpan(y);
+                for (int x = 0; x < image.Width; x++)
+                {
+                    pixelData[y * image.Width + x] = row[x].PackedValue;
+                }
+            }
+        });
+
+        var byteImage = new Common.ByteImage(pixelData, image.Width, image.Height);
+        var hash = ImagePhash.ComputeDigest(byteImage);
+
+        imageStream.Position = 0;
+
+        return Convert.FromHexString(hash.ToString().AsSpan(2));
     }
 }

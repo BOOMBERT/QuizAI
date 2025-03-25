@@ -1,6 +1,6 @@
 ﻿using QuizAI.Domain.Entities;
 
-namespace QuizAI.Application.Interfaces;
+namespace QuizAI.Domain.Interfaces;
 
 public interface IRabbitMqService
 {

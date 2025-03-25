@@ -77,7 +77,7 @@ public class GetQuizByIdQueryHandlerTests
 
         // Assert
 
-        Assert.Equal((!quiz.IsPrivate && quiz.ImageId != null) ? $"/api/uploads/{quiz.ImageId}{fileExtension}" : null, result.PublicImageUrl);
+        Assert.Equal((!quiz.IsPrivate && quiz.ImageId != null) ? $"https://quizaistorage.blob.core.windows.net/public-uploads/{quiz.ImageId}{fileExtension}" : null, result.PublicImageUrl);
         Assert.Equal(isDeprecated ? false : canEdit, result.CanEdit);
         Assert.Equal(hasUnfinishedAttempt, result.HasUnfinishedAttempt);
 

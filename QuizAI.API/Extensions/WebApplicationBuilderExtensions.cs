@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using QuizAI.API.Middlewares;
+using QuizAI.Domain.Exceptions;
 using Serilog;
 using System.Text;
 
@@ -19,7 +20,8 @@ public static class WebApplicationBuilderExtensions
         {
             options.TokenValidationParameters = new TokenValidationParameters
             {
-                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JwtSettings:Key"]!)),
+                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(
+                    Environment.GetEnvironmentVariable("JWT_KEY") ?? throw new ConflictException("Missing JWT_KEY"))),
                 ValidateAudience = false,
                 ValidateIssuer = false,
                 ValidateLifetime = true,

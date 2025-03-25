@@ -147,7 +147,7 @@ public class QuizzesControllerTests : IClassFixture<CustomWebApplicationFactory<
         Assert.True(quizDto.HasImage);
         Assert.True(quizDto.CanEdit);
         Assert.True(quizDto.HasUnfinishedAttempt);
-        Assert.Equal($"/api/uploads/{imageId}.png", quizDto.PublicImageUrl);
+        Assert.Equal($"https://quizaistorage.blob.core.windows.net/public-uploads/{imageId}.png", quizDto.PublicImageUrl);
     }
 
     [Theory]

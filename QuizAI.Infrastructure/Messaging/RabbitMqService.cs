@@ -1,27 +1,31 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Newtonsoft.Json;
 using QuizAI.Application.Common;
-using QuizAI.Application.Interfaces;
 using QuizAI.Domain.Entities;
+using QuizAI.Domain.Interfaces;
 using RabbitMQ.Client;
 using System.Text;
 
-namespace QuizAI.Application.Services;
+namespace QuizAI.Infrastructure.Messaging;
 
 public class RabbitMqService : IRabbitMqService
 {
     private readonly IHttpContextAccessor _httpContextAccessor;
     private readonly string _queueName;
+    private readonly string _hostName;
+    private readonly int _port;
 
-    public RabbitMqService(IHttpContextAccessor httpContextAccessor, string queueName)
+    public RabbitMqService(IHttpContextAccessor httpContextAccessor, string queueName, string hostName, int port)
     {
         _httpContextAccessor = httpContextAccessor;
         _queueName = queueName;
+        _hostName = hostName;
+        _port = port;
     }
 
     public async Task SendEmailToQueueAsync(string toEmail, string subject, string htmlMessage)
     {
-        var factory = new ConnectionFactory() { HostName = "localhost" };
+        var factory = new ConnectionFactory() { HostName = _hostName, Port = _port };
         using var connection = await factory.CreateConnectionAsync();
         using var channel = await connection.CreateChannelAsync();
 

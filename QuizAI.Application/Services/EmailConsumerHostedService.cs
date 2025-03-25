@@ -1,5 +1,5 @@
 ﻿using Microsoft.Extensions.Hosting;
-using QuizAI.Application.Interfaces;
+using QuizAI.Domain.Interfaces;
 
 namespace QuizAI.Application.Services;
 

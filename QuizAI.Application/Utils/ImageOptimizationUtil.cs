@@ -9,18 +9,17 @@ namespace QuizAI.Application.Utils;
 
 public static class ImageOptimizationUtil
 {
-    public static async Task<byte[]> Optimize(
+    public static async Task<Stream> Optimize(
         IFormFile imageToOptimize, (ushort width, ushort height)? newSize, CompressionSetting compressionSetting = CompressionSetting.Medium)
     {
         var imageExtension = Path.GetExtension(imageToOptimize.FileName);
 
-        using (var image = await SixLabors.ImageSharp.Image.LoadAsync(imageToOptimize.OpenReadStream()))
-        {
-            if (newSize != null)
-                Resize(image, ((ushort width, ushort height))newSize);
+        var image = await SixLabors.ImageSharp.Image.LoadAsync(imageToOptimize.OpenReadStream());
 
-            return await Compress(image, imageExtension, compressionSetting);
-        }
+        if (newSize != null)
+            Resize(image, ((ushort width, ushort height))newSize);
+
+        return await Compress(image, imageExtension, compressionSetting);
     }
 
     private static void Resize(SixLabors.ImageSharp.Image image, (ushort width, ushort height) newSize)
@@ -32,35 +31,34 @@ public static class ImageOptimizationUtil
         }));
     }
 
-    private static async Task<byte[]> Compress(SixLabors.ImageSharp.Image image, string fileExtension, CompressionSetting compressionSetting)
+    private static async Task<Stream> Compress(SixLabors.ImageSharp.Image image, string fileExtension, CompressionSetting compressionSetting)
     {
         fileExtension = fileExtension.ToLower();
+        var memoryStream = new MemoryStream();
 
-        using (var memoryStream = new MemoryStream())
+        if (fileExtension == FileExtension.Jpg || fileExtension == FileExtension.Jpeg)
         {
-            if (fileExtension == FileExtension.Jpg || fileExtension == FileExtension.Jpeg)
+            var jpegEncoder = new JpegEncoder
             {
-                var jpegEncoder = new JpegEncoder
-                {
-                    Quality = (byte)compressionSetting
-                };
-                await image.SaveAsync(memoryStream, jpegEncoder);
-            }
-            else if (fileExtension == FileExtension.Png)
-            {
-                var pngEncoder = new PngEncoder
-                {
-                    CompressionLevel = GetPngCompressionLevel(compressionSetting)
-                };
-                await image.SaveAsync(memoryStream, pngEncoder);
-            }
-            else
-            {
-                throw new UnsupportedMediaTypeException($"The file extension {fileExtension} is not supported");
-            }
-
-            return memoryStream.ToArray();
+                Quality = (byte)compressionSetting
+            };
+            await image.SaveAsync(memoryStream, jpegEncoder);
         }
+        else if (fileExtension == FileExtension.Png)
+        {
+            var pngEncoder = new PngEncoder
+            {
+                CompressionLevel = GetPngCompressionLevel(compressionSetting)
+            };
+            await image.SaveAsync(memoryStream, pngEncoder);
+        }
+        else
+        {
+            throw new UnsupportedMediaTypeException($"The file extension {fileExtension} is not supported");
+        }
+
+        memoryStream.Position = 0;
+        return memoryStream;
     }
 
     private static PngCompressionLevel GetPngCompressionLevel(CompressionSetting compressionSetting)

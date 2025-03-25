@@ -1,8 +1,8 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Identity;
-using QuizAI.Application.Interfaces;
 using QuizAI.Domain.Entities;
 using QuizAI.Domain.Exceptions;
+using QuizAI.Domain.Interfaces;
 using QuizAI.Domain.Repositories;
 
 namespace QuizAI.Application.Users.Commands.RegisterUser;

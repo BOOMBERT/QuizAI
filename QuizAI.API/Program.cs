@@ -1,4 +1,3 @@
-using Microsoft.Extensions.FileProviders;
 using QuizAI.API.Extensions;
 using QuizAI.API.Middlewares;
 using QuizAI.Application.Extensions;
@@ -6,34 +5,23 @@ using QuizAI.Infrastructure.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
-var publicStorageFolderName = "PublicUploads";
-var privateStorageFolderName = "PrivateUploads";
-
-var publicStoragePath = Path.Combine(builder.Environment.ContentRootPath, publicStorageFolderName);
-var privateStoragePath = Path.Combine(builder.Environment.ContentRootPath, privateStorageFolderName);
-
-Directory.CreateDirectory(publicStoragePath);
-Directory.CreateDirectory(privateStoragePath);
-
-builder.Services.AddInfrastructure(builder.Configuration);
+builder.Services.AddInfrastructure();
 builder.AddPresentation();
-builder.Services.AddApplication(builder.Configuration, publicStoragePath, privateStoragePath);
+builder.Services.AddApplication(builder.Configuration);
 
 var app = builder.Build();
 
 app.UseMiddleware<ErrorHandlingMiddleware>();
 
-app.UseStaticFiles(new StaticFileOptions
+if (Environment.GetEnvironmentVariable("DOTNET_ENVIRONMENT") != "Testing")
 {
-    FileProvider = new PhysicalFileProvider(
-        Path.Combine(builder.Environment.ContentRootPath, "PublicUploads")),
-    RequestPath = "/api/uploads"
-});
+    app.ApplyMigrations();
 
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
+    if (app.Environment.IsDevelopment())
+    {
+        app.UseSwagger();
+        app.UseSwaggerUI();
+    }
 }
 
 app.UseHttpsRedirection();

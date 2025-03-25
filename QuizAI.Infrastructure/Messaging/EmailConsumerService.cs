@@ -1,30 +1,34 @@
-﻿using Microsoft.AspNetCore.Identity.UI.Services;
-using Newtonsoft.Json;
-using QuizAI.Application.Common;
-using QuizAI.Application.Interfaces;
-using QuizAI.Domain.Exceptions;
-using RabbitMQ.Client;
+﻿using QuizAI.Domain.Exceptions;
 using RabbitMQ.Client.Events;
+using RabbitMQ.Client;
+using QuizAI.Domain.Interfaces;
+using Microsoft.AspNetCore.Identity.UI.Services;
+using QuizAI.Application.Common;
+using Newtonsoft.Json;
 using System.Text;
 
-namespace QuizAI.Application.Services;
+namespace QuizAI.Infrastructure.Messaging;
 
 public class EmailConsumerService : IEmailConsumerService
 {
     private readonly IEmailSender _emailSender;
     private readonly string _queueName;
+    private readonly string _hostName;
+    private readonly int _port;
     private IConnection? _connection;
     private IChannel? _channel;
 
-    public EmailConsumerService(IEmailSender emailSender, string queueName)
+    public EmailConsumerService(IEmailSender emailSender, string queueName, string hostName, int port)
     {
         _emailSender = emailSender;
         _queueName = queueName;
+        _hostName = hostName;
+        _port = port;
     }
 
     public async Task InitializeAsync()
     {
-        var factory = new ConnectionFactory() { HostName = "localhost" };
+        var factory = new ConnectionFactory() { HostName = _hostName, Port = _port };
         _connection = await factory.CreateConnectionAsync();
         _channel = await _connection.CreateChannelAsync();
 

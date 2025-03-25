@@ -147,7 +147,7 @@ public class GetAllQuizzesQueryHandlerTests
 
         var correctQuizDtosPublicImageUrlAssignments = new List<string?>() 
         {
-            null, null, null, $"/api/uploads/{testImageId}{testFileExtension}" 
+            null, null, null, $"https://quizaistorage.blob.core.windows.net/public-uploads/{testImageId}{testFileExtension}" 
         };
 
         // Act
